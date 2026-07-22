@@ -1,0 +1,215 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+0054ab40-2365-4af2-983b-38ae53ea4766,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Dam,Staudamm,Zapora,#2E86C1,dam,3
+005c9169-54ca-4476-8cd3-df4a3c72b1c6,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cinema,Kino,Kino,#2C3E50,clapperboard,1
+01795f6b-d6e7-4169-b4cc-f7acd23ffdef,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Roman Ruins,Römische Ruinen,Ruiny rzymskie,#B7950B,columns,4
+01c9bcee-6e50-429f-9c02-6c33798d47ab,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Orchard,Obstgarten,Sad,#E67E22,apple,2
+0214e091-4800-4253-aad2-8b6d092096e3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tunnel Entrance,Tunneleingang,Wejście do tunelu,#717D7E,circle-dot,2
+0457ce5d-2dda-4e9e-a84e-3f5f71664877,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Outdoor Gym,Outdoor-Fitnessplatz,Siłownia plenerowa,#E67E22,dumbbell,1
+04d4ae24-2da0-4dc5-b1a8-0a0d767714ed,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lighthouse,Leuchtturm,Latarnia morska,#F39C12,lighthouse,3
+070326ce-4926-4a2b-8d83-4c8c09715210,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Spa / Thermal Bath,Spa / Thermalbad,Spa / Termy,#48C9B0,waves,3
+073b5242-968c-4efb-9d00-412e7d1402dd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Traditional Market,Traditioneller Markt,Tradycyjny targ,#E67E22,store,2
+0976a2cd-d36d-4c73-ba8f-62bdacb1811f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Spring,Quelle,Źródło,#76D7C4,droplet,2
+0c8a6a84-0f00-4dd7-99a7-966994116b6b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bus Stop,Bushaltestelle,Przystanek autobusowy,#2E86C1,bus,1
+0d2b371a-c5bf-4416-9bb9-12dc231b01e5,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Aquarium,Aquarium,Akwarium,#2980B9,fish,3
+0e82285b-bcfd-4b5a-bcbf-6fdfbc46667d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Swimming Pool (Outdoor),Freibad,Basen odkryty,#2980B9,waves,2
+1253018a-5022-4a84-a482-9f7608db6e91,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rocky Outcrop,Felsvorsprung,Wychodnia skalna,#AAB7B8,land-layers,2
+126562f3-c642-4a18-837f-2e0494a2f514,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Playground,Spielplatz,Plac zabaw,#F39C12,ferris-wheel,1
+138858de-c0c3-4326-b450-cd2d1e8db101,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Market,Markt,Targ,#E67E22,store,2
+16647ae5-265f-4801-be58-d62f0de376c5,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cable Car Station,Seilbahnstation,Stacja kolei linowej,#8E44AD,cable-car,3
+16ff276f-c832-4c7e-bd20-fc28d9b180d4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Solar Farm,Solarpark,Farma słoneczna,#F1C40F,sun,2
+1986a8f7-4b2e-4df3-9efa-954e340c162c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Theme Park,Freizeitpark,Park rozrywki,#E74C3C,ferris-wheel,3
+19d99b81-559f-4f58-b0e0-7d401ccab5ee,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,National Park,Nationalpark,Park narodowy,#196F3D,tree,4
+1a7bf433-2d33-4952-84ee-c82e65a74cdf,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Deer Park,Wildgehege,Park jeleni,#CA6F1E,deer,2
+1ada3256-26b7-45e2-a11e-9630bd979b2c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Flower Meadow,Blumenwiese,Kwietna łąka,#8BC34A,flower,2
+1d00b714-a460-4a3c-804d-0f6bfa9478be,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Reservoir,Stausee,Zbiornik wodny,#2471A3,dam,2
+1da3974a-2017-42e7-b2ff-325884515991,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Dinosaur Park,Dinosaurierpark,Park dinozaurów,#8E44AD,bone,3
+1de3ecb2-3ce1-4899-b297-4cc6290376ea,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Glacier,Gletscher,Lodowiec,#AED6F1,snowflake,4
+1e0dea3c-5ff7-4e4f-b2fc-f7b554604413,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,River,Fluss,Rzeka,#1F618D,waves,2
+1e1e5186-6f9b-429d-8d2f-69d6c2f6c501,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ferry Crossing,Fährverbindung,Przeprawa promowa,#1F618D,ship,2
+1e337044-4678-4d14-aefc-961a88fa3e7d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Via Ferrata Section,Klettersteigabschnitt,Odcinek via ferraty,#C0392B,grip,3
+22e4cfbf-17d9-4b1a-9edb-68f7aa34e1de,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Science Centre,Wissenschaftszentrum,Centrum nauki,#2980B9,flask-conical,3
+24907963-f34a-44ad-92f3-8f0f25babd68,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bike Park,Bikepark,Bike park,#D35400,bike,3
+28657153-7572-4c02-af0d-0cafc833eeea,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,SAC Hut,SAC-Hütte,Schronisko SAC,#D35400,house-flag,4
+28e207ac-fb13-48d1-87c1-c53fd5595bf7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wildlife Observation Tower,Wildbeobachtungsturm,Wieża obserwacji zwierząt,#196F3D,tower,3
+2a038f6b-f230-497b-b1c1-e16ee8e6f27e,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Meditation Spot,Meditationsplatz,Miejsce medytacji,#7D3C98,moon,2
+2b0a1100-c9ce-4b9e-a0d0-698ac0d699ec,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Observatory,Sternwarte,Obserwatorium,#1B2631,telescope,3
+2b472d2a-2952-4fa7-947d-9dbe0363cdfa,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Archery Range,Bogenschießanlage,Strzelnica łucznicza,#884EA0,target,2
+2d3c1768-d4b0-4427-9509-46e0be70001a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tower,Turm,Wieża,#85929E,building-2,3
+2d9a7d45-847d-4f1a-9f09-d70101b97f19,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Equestrian Trail,Reitweg,Szlak konny,#CA6F1E,horse,2
+30999dc0-807c-469d-90fb-b31b4b44f937,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Customs Post,Zollstelle,Posterunek celny,#E74C3C,shield,1
+31368f80-b8d8-4b79-bdbe-53eeb424c73c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Megalith / Menhir,Megalith / Menhir,Megalit / Menhir,#85929E,monument,3
+31a1ed89-64ac-4414-8369-afc77f643a87,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Picnic Table,Picknicktisch,Stół piknikowy,#2ECC71,table,1
+35068350-5534-4655-804b-7550ac9b21fd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Café,Café,Kawiarnia,#6D4C41,coffee,1
+350b1f55-5861-4b31-8683-ea06f7265465,2026-06-09 21:01:54.513329+00,2026-06-09 21:01:54.513329+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Multi transport station,Umsteigebahnhof,Węzeł przesiadkowy,#456234,none,1
+35d1e738-ec96-4772-9943-7a787c958879,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Exhibition Centre,Ausstellungszentrum,Centrum wystawowe,#2980B9,gallery-vertical,2
+35e6187e-d7eb-46e2-a337-3ff0d3db628c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Paragliding Landing,Gleitschirm-Landeplatz,Lądowisko paralotni,#17A589,plane-landing,3
+371d7f23-8619-47d9-8095-2a3161bfd6ba,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fishing Spot,Angelplatz,Łowisko,#1F618D,fish,2
+373dbb33-2b8f-4109-8cd4-82568346bdf5,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Panorama Point,Panoramapunkt,Punkt panoramiczny,#F39C12,binoculars,3
+3b95f621-9b59-4b71-b243-020d25175c5d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sacred Site,Heilige Stätte,Miejsce święte,#7D6608,sparkles,3
+3c83e99d-7f7e-44a8-895d-154481320b43,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Moor,Moor,Torfowisko,#2E7D32,grass,2
+3c96f919-f611-4608-b52c-4de69cab44f8,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Beehive / Apiary,Bienenstock / Imkerei,Ul / Pasieka,#F1C40F,hexagon,2
+3fd10ff5-5d39-42a4-8ec7-7c079e56bcf4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Viaduct,Viadukt,Wiadukt,#717D7E,bridge,3
+4038476b-6493-422f-b479-0193fde8ad81,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hang Gliding Site,Drachenflugplatz,Miejsce lotni,#148F77,wind,3
+40e4c8a1-6380-46cc-83f4-c004c78bae85,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Memorial,Gedenkstätte,Pomnik pamięci,#717D7E,monument,2
+427c3422-1333-4426-8b3f-c6c6a1b7ef55,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Park,Park,Park,#27AE60,trees,2
+4327eab0-d5cf-4bd5-891f-8fd6a24fced2,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cave,Höhle,Jaskinia,#784212,cave,3
+433ee111-3942-4c91-9ec0-db6a1182447a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Nature Reserve,Naturschutzgebiet,Rezerwat przyrody,#1D8348,leaf,3
+43409922-c4d7-434e-80df-d7dd168cd940,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Snowshoe Trail,Schneeschuhweg,Szlak na rakietach śnieżnych,#EBF5FB,footprints,2
+4501ced2-d376-417a-a7e9-107ff731df2d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Old Town,Altstadt,Stare miasto,#76448A,building,3
+4579d513-6b17-4a4b-9c2f-74e664f8fd8b,2026-06-09 19:30:47.831894+00,2026-06-09 19:30:47.831894+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lake Harbor,Seehafen,Przystań jeziorna,#583245,Ship,1
+460c867b-abda-4c5d-af61-f5a4708b8fe5,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wind Turbine,Windkraftanlage,Turbina wiatrowa,#1ABC9C,wind,2
+46493027-1c10-4200-94c0-2fe472ff9126,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bouldering Area,Boulderplatz,Rejon boulderowy,#A93226,cube,3
+466b346e-f5e7-4f60-b0b0-cb8518793c8b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Peak,Berggipfel,Szczyt górski,#E74C3C,mountain,4
+48d6faa2-65d9-41b1-b1e8-765b7f167acd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bat Cave,Fledermaushöhle,Jaskinia nietoperzy,#784212,bat,3
+48e338e9-4c3d-4d77-85b8-96b0027873dd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Glacier Viewpoint,Gletscher-Aussichtspunkt,Punkt widokowy na lodowiec,#85C1E9,binoculars,4
+49bf2e78-3e72-4e41-ace1-79e699924c76,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bivouac,Biwak,Biwak,#A04000,tent,3
+4b08d081-c256-4095-9d6f-dd7e4ac9bcf0,2026-06-09 20:21:14.469293+00,2026-06-09 20:21:14.469293+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Multi transport station (Bus/Cable Car),Umsteigebahnhof (Bus/Seilbahn),Węzeł przesiadkowy (autobus/kolej linowa),#456294,train,1
+4b7aeea1-89d1-4fae-b191-67560b7210df,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Battlefield,Historisches Schlachtfeld,Historyczne pole bitwy,#922B21,sword,3
+4bc09ebe-bdb1-4da9-9741-486a2a91a455,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Petting Zoo,Streichelzoo,Mini zoo,#CA6F1E,paw-print,2
+4c459188-c0a7-4e78-982b-4972c3641791,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Viewpoint,Aussichtspunkt,Punkt widokowy,#E67E22,eye,3
+4cb0b96b-59c5-4114-a21c-40c3ada2c27a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Library,Bibliothek,Biblioteka,#5B2C6F,book-open,1
+4ccb2eee-58c2-4354-a336-1dd9a2c21776,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Road,Historische Straße,Historyczna droga,#B7950B,route,2
+4ffc090d-f144-4066-88c9-ae18b59f522f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Geological Formation,Geologische Formation,Formacja geologiczna,#935116,layers,3
+51ba53a2-6ed3-4556-aff3-f8bfd3420485,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Helipad,Hubschrauberlandeplatz,Lądowisko dla helikopterów,#E74C3C,helicopter,2
+529f5d2b-cfac-4f66-b507-970d0eb9aceb,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Botanical Garden,Botanischer Garten,Ogród botaniczny,#1ABC9C,flower-2,3
+55ae31d7-6e76-4e9b-9699-01a4545863d3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Statue / Monument,Statue / Denkmal,Statua / Pomnik,#85929E,person-standing,2
+5654f545-f217-42e0-91b5-a8f9899854aa,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Photography Spot,Fotostelle,Miejsce na zdjęcia,#2C3E50,camera,3
+56b38605-d229-4add-8dbb-5ebd8bf151f6,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wayside Cross,Wegkreuz,Krzyż przydrożny,#884EA0,cross,2
+58754013-088a-446f-9327-417c1137f71b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rest Bench,Rastbank,Ławka odpoczynkowa,#B7950B,armchair,1
+58eea2d4-ee0b-4f93-b91d-2dce3e5fac27,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Resort,Skigebiet,Ośrodek narciarski,#85C1E9,ski,3
+597082a4-763b-4069-ac77-c6e69cef1a81,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Slope,Skipiste,Stok narciarski,#AED6F1,ski,2
+5a541042-6e58-43a8-a927-046d576430e8,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Avalanche Research,Lawinenforschung,Badania lawinowe,#E74C3C,microscope,2
+5b1a2cb0-4a7d-4389-9b13-2b3a2e283ef5,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Information Board,Informationstafel,Tablica informacyjna,#2E86C1,info,1
+5e2f7d61-43f2-49c8-8853-81a62cb949ed,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Nature Trail,Naturlehrpfad,Ścieżka przyrodnicza,#27AE60,footprints,2
+60aeb91a-ef9a-4fdf-bbd6-f6c4794b0814,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Geology Trail,Geologielehrpfad,Ścieżka geologiczna,#935116,footprints,2
+61269a81-fae0-49ac-8666-4faa8b3b4d40,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Landsgemeinde Square,Landsgemeindeplatz,Plac Landsgemeinde,#F1C40F,users,4
+62185a5f-6844-4f69-ab17-3c78c92866f9,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Farm Shop,Hofladen,Sklep gospodarski,#27AE60,shopping-bag,2
+62955d50-ff89-4859-811e-c77660d22853,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Boat Dock,Bootssteg,Przystań łodzi,#1F618D,anchor,2
+64734b37-f0cf-4672-9311-a09439afd922,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Power Station,Kraftwerk,Elektrownia,#F39C12,zap,2
+69159527-c8f4-4c36-a685-4b50ea48a9dd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Mill,Historische Mühle,Zabytkowy młyn,#7FB3D3,cog,2
+6af6b16c-885d-4890-8a73-0564f4eb070a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Restaurant,Restaurant,Restauracja,#E74C3C,utensils,1
+6afbc531-e868-44e5-a136-5e1ee4afd368,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,UNESCO Site,UNESCO-Stätte,Obiekt UNESCO,#F1C40F,star-badge,5
+6c129d28-ffea-42ed-a6fe-4ca8ba7e4048,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Alpine Lake,Bergsee,Jezioro alpejskie,#1ABC9C,lake,4
+6c204301-3159-42a3-8a4c-0fbdb94c3d03,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Guesthouse,Gasthaus,Pensjonat,#AEB6BF,house,1
+6ca09a4a-be3f-461b-94eb-6502e9bbcc7f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Farm,Historischer Bauernhof,Zabytkowe gospodarstwo,#CA6F1E,warehouse,2
+718c03c0-451c-489b-b5b5-bc19aa9ada9a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trailhead,Wanderparkplatz,Początek szlaku,#229954,map-pin,2
+73f86e86-9af6-4952-b4b4-b3d19db738e2,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Climbing Crag,Kletterfelsen,Skała wspinaczkowa,#922B21,mountain,3
+74061852-4127-47a3-9728-b2b2d046b147,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Watermill,Wassermühle,Młyn wodny,#7FB3D3,wind-turbine,2
+74824dcd-f98e-4af6-a23a-45ff9cf413c7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cathedral,Kathedrale,Katedra,#5D4037,landmark,4
+756e0f90-185c-4920-a8da-18529489c68d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wildlife Hide,Wildbeobachtungsversteck,Czatownia,#1E8449,eye,3
+7571dcbe-dabc-4a16-b2cb-1c6466faddb0,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Chapel,Kapelle,Kaplica,#795548,church,2
+75c79712-0959-4b86-a8fb-b929c76ec67f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Castle,Schloss,Zamek,#6C3483,castle,4
+78c6ce77-9d92-4699-a8ec-f47c1e373c73,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Community Garden,Gemeinschaftsgarten,Ogród społecznościowy,#43A047,sprout,1
+78dd82d8-66db-496b-afef-df09837b427b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Zoo,Zoo,Zoo,#F39C12,paw-print,3
+798585cb-f728-48bb-aa85-6283e2b579b2,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Glamping,Glamping,Glamping,#F39C12,tent,2
+799b90c1-d9d7-458a-adb0-a007f21c9234,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Drinking Water,Trinkwasser,Woda pitna,#3498DB,glass-water,1
+7a85a205-545d-4777-a58b-9868f5f933a4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mural / Street Art,Wandbild / Street Art,Mural / Sztuka uliczna,#E74C3C,palette,2
+7bcafdac-028b-48ac-afb7-bfb58f397031,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bed & Breakfast,Pension,Bed & Breakfast,#F0B27A,bed,1
+7c6b4044-0de6-440d-b83a-45453ed873cd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hunting Area,Jagdgebiet,Teren łowiecki,#6E2F1A,target,1
+7db3e5de-7f44-4856-b283-b500c088b66e,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Planetarium,Planetarium,Planetarium,#2C3E50,star,3
+81580ef0-cae1-411d-9242-3872f6e7e49e,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sauna,Sauna,Sauna,#E59866,flame,2
+816f8a03-673e-472d-8166-845eeec45f62,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Prayer Chapel,Andachtskapelle,Kaplica modlitewna,#795548,church,2
+8235b0aa-1f15-4eb8-82dc-a1b8864337b4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fossil Site,Fossilienfundstätte,Stanowisko skamielin,#7B7D7D,bone,3
+84845930-ad2a-4734-9b89-496dffa4062c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Col,Joch,Przełęcz,#CA6F1E,chevron-up,2
+85a8dc8d-6cdc-4398-bede-544e719eb8e3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Water Playground,Wasserspielplatz,Wodny plac zabaw,#3498DB,waves,2
+85dba625-1bd3-4313-a832-a4d95b3b9fac,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cross-Country Ski Trail,Langlaufloipe,Trasa biegowa,#D6EAF8,ski-nordic,2
+8698256f-28fc-4d55-b29a-0d390f08f761,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Vineyard,Weinberg,Winnica,#8E44AD,wine,3
+86b88624-fcd4-4be5-b484-e23c247af5f2,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Paintball,Paintball,Paintball,#2ECC71,gun,2
+871609e9-8449-4470-acf0-27e1de881eca,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Star Gazing Spot,Sternbeobachtungsplatz,Miejsce obserwacji gwiazd,#1B2631,stars,3
+878ff006-2890-4700-8d35-937033a471be,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Railway,Bergbahn,Kolej górska,#8E44AD,train-track,3
+88f7b61a-5d08-4a53-ad9b-4f62ca710751,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wooden Bridge,Holzbrücke,Drewniany most,#784212,bridge,2
+8bbe7e4f-bbd2-4bee-b140-7f06515abca2,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Escape Room,Escape Room,Escape room,#8E44AD,lock,2
+8c163784-54a6-4f1e-a94c-3f292a7b7e59,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Research Station,Forschungsstation,Stacja badawcza,#717D7E,microscope,2
+8c6cc84c-3d47-427b-ba5d-a88d0a7fb832,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Zip Line,Seilrutsche,Tyrolka,#27AE60,zap,3
+8c7041f0-023d-400b-bbc0-8b0eb9aafaa4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Restaurant,Bergrestaurant,Restauracja górska,#D35400,utensils,2
+8ccb613a-fca2-4cd3-8d5a-719d03372809,2026-06-09 20:20:04.456795+00,2026-06-09 20:20:04.456795+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Multi transport station (Tram/Bus),Umsteigebahnhof (Tram/Bus),Węzeł przesiadkowy (tramwaj/autobus),#453834,tram,1
+8cccb61d-8718-4b22-b1fa-6f98b8eda4af,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Train Station,Bahnhof,Stacja kolejowa,#FF2C2C,train,1
+8ddc4bc2-6730-4e0b-8b1d-8ef4fcd236f6,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Paragliding Launch,Gleitschirm-Startplatz,Startowisko paralotni,#1ABC9C,wind,4
+8e5473c6-8cd1-4a9a-9a0b-1fd027fe7af4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Barbecue Spot,Grillplatz,Miejsce na grilla,#E59866,fire,2
+90ed8ffd-cba7-4f6e-a446-d5ca0d51e963,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Alpine Summit,Alpengipfel,Szczyt alpejski,#C0392B,mountain-snow,5
+9184338e-abdd-41f0-a4f3-b6253b9013ce,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Chair Lift,Sessellift,Wyciąg krzesełkowy,#6C3483,chair,2
+93ce7dca-ec72-4607-bb55-267f76ba8f06,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tennis Court,Tennisplatz,Kort tenisowy,#F9E79F,circle,1
+96d7f5cb-0d4f-449b-bfc7-a9abcefe22c7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fireplace,Feuerstelle,Palenisko,#CB4335,flame,2
+98be8ec0-224f-475b-93bf-ebcd6acf64f3,2026-06-09 20:18:54.190766+00,2026-06-09 20:18:54.190766+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tram,Straßenbahn,Tramwaj,#434123,tram,1
+9c551f68-a2d5-4e1c-892a-e90a723823cc,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rose Garden,Rosengarten,Ogród różany,#EC407A,flower,3
+9c6874cc-608a-45c4-8d27-5a4e39a0afe7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Bridge,Historische Brücke,Zabytkowy most,#7D3C98,bridge,3
+9de3bf35-b034-411d-94c6-ca6ba9014d6b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Campfire Site,Lagerfeuerplatz,Miejsce na ognisko,#E74C3C,fire,2
+a0e300ce-e5e8-468d-9a8d-8b2a407c9901,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,University,Universität,Uniwersytet,#2E4057,graduation-cap,2
+a24a8523-c650-4299-9d05-f3d40fa32f98,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ruin,Ruine,Ruina,#717D7E,landmark,3
+a456bf01-5366-4c20-a67b-9b89dd4575ab,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,High Ropes Course,Hochseilgarten,Park linowy,#D35400,rope,3
+a485f704-52a5-4d8d-aef8-390b66cc3538,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Folklore Site,Folklorestätte,Miejsce folkloru,#884EA0,masks-theater,2
+a66342b8-915c-40b0-954f-e30e4e7b6b2c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Archaeological Site,Archäologische Stätte,Stanowisko archeologiczne,#9C640C,search,3
+a77ac945-7f57-4668-a455-fd78bc81f75c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wetland,Feuchtgebiet,Mokradło,#148F77,plant,3
+a9452e0c-cdc4-4384-b0e8-d0983213b660,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Game Reserve,Wildreservat,Rezerwat zwierzyny,#1D8348,paw-print,3
+a9a252d9-aed7-4540-a1de-5dc8ed4b73f1,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Waterfall,Wasserfall,Wodospad,#2980B9,droplets,4
+aa8131f9-00e4-4a2e-872c-d8712eadcb8f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lido / Beach,Strandbad / Strand,Kąpielisko / Plaża,#F7DC6F,umbrella-beach,3
+aae53488-d49d-4341-80b4-a3af6603efa3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bar,Bar,Bar,#8E44AD,glass,1
+ab381976-8329-4440-9772-d279a1113797,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Funicular Station,Standseilbahnstation,Stacja kolejki linowo-terenowej,#9B59B6,tram,3
+ac5bbe44-d157-4e99-90a3-b4d75ab92aa1,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sports Stadium,Sportstadion,Stadion sportowy,#E74C3C,trophy,2
+ae16b35d-59a1-4a0a-8d9c-c08df20ae2d6,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Weather Station,Wetterstation,Stacja meteorologiczna,#85C1E9,cloud-sun,2
+b1ed8423-01c7-422e-a368-f9326fbbd03f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Shrine,Schrein,Kapliczka,#8D6E63,star,2
+b3a96873-c688-4cc8-a32d-4043d9309e7c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Alpine Meadow,Alm,Hala górska,#27AE60,grass,3
+b5d65bf2-7cf1-48e5-be8f-d1daf0bc702f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Pilgrimage Site,Wallfahrtsort,Miejsce pielgrzymkowe,#A04000,heart,3
+b648227e-728b-4603-a047-6a539846ea8c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Historic Village,Historisches Dorf,Zabytkowa wieś,#884EA0,city,3
+b771392e-1352-4e70-b7dc-3017efdf98c6,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Parking,Parkplatz,Parking,#717D7E,square-parking,1
+bb1ae539-d26a-4435-a3a1-55893e6b3bd4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Forest,Wald,Las,#1E8449,trees,2
+be6348c8-f662-4d5c-a49f-f0fc5d7865cb,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Yoga Spot,Yoga-Platz,Miejsce do jogi,#A569BD,person-standing,2
+c11cf58d-2172-45f0-8147-df0d09aa6fae,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Landslide Area,Erdrutschgebiet,Obszar osuwiskowy,#6E2F1A,triangle-alert,2
+c1bf4560-8e7c-47e8-9b33-298ab10fe070,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mini Golf,Minigolf,Minigolf,#27AE60,golf,1
+c42c5d21-8d90-4344-8d55-2a384069104d,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Avalanche Zone,Lawinenzone,Strefa lawinowa,#C0392B,triangle-alert,2
+c4355a98-2e60-4221-94ed-7b5cef3f1f17,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Suspension Bridge,Bergseilbrücke,Górski most wiszący,#8E44AD,bridge-suspension,4
+c5792a5d-2920-439d-b2f8-296960c9df4f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Swimming Spot,Badestelle,Miejsce do kąpieli,#52BE80,swim,3
+c5d48f82-2bed-4cb5-ac9f-b88e46eee251,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rack Railway,Zahnradbahn,Kolej zębata,#7D3C98,train,3
+c68ac507-d59d-4710-a1d0-2c218d4aacc9,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trampoline Park,Trampolinpark,Park trampolin,#F39C12,person-jumping,2
+c75e5957-2513-4a1f-933f-5260ca988e26,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Camping,Campingplatz,Kemping,#27AE60,tent,2
+c916cacc-1742-4e49-8f06-10a47a1cf68a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Golf Course,Golfplatz,Pole golfowe,#2ECC71,golf,2
+c91f9988-2f51-4924-927d-eeef71d4a200,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cheese Dairy,Käserei,Serowarnia,#F39C12,cheese,3
+c9520758-3098-4a4f-a061-aaecc3514b94,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Brewery,Brauerei,Browar,#A04000,beer,2
+c9689da5-ca78-4075-9ac7-7667c31c926e,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Children's Farm,Kinderbauernhof,Gospodarstwo dla dzieci,#27AE60,tractor,2
+c9beb8fd-3e2a-40f0-ac70-88f81056ddc7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,School,Schule,Szkoła,#1F618D,school,1
+c9fe47e7-3f40-4021-9133-aa84e02822bc,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Refuge,Schutzhütte,Schronienie,#BA4A00,house-heart,3
+cac8e387-9631-44e7-93b9-377eaa4d944b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hostel,Herberge,Hostel,#1ABC9C,bed,1
+cbaa7cd5-3a7b-401d-a94c-930113235bfa,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Hut,Berghütte,Schronisko górskie,#E67E22,house-chimney,4
+ce6d8d90-661c-4a51-a465-d93c8a04b1e4,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sledging Run,Schlittelweg,Tor saneczkowy,#D4E6F1,arrow-down-to-line,2
+d0ff9fe6-b73d-4909-a513-77e70505723c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Museum,Museum,Muzeum,#5B2C6F,building-library,3
+d266570e-a701-4f21-84d5-1ad981ab86da,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hotel,Hotel,Hotel,#2980B9,hotel,1
+d2a2bca8-6969-410d-a24f-af3c9effc0fb,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Summit Cross,Gipfelkreuz,Krzyż szczytowy,#E74C3C,cross,3
+d3f9ea7f-7ea1-4287-bf8b-fb7eacf5d091,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Via Ferrata Start,Klettersteig-Einstieg,Początek via ferraty,#E74C3C,carabiner,4
+d64f7b0c-9953-4b85-a8ba-62b6520196fc,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gorge,Schlucht,Wąwóz,#2E86C1,waves-ladder,3
+d7ac32e0-de5f-4f74-9a17-9da0b848071a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hot Spring,Heiße Quelle,Gorące źródło,#E74C3C,thermometer-hot,3
+d7c8180c-cb71-4ba5-8891-0037bc1dbc50,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Winery,Weingut,Winiarnia,#7D3C98,wine,3
+d85e04be-1fff-45eb-88fc-c89d641c776b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Pass,Pass,Przełęcz,#D35400,mountain-pass,3
+d98ae2f8-7328-458e-a4d4-eb27873036bd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Border Crossing,Grenzübergang,Przejście graniczne,#C0392B,flag,1
+dc74310d-9737-4a7c-932e-af65160707d8,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wildlife Park,Wildpark,Park dzikiej przyrody,#27AE60,paw-print,3
+dd62cede-ef2a-40f2-817c-48fd99a9082e,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Aurora Viewpoint,Aurora-Aussichtspunkt,Punkt obserwacji zorzy,#76D7C4,sparkles,4
+de0d042c-18e8-401d-a5ac-40713aa914dd,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lake,See,Jezioro,#117A65,water,3
+df182b71-444a-43b1-85be-762848f19b6f,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Open Air Museum,Freilichtmuseum,Skansen,#6C3483,picture-in-picture-2,3
+e0b6f375-47d6-449b-9232-b2bbdb9b94e0,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sunset Point,Sonnenuntergangspunkt,Punkt zachodu słońca,#E67E22,sunset,4
+e2f6deef-9c3b-4ee3-b6f5-4579aa14db0a,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Adventure Park,Abenteuerpark,Park przygody,#E74C3C,trees,3
+e49e1afe-caea-41d6-be95-d1b987f8089c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Roman Road,Römerstraße,Droga rzymska,#9C640C,route,3
+e4d83e8d-0732-4289-8685-7b9686ae9090,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Distillery,Brennerei,Destylarnia,#884EA0,flask-conical,2
+e64838dd-fec6-4655-8255-6534785112d3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,City Park,Stadtpark,Park miejski,#2ECC71,tree-deciduous,2
+e81dc988-8ff4-4780-a090-55f0b3851c70,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Concert Hall,Konzerthalle,Sala koncertowa,#8E44AD,music,2
+e826ed36-e438-4770-a498-92c1f3198d49,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Festival Venue,Festivalgelände,Miejsce festiwalowe,#E74C3C,music,2
+e8ea5939-6100-4e13-bfaa-9ad21a4dd664,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Monastery,Kloster,Klasztor,#7D6608,church,4
+eabf3344-502d-4b72-b40e-130eaa2e29eb,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gorge / Canyon,Schlucht / Canyon,Wąwóz / Kanion,#1A5276,mountain,3
+eb7fdf42-1581-4e7b-a10c-def496282a13,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Alpine Club Hut,Alpenvereinshütte,Schronisko klubu alpejskiego,#C0392B,house-chimney-user,4
+ed768654-e7fd-495c-8edd-8347e41ca339,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bird Watching Spot,Vogelbeobachtungsplatz,Miejsce obserwacji ptaków,#7FB3D3,bird,3
+ee0fc7ca-a64e-49e4-862b-fbf2f80451a7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sunrise Point,Sonnenaufgangspunkt,Punkt wschodu słońca,#F39C12,sunrise,4
+ee4e8c63-b29b-42cb-9c35-755da25b3ae8,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cemetery,Friedhof,Cmentarz,#717D7E,cross,1
+eef024de-36bc-48f3-925f-dcb39ae6c628,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bakery,Bäckerei,Piekarnia,#CA6F1E,croissant,1
+f0fb23b1-dc7e-4617-b77b-1f1fbb52f593,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Church,Kirche,Kościół,#6D4C41,church,2
+f19e94bd-84a8-47b6-bf02-85ee7e288b6c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,BMX Track,BMX-Strecke,Tor BMX,#CA6F1E,bike,2
+f33f1ddd-d490-4701-8776-e747a9ab1900,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gondola Station,Gondelstation,Stacja gondoli,#7D3C98,cable-car,3
+f5175f8c-2795-4bf5-ba10-f19d54a470c3,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Shelter,Unterstand,Wiata,#CA6F1E,square-parking,2
+f57a096f-bf3e-4cc7-a10e-2480a0866148,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Skate Park,Skatepark,Skatepark,#717D7E,circle-dot,2
+f813c259-36f9-4846-b971-4be1ba4dc056,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Shooting Range,Schießstand,Strzelnica,#717D7E,crosshair,2
+f8daa729-d9ca-4ca8-b4e9-f16b4828c89b,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Arboretum,Arboretum,Arboretum,#2E7D32,tree-pine,3
+f99d9285-4fd9-4b42-9bd3-2302403ce124,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,War Memorial,Kriegsdenkmal,Pomnik wojenny,#6D6D6D,monument,2
+f9a1f9f5-89c2-4b74-998d-f78a1e95d2f9,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Picnic Area,Picknickplatz,Miejsce piknikowe,#28B463,picnic,2
+f9bf4932-1794-4d76-83e7-b7d7ece630d7,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Farm Stay,Ferien auf dem Bauernhof,Agroturystyka,#CA6F1E,barn,2
+f9cba109-962e-4611-bc5c-a09f69d16535,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Erratic Boulder,Findling,Głaz narzutowy,#717D7E,circle,2
+fbb7f7a8-a199-43ac-8e60-5166840ee443,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fountain,Brunnen,Fontanna,#48C9B0,fountain,2
+fe5d4515-c344-4c9e-9938-41f2522e53a1,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Theatre,Theater,Teatr,#6C3483,masks-theater,2
+ff057c21-cae9-4e8f-8aea-af2246b5279c,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ravine,Klamm,Jar,#1A5276,terrain,2
+ffc57bf8-f91e-4bde-a420-27befaab0ada,2026-05-06 19:20:05.242835+00,2026-05-06 19:20:05.242835+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Bike Trail,Mountainbike-Strecke,Trasa rowerów górskich,#F39C12,bike,3

@@ -1,0 +1,31 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+5506fed9-5894-4ea6-ade7-63f962abb632,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Summit,Gipfel,Szczyt,#E74C3C,waypoint_summit,1
+b12ab0e9-3e0d-4fa6-9c9f-e4a6e833b92d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Pass,Pass,Przełęcz,#E67E22,waypoint_pass,1
+7284427b-b229-4f00-913d-afeb325ebef5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hut,Hütte,Schronisko,#D35400,waypoint_hut,1
+6f7d23fc-a04f-4f36-921b-9a3d06bf304f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Shelter,Unterstand,Wiata,#CA6F1E,waypoint_shelter,1
+c16e5644-8853-4f55-aeae-c0745230edc1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Campsite,Zeltplatz,Pole namiotowe,#229954,waypoint_campsite,1
+2f59cedd-9f3a-4eb0-aad3-1cb94ed00dd4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Water Source,Wasserquelle,Źródło wody,#3498DB,waypoint_water,1
+77c1055c-7cbf-4e0b-aec3-97d10d4a1c85,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Spring,Quelle,Źródło,#2980B9,waypoint_spring,1
+f363afdb-165c-41ba-9ff9-a93a50040deb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lake,See,Jezioro,#2874A6,waypoint_lake,1
+d0a133b9-c289-4a1d-a4f9-e75aef89ca6a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Waterfall,Wasserfall,Wodospad,#5DADE2,waypoint_waterfall,1
+88bdd4b0-a8d0-4a6a-8ef1-8470d9872ebe,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Viewpoint,Aussichtspunkt,Punkt widokowy,#9B59B6,waypoint_viewpoint,1
+b160b5bc-5de0-4936-a16c-d6f6485cf1a9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Photo Spot,Fotostelle,Miejsce na zdjęcia,#8E44AD,waypoint_photo_spot,1
+08d1a269-c4e4-46b0-acdf-c673401841ba,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Junction,Kreuzung,Skrzyżowanie,#95A5A6,waypoint_junction,1
+d5a2f594-d49f-4d2e-bd0a-17fe0f6b227b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trailhead,Ausgangspunkt,Początek szlaku,#27AE60,waypoint_trailhead,1
+47d41f43-668c-4651-b639-3f670293631d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Parking,Parkplatz,Parking,#34495E,waypoint_parking,1
+832ba8d8-fbc3-417a-89fc-12722223918f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bus Stop,Bushaltestelle,Przystanek autobusowy,#5D6D7E,waypoint_bus_stop,1
+6f809e69-1acb-40e5-84d6-d9b76d48a80f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Train Station,Bahnhof,Stacja kolejowa,#2C3E50,waypoint_train_station,1
+4216b087-84f6-4545-b6f2-076a09472fb8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cable Car,Seilbahn,Kolej linowa,#1ABC9C,waypoint_cable_car,1
+7c89cd49-3c0e-47bc-a669-a2e8b85995c9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bridge,Brücke,Most,#7F8C8D,waypoint_bridge,1
+6b804983-5a7b-4c04-8cf1-d660cda8a179,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ford,Furt,Bród,#48C9B0,waypoint_ford,1
+0a369a79-7327-4033-99c3-e6458a2251e7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ladder,Leiter,Drabina,#B7950B,waypoint_ladder,1
+57a60a6b-5ac1-4a7c-8859-babcd39fbcec,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gate,Tor,Brama,#873600,waypoint_gate,1
+da4a964d-931e-4ba0-bd39-c81d5643532e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cave,Höhle,Jaskinia,#4D5656,waypoint_cave,1
+7c76fc66-c663-475d-a8da-a23a616e75cc,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Restaurant,Restaurant,Restauracja,#E67E22,waypoint_restaurant,1
+f7f23599-f0c6-4b00-8a7c-341df665f1ab,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Toilet,Toilette,Toaleta,#5DADE2,waypoint_toilet,1
+e8f459c7-aab9-4dfa-8c47-ce5b984c7069,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,First Aid,Erste Hilfe,Pierwsza pomoc,#C0392B,waypoint_first_aid,1
+d13e1b87-cb2e-4519-987e-dcc1e6d7dabb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Chapel,Kapelle,Kaplica,#A569BD,waypoint_chapel,1
+9613f8bd-5112-426c-a7bc-abe69f19f0b3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ruins,Ruine,Ruiny,#797D7F,waypoint_ruins,1
+54291bcb-ea91-4f15-a753-c25f0cdf02d2,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Border,Grenze,Granica,#F39C12,waypoint_border,1
+bafe1830-13ff-4d24-a11a-ecf9108c9994,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rest Area,Rastplatz,Miejsce odpoczynku,#58D68D,waypoint_rest_area,1
+719529e9-c010-412c-9ba1-e4715650101c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Danger,Gefahr,Niebezpieczeństwo,#922B21,waypoint_danger,1

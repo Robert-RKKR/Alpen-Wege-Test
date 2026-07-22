@@ -1,0 +1,108 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+d45650ea-671c-469e-861c-41d4ed62cc51,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hiking Boots,Wanderschuhe,Buty trekkingowe,000000,gear_type,1
+73635ef8-9f7a-4046-9539-e24e9943f5c4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hiking Poles,Wanderstöcke,Kijki trekkingowe,000000,gear_type,1
+8ced9f8b-7aa9-4c16-8ca6-48ff6df53bc5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hiking Backpack,Wanderrucksack,Plecak turystyczny,000000,gear_type,1
+5ce8afa7-b106-4be6-b94d-c9ce406b4da5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hiking Gaiters,Gamaschen,Stuptuty,000000,gear_type,1
+efc6529b-42fb-4284-b1ea-14145cf867e3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trekking Sandals,Trekkingsandalen,Sandały trekkingowe,000000,gear_type,1
+b509e77c-098a-4af0-898d-39917aadd410,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trail Running Shoes,Trailrunning-Schuhe,Buty do biegania w terenie,000000,gear_type,1
+9d42e7dd-b6bd-4c33-a1d1-b6b309af0391,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Poles,Laufstöcke,Kijki do biegania,000000,gear_type,1
+118f7135-6152-4532-bda8-38c5ce4823fc,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Vest,Laufweste,Kamizelka biegowa,000000,gear_type,1
+691c689e-2aae-4298-bed3-d3f6fed26c72,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Shorts,Laufshorts,Spodenki do biegania,000000,gear_type,1
+18edf49c-1c32-46c2-8049-b18df9e8bf45,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Tights,Lauftights,Legginsy do biegania,000000,gear_type,1
+6afd41e9-9245-4e9c-90d3-361f68e377b9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running T-Shirt,Lauf-T-Shirt,Koszulka do biegania,000000,gear_type,1
+d7bf8206-5c23-40e3-a9bf-4019e39569bb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Jacket,Laufjacke,Kurtka do biegania,000000,gear_type,1
+bf6afadc-8e0c-440f-bc3d-6c9e0193a9d1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Cap,Laufkappe,Czapka do biegania,000000,gear_type,1
+ead6da09-3ace-4a82-a973-55cff5c9cb92,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Socks,Laufsocken,Skarpety do biegania,000000,gear_type,1
+eebfc0fb-2cb3-4054-8477-7acd1e8b3dab,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Headband,Laufstirnband,Opaska do biegania,000000,gear_type,1
+43536bc6-76cb-400c-8bc1-2e157ed84bbe,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Gloves,Laufhandschuhe,Rękawiczki do biegania,000000,gear_type,1
+90ecc147-c16a-47ab-97cd-1e6b798de932,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Arm Sleeves,Lauf-Armlinge,Rękawki do biegania,000000,gear_type,1
+c56eafe5-6bef-4b82-9e06-4c81adf05859,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Road Running Shoes,Straßenlaufschuhe,Buty do biegania szosowego,000000,gear_type,1
+6617ea0f-d5e6-4efa-acfd-5a20f8c8a7bb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Running Watch,Laufuhr,Zegarek do biegania,000000,gear_type,1
+9442fdab-1ba1-401b-86b3-8d43ff05521c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Heart Rate Monitor,Herzfrequenzmesser,Pulsometr,000000,gear_type,1
+8388ebf9-0f03-4caf-a479-27ca09b4d234,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hydration Belt,Trinkgürtel,Pas z bidonami,000000,gear_type,1
+19d3ec84-dba7-42b2-9b96-fe0c58b469d7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hydration Pack,Trinksystem-Rucksack,Plecak z bukłakiem,000000,gear_type,1
+a015982c-cdf5-4fe2-a85f-e23874f4b4ec,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Soft Flask,Softflask,Bidon elastyczny,000000,gear_type,1
+aa10f7ac-d6bd-4407-8905-b8764589f51e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountaineering Boots,Bergstiefel,Buty wysokogórskie,000000,gear_type,1
+6ffa7a2b-c668-4b77-80e7-080708ab48f7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Crampons,Steigeisen,Raki,000000,gear_type,1
+67a268bf-b581-44d3-9012-9c467a37fce4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ice Axe,Eispickel,Czekan,000000,gear_type,1
+b3c7c943-cba7-46d1-8b36-0622dacb5c7c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Climbing Harness,Klettergurt,Uprząż wspinaczkowa,000000,gear_type,1
+40276aef-a6ea-4cf0-84e0-f904deb9e0d3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Climbing Helmet,Kletterhelm,Kask wspinaczkowy,000000,gear_type,1
+f64c06bf-9f84-4e47-b999-5ecaece94f94,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Climbing Rope,Kletterseil,Lina wspinaczkowa,000000,gear_type,1
+2688ef86-9b3b-455f-963a-1a89cc150e66,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Carabiners,Karabiner,Karabinki,000000,gear_type,1
+6ccfe3eb-80c2-435e-96f1-4fd38bd10966,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Belay Device,Sicherungsgerät,Przyrząd asekuracyjny,000000,gear_type,1
+368e1e3a-1904-49b0-9a12-071e0f378cc3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Quickdraws,Expressschlingen,Ekspressy,000000,gear_type,1
+2e41d993-2efc-4f12-bea1-bf014360c308,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Climbing Shoes,Kletterschuhe,Buty wspinaczkowe,000000,gear_type,1
+46e23d65-532c-46db-bae7-a8159219d27b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Chalk Bag,Magnesiabeutel,Woreczek na magnezję,000000,gear_type,1
+d355f610-0fd8-49ff-a264-32976cc513b0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Approach Shoes,Zustiegsschuhe,Buty podejściowe,000000,gear_type,1
+f4abca97-f5e2-45c2-83f6-742eb1214237,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Boots,Skischuhe,Buty narciarskie,000000,gear_type,1
+a189ed73-b918-443b-afb4-c4a8b92633e2,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Touring Skis,Tourenski,Narty skiturowe,000000,gear_type,1
+0368fb37-854a-4da5-87c6-acab888e8e0c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Touring Bindings,Tourenbindungen,Wiązania skiturowe,000000,gear_type,1
+fd98ea3c-2b42-4e9c-acd5-ef7157271a56,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Touring Skins,Skifelle,Foki narciarskie,000000,gear_type,1
+024dad22-6542-463b-9abb-15047f46bc4e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Avalanche Beacon,Lawinenverschüttetensuchgerät,Detektor lawinowy,000000,gear_type,1
+9e234a3a-45ff-436e-aa1a-576363deb535,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Avalanche Probe,Lawinensonde,Sonda lawinowa,000000,gear_type,1
+d9b10fd9-c5ba-44fd-bdc6-865541743cb8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Avalanche Shovel,Lawinenschaufel,Łopatka lawinowa,000000,gear_type,1
+21f9c1b3-a144-4d5b-bece-7691b9f1011d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Helmet,Skihelm,Kask narciarski,000000,gear_type,1
+14e1cc14-9e5d-499e-9926-0a765b884ce3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Goggles,Skibrille,Gogle narciarskie,000000,gear_type,1
+c0f39870-4773-42e4-8f50-6cfc1a030acb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Ski Poles,Skistöcke,Kijki narciarskie,000000,gear_type,1
+b6e8ef05-c8f4-4b05-ad01-a51d647cb210,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cross-Country Skis,Langlaufski,Narty biegowe,000000,gear_type,1
+c4c828fc-6f6f-4811-b234-c9bd8ad2df7f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Snowboard,Snowboard,Deska snowboardowa,000000,gear_type,1
+22053d63-5106-4b8e-a493-256990d8d85c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Snowboard Boots,Snowboardschuhe,Buty snowboardowe,000000,gear_type,1
+df1e41c1-a7fb-45ac-bfd1-4f236a6cb0b1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Snowshoes,Schneeschuhe,Rakiety śnieżne,000000,gear_type,1
+e4e515eb-856d-4d64-9ad7-323353054f6a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Road Bike,Rennrad,Rower szosowy,000000,gear_type,1
+73c1e7a4-a42d-46b9-a165-89858e1db272,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mountain Bike,Mountainbike,Rower górski,000000,gear_type,1
+d741154f-dfc5-4876-bfc0-6d9586e77c95,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gravel Bike,Gravelbike,Rower gravelowy,000000,gear_type,1
+34d2a5a9-ed36-4c04-8a76-db53d824baf9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Helmet,Fahrradhelm,Kask rowerowy,000000,gear_type,1
+2b52b5d7-120c-4d5a-a68f-89a12662b076,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Shoes,Radschuhe,Buty rowerowe,000000,gear_type,1
+96172600-70dd-4bbb-afed-c3a3644c8b36,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Jersey,Radtrikot,Koszulka rowerowa,000000,gear_type,1
+9783d760-c06b-4c2a-b147-ddca001ce0e0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Shorts,Radhose,Spodenki rowerowe,000000,gear_type,1
+92b9958e-681e-450e-9878-3c480d62ecb0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Gloves,Radhandschuhe,Rękawiczki rowerowe,000000,gear_type,1
+cf715af6-a1ae-47ed-88ec-b6c2a9db8823,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cycling Glasses,Radbrille,Okulary rowerowe,000000,gear_type,1
+7bc52029-77d6-4e4f-abe4-4efd8f15b785,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bike Computer,Fahrradcomputer,Licznik rowerowy,000000,gear_type,1
+a6a1397b-ec6b-4958-8cb6-32981f586349,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bike Lock,Fahrradschloss,Zapięcie rowerowe,000000,gear_type,1
+911af8d3-a1c0-42c6-816f-69e05e905c29,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Bike Lights,Fahrradbeleuchtung,Oświetlenie rowerowe,000000,gear_type,1
+e7b4ff20-fe7b-4361-afa9-9610b938c354,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Swimsuit,Badeanzug,Strój kąpielowy,000000,gear_type,1
+0f3aa5b0-c6df-4914-8bc2-b95e3543c285,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Swimming Goggles,Schwimmbrille,Okulary pływackie,000000,gear_type,1
+fef4ccba-582c-4472-8590-6fc227c2e6c1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Swim Cap,Badekappe,Czepek pływacki,000000,gear_type,1
+f4e88f3b-d2c9-416a-a3d7-b14e6467f0f8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wetsuit,Neoprenanzug,Pianka neoprenowa,000000,gear_type,1
+d8a50f67-8fd9-48b8-882b-a03c4e89658d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fins,Flossen,Płetwy,000000,gear_type,1
+6bebf18e-1b84-4c38-bc40-0876949dbc11,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Kickboard,Schwimmbrett,Deska do pływania,000000,gear_type,1
+8ff0aa09-40b8-4ed7-a36c-66431b32d474,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tent,Zelt,Namiot,000000,gear_type,1
+e3afd25d-6c13-400e-88b5-376d033d5aa2,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sleeping Bag,Schlafsack,Śpiwór,000000,gear_type,1
+22e71fad-26ae-4102-a42f-449603796776,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sleeping Pad,Isomatte,Karimata,000000,gear_type,1
+4a92cecf-fe7d-497d-9a44-7bf19f9f96da,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Headlamp,Stirnlampe,Czołówka,000000,gear_type,1
+3df95e76-3eba-416a-b192-0817b708e34b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trekking Backpack,Trekkingrucksack,Plecak trekkingowy,000000,gear_type,1
+479f3f82-9208-4dfb-ab4d-a72dc386c27e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rain Jacket,Regenjacke,Kurtka przeciwdeszczowa,000000,gear_type,1
+e325a3d6-b525-4117-b646-07bfe4f7ec65,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Softshell Jacket,Softshelljacke,Kurtka softshellowa,000000,gear_type,1
+e545f5a3-4e22-46ff-8b05-5fe2d1a922cd,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hardshell Jacket,Hardshelljacke,Kurtka hardshellowa,000000,gear_type,1
+b4663a8a-1e5f-4515-b38b-571739a519f9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Down Jacket,Daunenjacke,Kurtka puchowa,000000,gear_type,1
+b5d8de43-9350-4e4f-b9f8-01b0b6b76fe9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fleece Jacket,Fleecejacke,Kurtka polarowa,000000,gear_type,1
+82012522-ed9f-49f0-b770-012c2905fbe2,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Base Layer Top,Funktionsunterhemd,Bielizna termoaktywna góra,000000,gear_type,1
+e88c2c84-08b8-43bf-b969-0c2c759b88aa,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Base Layer Bottom,Funktionsunterhose,Bielizna termoaktywna dół,000000,gear_type,1
+f50074af-ad30-48e9-b2e2-42ba3af902f4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hiking Pants,Wanderhose,Spodnie trekkingowe,000000,gear_type,1
+3242aad2-c860-418a-bb5d-fb40f2e6dc9f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trekking Socks,Trekkingsocken,Skarpety trekkingowe,000000,gear_type,1
+19dff88b-8959-44e8-80e9-c66d23c8def0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Training Shoes,Trainingsschuhe,Buty treningowe,000000,gear_type,1
+a076d2fa-3538-4c5e-9e8b-96113c655b79,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gym Gloves,Trainingshandschuhe,Rękawiczki na siłownię,000000,gear_type,1
+4a8030a7-92e4-46fa-a494-198669cd9aa6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Resistance Bands,Widerstandsbänder,Gumy oporowe,000000,gear_type,1
+14a73805-fae1-4f1a-990f-691001d3d0dc,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Jump Rope,Springseil,Skakanka,000000,gear_type,1
+5640b4e9-a2ae-464b-8af8-765cb828aff6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Yoga Mat,Yogamatte,Mata do jogi,000000,gear_type,1
+c35a462f-fbdf-45f6-8847-46577b7bb06e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Foam Roller,Faszienrolle,Roller do masażu,000000,gear_type,1
+a38f506b-4526-47bd-8eca-c08c7b1a76be,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tennis Racket,Tennisschläger,Rakieta tenisowa,000000,gear_type,1
+ac42ef4d-72ea-44b0-b1e0-f99a8f95326d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Badminton Racket,Badmintonschläger,Rakieta do badmintona,000000,gear_type,1
+11f879b8-901b-43ff-af09-56a2fc8a929b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Table Tennis Paddle,Tischtennisschläger,Rakietka do ping-ponga,000000,gear_type,1
+43480d3b-fe56-4cd5-9592-2df458215cd5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Squash Racket,Squashschläger,Rakieta do squasha,000000,gear_type,1
+24d477f0-c9ff-42f1-833f-0816832750ff,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Football Boots,Fußballschuhe,Korki piłkarskie,000000,gear_type,1
+d57b9e82-42e0-400a-9b8d-f19932961ae1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Football Shin Guards,Schienbeinschoner,Ochraniacze piłkarskie,000000,gear_type,1
+95e05b5b-f0b5-45ae-a5d1-bf5161588ebe,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Basketball Shoes,Basketballschuhe,Buty do koszykówki,000000,gear_type,1
+6fd62a2e-3cc5-4d76-9a01-be9d0c6f5098,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Volleyball Shoes,Volleyballschuhe,Buty do siatkówki,000000,gear_type,1
+8e4b5521-36f7-4eaa-a1dc-572b6134f554,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Handball Shoes,Handballschuhe,Buty do piłki ręcznej,000000,gear_type,1
+e6e8ae57-7b43-4098-ae8c-fc75c5eb8c89,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sports Sunglasses,Sportsonnenbrille,Okulary sportowe,000000,gear_type,1
+c8f1a79a-d08b-4349-a853-f82ef2252a17,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,GPS Watch,GPS-Uhr,Zegarek GPS,000000,gear_type,1
+90cbb3cf-fe26-458c-b016-94324283128d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Action Camera,Actionkamera,Kamera sportowa,000000,gear_type,1
+cfb948e5-eb62-4bc7-a701-78238b28819c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Power Bank,Powerbank,Powerbank,000000,gear_type,1
+40eb9ce6-359d-4428-b4a3-4d444133b5e5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Compression Socks,Kompressionssocken,Skarpety kompresyjne,000000,gear_type,1
+c0d29627-0c9a-4676-904f-c5a3decb4aa6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Neck Gaiter,Schlauchtuch,Komin,000000,gear_type,1
+2f626d7f-5a61-488b-9758-9b5247d1a94a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sun Hat,Sonnenhut,Kapelusz przeciwsłoneczny,000000,gear_type,1
+e682dfe0-5122-4000-a3bf-4e593fe9d333,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trekking Hat,Trekkinghut,Kapelusz trekkingowy,000000,gear_type,1
+dcbb9282-6eec-4655-ba8c-76cbc5019b0e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Dry Bag,Packsack,Worek wodoszczelny,000000,gear_type,1
+b9facc22-db16-4f2a-85d9-ff24e64a0780,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,First Aid Kit,Erste-Hilfe-Set,Apteczka,000000,gear_type,1
+69b4ea2e-a140-4db9-84b3-29c3aece560e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trekking Umbrella,Trekkingschirm,Parasolka trekkingowa,000000,gear_type,1

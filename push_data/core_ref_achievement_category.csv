@@ -1,0 +1,15 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+83312366-dcbe-4589-b6cb-8998f4dc7f51,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Distance,Distanz,Dystans,#3498DB,ach_cat_distance,1
+3260c7fa-d07c-4da4-8e81-97739e9f08c7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Elevation,Höhenmeter,Przewyższenie,#E67E22,ach_cat_elevation,1
+5a84117b-6afa-4d3f-8fdb-e12f647a1b94,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Exploration,Erkundung,Eksploracja,#2ECC71,ach_cat_exploration,1
+e86ea765-0ced-4b89-a197-3c5f67b2a035,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Social,Sozial,Społeczność,#9B59B6,ach_cat_social,1
+ac1cc60e-faaa-4da1-bf6d-938e5216f8e3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Consistency,Beständigkeit,Regularność,#1ABC9C,ach_cat_consistency,1
+c84a1fbf-cd05-48ff-8b36-3696622baa31,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Speed,Geschwindigkeit,Prędkość,#E74C3C,ach_cat_speed,1.2
+f03adc07-fe5c-4565-8d23-a05f7ac394a0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Endurance,Ausdauer,Wytrzymałość,#D35400,ach_cat_endurance,1.2
+f62de4a7-3b1b-48f2-94ea-8f9ab07bb2e9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Seasonal,Saisonal,Sezonowe,#F39C12,ach_cat_seasonal,1
+28a3d209-99e0-4b74-8ae7-323f9fc586d8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Peaks,Gipfel,Szczyty,#7F8C8D,ach_cat_peaks,1.3
+6ff4e87d-094e-4b22-aab5-353e11689ef0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Collection,Sammlung,Kolekcja,#8E44AD,ach_cat_collection,1
+60f2991d-5165-4081-8c71-e18a45c8cf1e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Navigation,Navigation,Nawigacja,#16A085,ach_cat_navigation,1
+ae314956-2904-4ea0-aebd-5fa6aea2ab04,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Photography,Fotografie,Fotografia,#2980B9,ach_cat_photography,1
+d66e7c97-8670-4e0f-9e4a-d2081100adfb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Weather,Wetter,Pogoda,#95A5A6,ach_cat_weather,1
+0aada4f7-577b-4d7b-8a29-4a624dd6f005,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Nocturnal,Nächtlich,Nocne,#2C3E50,ach_cat_nocturnal,1.3

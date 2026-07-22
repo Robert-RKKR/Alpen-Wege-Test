@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: alpenwege-postgres
+    environment:
+      POSTGRES_DB: alpenwege
+      POSTGRES_USER: alpenwege
+      POSTGRES_PASSWORD: alpenwege
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./alpen_wege_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alpenwege -d alpenwege"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nocodb-db:
+    image: postgres:15
+    container_name: alpenwege-nocodb-postgres
+    environment:
+      POSTGRES_DB: nocodb
+      POSTGRES_USER: nocodb
+      POSTGRES_PASSWORD: nocodb
+    volumes:
+      - nocodb_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nocodb -d nocodb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: alpenwege-nocodb
+    environment:
+      NC_DB: "pg://nocodb-db:5432?u=nocodb&p=nocodb&d=nocodb"
+      NC_ALLOW_LOCAL_HOOKS: "true"
+      NC_ALLOW_LOCAL_EXTERNAL_DBS: "true"
+      NC_DISABLE_SSRF_PROTECTION: "true"
+      NC_INVITE_ONLY_SIGNUP: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nocodb-db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  nocodb_pgdata:

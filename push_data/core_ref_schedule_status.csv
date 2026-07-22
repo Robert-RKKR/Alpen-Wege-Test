@@ -1,0 +1,11 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+aef83636-b8e2-4cd9-abb3-10d299522911,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Draft,Entwurf,Szkic,#95A5A6,schedule_draft,1
+38b8aa22-c030-48f3-8af4-af4179fc724f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Planned,Geplant,Zaplanowany,#3498DB,schedule_planned,1
+62099994-c4fe-47d6-b948-c1c2eccf9348,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Confirmed,Bestätigt,Potwierdzony,#2ECC71,schedule_confirmed,1
+010a9fdf-577b-4e82-bde0-e4dceaf411cb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,In Progress,In Bearbeitung,W trakcie,#F1C40F,schedule_in_progress,1
+31402697-fa6e-4d0f-971b-ca4ea9cc7d57,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Completed,Abgeschlossen,Ukończony,#27AE60,schedule_completed,1
+818683a7-35ff-44be-a5fa-9d38bff36008,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Postponed,Verschoben,Przełożony,#E67E22,schedule_postponed,1
+6520fdb1-9470-4a56-9660-94e5dba269c0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,On Hold,Pausiert,Wstrzymany,#F39C12,schedule_on_hold,1
+80ae1d2e-f39a-4af6-9137-60948b3eaec7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cancelled,Abgesagt,Anulowany,#E74C3C,schedule_cancelled,1
+07fd14c4-c926-46a4-a540-c6875e999151,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Failed,Fehlgeschlagen,Nieudany,#C0392B,schedule_failed,1
+a89dcc83-bcc2-4aea-8fd6-8b25ba6b914c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Aborted,Abgebrochen,Przerwany,#922B21,schedule_aborted,1

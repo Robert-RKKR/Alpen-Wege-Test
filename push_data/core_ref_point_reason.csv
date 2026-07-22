@@ -1,0 +1,21 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+0afc4f0e-4b97-449d-ba6f-4b4af5f69aa3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Activity Completed,Aktivität abgeschlossen,Ukończona aktywność,#2ECC71,point_activity,1
+b0927edb-39bf-47bb-bb96-57eb24c243b2,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Achievement Unlocked,Erfolg freigeschaltet,Odblokowane osiągnięcie,#F1C40F,point_achievement,1
+0e5094b9-4b28-49aa-913f-27e6267fda73,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,POI Discovered,POI entdeckt,Odkryty POI,#3498DB,point_poi,1
+419c7fa5-bd02-449b-8861-507680545e0b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Daily Bonus,Täglicher Bonus,Dzienny bonus,#E67E22,point_daily_bonus,1
+2f1a007c-0b30-40f5-b6ab-96e6586a8853,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Card Collected,Karte gesammelt,Zebrana karta,#9B59B6,point_card,1
+8a37fee1-23dc-432c-80b6-da0facdf6903,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Route Created,Route erstellt,Utworzona trasa,#16A085,point_route_created,1
+5ba5c8ef-27d3-4869-8a87-e24c0fdd9f1b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Photo Uploaded,Foto hochgeladen,Przesłane zdjęcie,#2980B9,point_photo,1
+67cefa40-ec2a-4247-843c-7a35714ccdf1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Comment Posted,Kommentar veröffentlicht,Dodany komentarz,#5DADE2,point_comment,1
+0061a5dd-ced0-43b7-831d-61e44c33f7c5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rating Given,Bewertung abgegeben,Wystawiona ocena,#F39C12,point_rating,1
+3c29cac4-2aed-4f82-8d8e-ec809e9e87db,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Streak Bonus,Serien-Bonus,Bonus za serię,#E74C3C,point_streak,1.2
+f1ba8516-7eec-4a3f-b92a-1bc784313d48,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Summit Reached,Gipfel erreicht,Zdobyty szczyt,#7F8C8D,point_summit,1.5
+a9720c2c-59bc-4d53-9868-2e60b1ea68f3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,First Ascent,Erstbegehung,Pierwsze wejście,#C0392B,point_first_ascent,2
+0cd0fa8c-fe25-430e-aaef-865a1352af52,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Referral,Empfehlung,Polecenie,#8E44AD,point_referral,1
+29fd2bfa-4661-4077-8895-c2b317d6577f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Challenge Won,Herausforderung gewonnen,Wygrane wyzwanie,#D35400,point_challenge,1.5
+fb63d2db-2dbe-4c11-afd3-8cb6777b1677,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Level Up,Levelaufstieg,Awans poziomu,#F1C40F,point_level_up,1
+83611bba-5ba1-4e0d-9464-48a5b2cde76d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Weekly Goal,Wochenziel,Cel tygodniowy,#27AE60,point_weekly_goal,1
+c089e5f4-2c45-4f6f-bf65-a5827978dff3,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Region Completed,Region abgeschlossen,Ukończony region,#2C3E50,point_region_completed,1.5
+6bad5f56-b26b-4d1d-b8e4-e35e27ff6df0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Distance Milestone,Distanz-Meilenstein,Kamień milowy dystansu,#3498DB,point_distance_milestone,1
+aa9f83cc-13b1-44fd-a184-4e5089531762,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Elevation Milestone,Höhen-Meilenstein,Kamień milowy przewyższenia,#E67E22,point_elevation_milestone,1
+5960e4c2-3dd5-46ca-b412-9d54eb9649d8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Community Contribution,Community-Beitrag,Wkład społeczności,#1ABC9C,point_community,1

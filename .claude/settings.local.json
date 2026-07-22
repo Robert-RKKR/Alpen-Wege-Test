@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker exec *)",
+      "Bash(awk -F, '{for\\(i=1;i<=NF;i++\\){if\\($i==\"title\"\\)$i=\"name\"} print}' OFS=,)",
+      "Bash(python3 csv_to_pg_arrays.py)",
+      "Bash(sudo bash /home/rkkr/test/alpen_wege_test/update_database.sh)",
+      "Bash(bash /home/rkkr/test/alpen_wege_test/update_database.sh)",
+      "Bash(python3 /home/rkkr/test/alpen_wege_test/csv_to_pg_arrays.py)",
+      "Bash(bash -n /home/rkkr/test/alpen_wege_test/update_database.sh)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 /tmp/claude-1000/-home-rkkr-test-alpen-wege-test/e674ffb4-c0ed-4b09-bf97-20e067dc04bb/scratchpad/gen_core_ref.py)",
+      "Bash(python3 /tmp/claude-1000/-home-rkkr-test-alpen-wege-test/e674ffb4-c0ed-4b09-bf97-20e067dc04bb/scratchpad/fix_compendium.py)",
+      "Bash(python3 /tmp/claude-1000/-home-rkkr-test-alpen-wege-test/e674ffb4-c0ed-4b09-bf97-20e067dc04bb/scratchpad/sync_ids.py)"
+    ]
+  }
+}
