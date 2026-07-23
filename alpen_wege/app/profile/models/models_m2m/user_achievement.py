@@ -23,17 +23,22 @@ class ProfileM2mUserAchievement(TimestampMixin, UserScopedMixin, Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     achievement_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("profile_cat_achievement.id"), nullable=False
+        ForeignKey("profile_cat_achievement.id"),
+        nullable=False,
     )
     collected_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
+        DateTime(timezone=True),
+        nullable=False,
     )
     comment: Mapped[str | None] = mapped_column(Text)
     is_repeat: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
     track_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("explorer_agg_track.id", ondelete="SET NULL")

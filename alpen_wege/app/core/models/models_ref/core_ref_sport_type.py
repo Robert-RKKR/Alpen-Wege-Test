@@ -19,6 +19,11 @@ class CoreRefSportType(Base, ReferenceWithFactorMixin):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    name: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(
+        Text,
+        unique=True,
+        nullable=False,
+    )

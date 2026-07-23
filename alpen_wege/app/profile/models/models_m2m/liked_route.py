@@ -14,8 +14,10 @@ class ProfileM2mLikedRoute(CreatedOnlyMixin, UserScopedMixin, Base):
     __table_args__ = (UniqueConstraint("user_id", "route_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     route_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("explorer_agg_route.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("explorer_agg_route.id", ondelete="CASCADE"),
+        nullable=False,
     )

@@ -20,11 +20,14 @@ class SocialM2mFollow(CreatedOnlyMixin, Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     follower_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("profile_usr_user.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("profile_usr_user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     following_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("profile_usr_user.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("profile_usr_user.id", ondelete="CASCADE"),
+        nullable=False,
     )

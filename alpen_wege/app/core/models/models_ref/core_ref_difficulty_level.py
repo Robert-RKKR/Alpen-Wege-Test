@@ -13,5 +13,6 @@ class CoreRefDifficultyLevel(Base, ReferenceWithFactorMixin):
     __tablename__ = "core_ref_difficulty_level"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )

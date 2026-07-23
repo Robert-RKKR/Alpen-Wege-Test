@@ -22,9 +22,13 @@ class ExplorerAggTrip(
     __tablename__ = "explorer_agg_trip"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    name: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
     length_days: Mapped[int | None] = mapped_column(Integer)
     first_day: Mapped[date | None] = mapped_column(Date)
     last_day: Mapped[date | None] = mapped_column(Date)

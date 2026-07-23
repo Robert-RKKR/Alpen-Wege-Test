@@ -21,15 +21,22 @@ class ExplorerAggSegment(
     __tablename__ = "explorer_agg_segment"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     rating_avg: Mapped[float | None] = mapped_column(Real)
-    rating_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    rating_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
     sport_type_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("core_ref_sport_type.id"), nullable=False
+        ForeignKey("core_ref_sport_type.id"),
+        nullable=False,
     )
     geo_record_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("explorer_sub_geo_record.id"), nullable=False
+        ForeignKey("explorer_sub_geo_record.id"),
+        nullable=False,
     )
     main_photo_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("asset_agg_photo.id")

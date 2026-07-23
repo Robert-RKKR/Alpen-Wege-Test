@@ -20,11 +20,21 @@ class SocialSubComment(TimestampMixin, UserScopedMixin, Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    entity_type: Mapped[str] = mapped_column(Text, nullable=False)
-    entity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    comment: Mapped[str] = mapped_column(Text, nullable=False)
+    entity_type: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    entity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    comment: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
     parent_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("social_sub_comment.id", ondelete="CASCADE")
     )

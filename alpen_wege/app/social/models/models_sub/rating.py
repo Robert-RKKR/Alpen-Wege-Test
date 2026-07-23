@@ -25,8 +25,18 @@ class SocialSubRating(TimestampMixin, UserScopedMixin, Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    entity_type: Mapped[str] = mapped_column(Text, nullable=False)
-    entity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    entity_type: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    entity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    score: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )

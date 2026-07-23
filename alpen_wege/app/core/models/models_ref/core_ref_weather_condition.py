@@ -13,5 +13,6 @@ class CoreRefWeatherCondition(Base, ReferenceWithFactorMixin):
     __tablename__ = "core_ref_weather_condition"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )

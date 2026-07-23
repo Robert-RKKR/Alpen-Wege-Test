@@ -22,7 +22,15 @@ class AssetAggGpx(
     __tablename__ = "asset_agg_gpx"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    name: Mapped[str] = mapped_column(Text, nullable=False)
-    path: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    path: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        unique=True,
+    )

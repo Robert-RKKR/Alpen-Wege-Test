@@ -20,17 +20,27 @@ class AuthUserCredentials(TimestampMixin, Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("profile_usr_user.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,
     )
-    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
-    user_group: Mapped[str] = mapped_column(Text, nullable=False, server_default="user")
+    password_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    user_group: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="user",
+    )
     is_verified: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 

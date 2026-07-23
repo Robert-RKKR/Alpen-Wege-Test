@@ -14,7 +14,8 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
     __tablename__ = "explorer_sub_geo_record"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     gpx_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("asset_agg_gpx.id"))
     geo_performance_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -32,5 +33,11 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
     lowest_elevation_m: Mapped[int | None] = mapped_column(Integer)
     avg_grade: Mapped[float | None] = mapped_column(Real)
     highest_grade: Mapped[float | None] = mapped_column(Real)
-    start_location = mapped_column(Geometry("POINT", srid=4326), nullable=True)
-    end_location = mapped_column(Geometry("POINT", srid=4326), nullable=True)
+    start_location = mapped_column(
+        Geometry("POINT", srid=4326),
+        nullable=True,
+    )
+    end_location = mapped_column(
+        Geometry("POINT", srid=4326),
+        nullable=True,
+    )

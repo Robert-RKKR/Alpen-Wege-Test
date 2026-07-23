@@ -22,9 +22,13 @@ class ExplorerAggTrack(
     __tablename__ = "explorer_agg_track"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
-    name: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
     recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     sport_type_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("core_ref_sport_type.id")

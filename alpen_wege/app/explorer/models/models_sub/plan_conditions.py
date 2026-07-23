@@ -13,7 +13,8 @@ class ExplorerSubPlanConditions(TimestampMixin, Base):
     __tablename__ = "explorer_sub_plan_conditions"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     equipment_required: Mapped[dict | None] = mapped_column(JSON)
     equipment_optional: Mapped[dict | None] = mapped_column(JSON)
@@ -24,7 +25,10 @@ class ExplorerSubPlanConditions(TimestampMixin, Base):
     guide_recommended: Mapped[bool | None] = mapped_column(Boolean)
     min_age: Mapped[int | None] = mapped_column(Integer)
     max_group_size: Mapped[int | None] = mapped_column(Integer)
-    best_months = mapped_column(ARRAY(Integer), nullable=True)
+    best_months = mapped_column(
+        ARRAY(Integer),
+        nullable=True,
+    )
     best_months_note: Mapped[str | None] = mapped_column(Text)
     best_months_note_de: Mapped[str | None] = mapped_column(Text)
     best_months_note_pl: Mapped[str | None] = mapped_column(Text)

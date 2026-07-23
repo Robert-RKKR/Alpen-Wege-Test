@@ -13,7 +13,8 @@ class CompendiumSubPoiAccess(TimestampMixin, Base):
     __tablename__ = "compendium_sub_poi_access"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     public_transport: Mapped[bool | None] = mapped_column(Boolean)
     public_transport_info: Mapped[str | None] = mapped_column(Text)

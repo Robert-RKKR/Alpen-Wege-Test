@@ -13,7 +13,8 @@ class CompendiumCatCard(TimestampMixin, OwnedMixin, ContentI18nMixin, Base):
     __tablename__ = "compendium_cat_card"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     name: Mapped[str | None] = mapped_column(Text)
     rarity_id: Mapped[uuid.UUID | None] = mapped_column(

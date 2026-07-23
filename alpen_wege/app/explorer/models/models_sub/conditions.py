@@ -13,7 +13,8 @@ class ExplorerSubConditions(TimestampMixin, Base):
     __tablename__ = "explorer_sub_conditions"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     temperature_avg: Mapped[int | None] = mapped_column(Integer)
     temperature_min: Mapped[int | None] = mapped_column(Integer)
