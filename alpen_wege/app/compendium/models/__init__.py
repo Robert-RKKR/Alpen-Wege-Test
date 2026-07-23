@@ -1,3 +1,4 @@
+# Local application
 from .models_cat.card import CompendiumCatCard
 from .models_cat.country import CompendiumCatCountry
 from .models_cat.poi import CompendiumCatPoi

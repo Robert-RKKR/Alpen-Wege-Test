@@ -1,3 +1,4 @@
+# Local application
 from .core_ref_achievement_category import CoreRefAchievementCategory
 from .core_ref_achievement_scope import CoreRefAchievementScope
 from .core_ref_achievement_type import CoreRefAchievementType

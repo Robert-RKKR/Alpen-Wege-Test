@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 from datetime import datetime
 
+# Third-party
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, TimestampMixin, UserScopedMixin
 
 

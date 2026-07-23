@@ -1,10 +1,13 @@
+# Standard library
 import uuid
 from datetime import datetime
 
+# Third-party
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, Integer, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import (
     Base,
     NameI18nMixin,

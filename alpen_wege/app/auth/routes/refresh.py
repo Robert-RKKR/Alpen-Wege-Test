@@ -1,5 +1,7 @@
+# Third-party
 from fastapi import APIRouter, Depends
 
+# Local application
 from app.auth.dependencies import get_current_active_user
 from app.auth.schemas import TokenResponse
 from app.auth.services.jwt import create_access_token
@@ -13,6 +15,11 @@ router = APIRouter()
 async def refresh_token(
     current_user: ProfileUsrUser = Depends(get_current_active_user),
 ):
+    # Issue a fresh access token for the already-authenticated caller.
+    # Params:
+    #   current_user: the authenticated, active user, injected by the dependency.
+    # Returns: a TokenResponse with a new access token and its lifetime in seconds.
+    # Mint a new token carrying the user's id and group.
     settings = get_settings()
     token = create_access_token(current_user.id, current_user.credentials.user_group)
     return TokenResponse(

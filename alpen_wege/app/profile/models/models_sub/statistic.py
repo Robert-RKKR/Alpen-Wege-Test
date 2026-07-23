@@ -1,9 +1,19 @@
+# Standard library
 import uuid
 
-from sqlalchemy import BigInteger, CheckConstraint, Integer, Text, UniqueConstraint, func
+# Third-party
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    Integer,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, TimestampMixin, UserScopedMixin
 
 

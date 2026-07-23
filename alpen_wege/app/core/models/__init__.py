@@ -1,3 +1,4 @@
+# Local application
 from .models_ref import (
     CoreRefAchievementCategory,
     CoreRefAchievementScope,

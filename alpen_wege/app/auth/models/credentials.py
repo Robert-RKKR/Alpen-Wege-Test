@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 from datetime import datetime
 
+# Third-party
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+# Local application
 from app.core.base import Base, TimestampMixin
 
 
@@ -25,9 +28,7 @@ class AuthUserCredentials(TimestampMixin, Base):
         nullable=False,
     )
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
-    user_group: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default="user"
-    )
+    user_group: Mapped[str] = mapped_column(Text, nullable=False, server_default="user")
     is_verified: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )

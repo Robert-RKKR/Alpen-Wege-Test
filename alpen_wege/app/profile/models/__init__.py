@@ -1,3 +1,4 @@
+# Local application
 from .models_cat import ProfileCatAchievement
 from .models_m2m import (
     ProfileM2mLikedJourney,

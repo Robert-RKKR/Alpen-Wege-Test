@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 
+# Third-party
 from geoalchemy2 import Geometry
 from sqlalchemy import ForeignKey, Integer, JSON, Real, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, TimestampMixin
 
 
@@ -13,9 +16,7 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, server_default=func.gen_random_uuid()
     )
-    gpx_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("asset_agg_gpx.id")
-    )
+    gpx_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("asset_agg_gpx.id"))
     geo_performance_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("explorer_sub_geo_performance.id")
     )

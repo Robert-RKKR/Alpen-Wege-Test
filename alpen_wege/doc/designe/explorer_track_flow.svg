@@ -1,0 +1,111 @@
+<svg viewBox="0 0 980 810" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="980" height="810" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="40" y="46" font-size="24" font-weight="700" fill="#0f172a">Recorded activities — three-tier data architecture</text>
+  <text x="40" y="72" font-size="14" fill="#64748b">One track flows into three tiers that react to change in different ways. This is what makes "no hard delete" safe.</text>
+
+  <!-- ============ TIER 1 ============ -->
+  <rect x="40" y="100" width="880" height="150" rx="12" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <circle cx="66" cy="126" r="6" fill="#4f46e5"/>
+  <text x="82" y="131" font-size="16" font-weight="700" fill="#3730a3">TIER 1 · Authoritative facts</text>
+  <text x="898" y="131" font-size="12.5" font-weight="600" fill="#4f46e5" text-anchor="end">written once, transactionally · NEVER destroyed</text>
+
+  <!-- Tier 1 boxes -->
+  <g>
+    <rect x="60" y="146" width="196" height="82" rx="8" fill="#ffffff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="158" y="180" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">explorer_agg_track</text>
+    <text x="158" y="200" font-size="10.5" fill="#64748b" text-anchor="middle">the activity itself</text>
+
+    <rect x="274" y="146" width="196" height="82" rx="8" fill="#ffffff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="372" y="180" font-size="10.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">explorer_sub_geo_record</text>
+    <text x="372" y="200" font-size="10.5" fill="#64748b" text-anchor="middle">distance, elevation, geometry</text>
+
+    <rect x="488" y="146" width="196" height="82" rx="8" fill="#ffffff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="586" y="174" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">explorer_sub_geo_</text>
+    <text x="586" y="188" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">performance</text>
+    <text x="586" y="208" font-size="10.5" fill="#64748b" text-anchor="middle">speed, HR, calories</text>
+
+    <rect x="702" y="146" width="196" height="82" rx="8" fill="#ffffff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="800" y="180" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">asset_agg_gpx</text>
+    <text x="800" y="200" font-size="10.5" fill="#64748b" text-anchor="middle">raw uploaded file</text>
+  </g>
+
+  <!-- Arrow Tier1 -> Tier2 -->
+  <line x1="300" y1="250" x2="300" y2="294" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="314" y="277" font-size="12.5" font-weight="600" fill="#334155">recompute from scratch</text>
+  <text x="314" y="292" font-size="11" fill="#64748b">idempotent re-aggregation on every fact change</text>
+
+  <!-- Curved arrow Tier1 -> Tier3 (right side) -->
+  <path d="M 918,175 C 962,175 962,175 962,220 L 962,548 C 962,592 962,592 922,592" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="955" y="392" font-size="12" font-weight="600" fill="#334155" text-anchor="end">evaluate once at ingest,</text>
+  <text x="955" y="408" font-size="12" font-weight="600" fill="#334155" text-anchor="end">then frozen</text>
+
+  <!-- ============ TIER 2 ============ -->
+  <rect x="40" y="296" width="880" height="150" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <circle cx="66" cy="322" r="6" fill="#d97706"/>
+  <text x="82" y="327" font-size="16" font-weight="700" fill="#b45309">TIER 2 · Derived aggregates</text>
+  <text x="898" y="327" font-size="12.5" font-weight="600" fill="#d97706" text-anchor="end">recomputed · DROPS when a track is archived</text>
+
+  <g>
+    <rect x="60" y="342" width="196" height="82" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.2"/>
+    <text x="158" y="376" font-size="10.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">profile_sub_statistic</text>
+    <text x="158" y="396" font-size="10.5" fill="#64748b" text-anchor="middle">all-time / year / month</text>
+
+    <rect x="274" y="342" width="196" height="82" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.2"/>
+    <text x="372" y="376" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle">trip aggregates</text>
+    <text x="372" y="396" font-size="10.5" fill="#64748b" text-anchor="middle">multi-day rollups</text>
+
+    <rect x="488" y="342" width="196" height="82" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.2"/>
+    <text x="586" y="376" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle">segment-effort rankings</text>
+    <text x="586" y="396" font-size="10.5" fill="#64748b" text-anchor="middle">PRs, progress, leaderboards</text>
+
+    <rect x="702" y="342" width="196" height="82" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.2"/>
+    <text x="800" y="376" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">rating_avg</text>
+    <text x="800" y="396" font-size="10.5" fill="#64748b" text-anchor="middle">cached averages</text>
+  </g>
+
+  <!-- ============ TIER 3 ============ -->
+  <rect x="40" y="492" width="880" height="150" rx="12" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+  <circle cx="66" cy="518" r="6" fill="#0d9488"/>
+  <text x="82" y="523" font-size="16" font-weight="700" fill="#0f766e">TIER 3 · Event log</text>
+  <text x="898" y="523" font-size="12.5" font-weight="600" fill="#0d9488" text-anchor="end">append-only · STICKY · never rewound</text>
+
+  <g>
+    <rect x="60" y="538" width="196" height="82" rx="8" fill="#ffffff" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="158" y="572" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">profile_sub_point</text>
+    <text x="158" y="592" font-size="10.5" fill="#64748b" text-anchor="middle">points ledger</text>
+
+    <rect x="274" y="538" width="196" height="82" rx="8" fill="#ffffff" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="372" y="566" font-size="9.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">profile_m2m_user_</text>
+    <text x="372" y="580" font-size="9.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">achievement</text>
+    <text x="372" y="600" font-size="10.5" fill="#64748b" text-anchor="middle">badge grants (the 100k)</text>
+
+    <rect x="488" y="538" width="196" height="82" rx="8" fill="#ffffff" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="586" y="572" font-size="10.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">profile_m2m_user_card</text>
+    <text x="586" y="592" font-size="10.5" fill="#64748b" text-anchor="middle">collected cards</text>
+
+    <rect x="702" y="538" width="196" height="82" rx="8" fill="#ffffff" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="800" y="572" font-size="10.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">profile_m2m_user_poi</text>
+    <text x="800" y="592" font-size="10.5" fill="#64748b" text-anchor="middle">first-visit facts</text>
+  </g>
+
+  <!-- ============ ARCHIVE LEGEND ============ -->
+  <rect x="40" y="688" width="880" height="98" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="60" y="716" font-size="14.5" font-weight="700" fill="#0f172a">Archive a track  (no hard delete, no tombstone — just an inclusion flag)</text>
+
+  <circle cx="68" cy="740" r="5" fill="#4f46e5"/>
+  <text x="82" y="744" font-size="12" fill="#334155"><tspan font-weight="700" fill="#3730a3">Tier 1</tspan> — row kept, flagged inactive; GPX + geo evidence preserved.</text>
+
+  <circle cx="68" cy="762" r="5" fill="#d97706"/>
+  <text x="82" y="766" font-size="12" fill="#334155"><tspan font-weight="700" fill="#b45309">Tier 2</tspan> — recomputes; the track drops out of totals, rollups and rankings.</text>
+
+  <circle cx="530" cy="762" r="5" fill="#0d9488"/>
+  <text x="544" y="766" font-size="12" fill="#334155"><tspan font-weight="700" fill="#0f766e">Tier 3</tspan> — untouched; badges, points, cards and visits all stay.</text>
+</svg>

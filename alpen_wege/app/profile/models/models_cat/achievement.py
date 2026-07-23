@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 
+# Third-party
 from sqlalchemy import Boolean, ForeignKey, Real, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, ContentI18nMixin, OwnedMixin, TimestampMixin
 
 

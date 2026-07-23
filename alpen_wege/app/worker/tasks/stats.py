@@ -1,6 +1,8 @@
+# Standard library
 import logging
 from datetime import datetime, timedelta, timezone
 
+# Local application
 from app.worker.celery_app import celery_app
 from app.database import SyncSessionLocal
 
@@ -9,9 +11,14 @@ logger = logging.getLogger(__name__)
 
 @celery_app.task
 def log_active_users():
+    # Celery task: count and log users active within the last hour.
+    # Params: none.
+    # Returns: a dict {"active_users": <count>}.
+    # Synchronous session: Celery workers run outside the async event loop.
     with SyncSessionLocal() as session:
         from sqlalchemy import text
 
+        # Count users whose last_active_at falls within the past hour.
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         result = session.execute(
             text("SELECT count(*) FROM profile_usr_user WHERE last_active_at > :since"),
@@ -25,9 +32,15 @@ def log_active_users():
 
 @celery_app.task
 def aggregate_user_statistics(user_id: str):
+    # Celery task: recompute and upsert lifetime activity totals for one user.
+    # Params:
+    #   user_id: the user's id whose statistics should be aggregated.
+    # Returns: a dict {"user_id": ..., "status": "done"}.
+    # Synchronous session: Celery workers run outside the async event loop.
     with SyncSessionLocal() as session:
         from sqlalchemy import text
 
+        # Aggregate counts/distance/elevation/time across the user's tracks.
         result = session.execute(
             text(
                 """
@@ -46,6 +59,7 @@ def aggregate_user_statistics(user_id: str):
         )
         row = result.one()
 
+        # Upsert the aggregated totals into the "all"-scope statistics row.
         session.execute(
             text(
                 """

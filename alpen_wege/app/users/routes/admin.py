@@ -1,8 +1,11 @@
+# Standard library
 from uuid import UUID
 
+# Third-party
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Local application
 from app.core.dependencies import get_db
 from app.core.schemas import PaginatedResponse
 from app.auth.permissions import require_groups
@@ -22,8 +25,18 @@ async def list_users(
     _admin: ProfileUsrUser = Depends(require_groups("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # List users (admin only) with pagination and an optional active filter.
+    # Params:
+    #   skip: number of records to skip (offset >= 0).
+    #   limit: page size (1..200).
+    #   is_active: optional filter on account active state.
+    #   _admin: enforces that the caller is in the "admin" group (value unused).
+    #   db: the async database session, injected by get_db.
+    # Returns: a PaginatedResponse of UserRead items plus paging metadata.
+    # Fetch the page of users and the total match count from the service.
     service = UserService(db)
     users, total = await service.list_users(skip, limit, is_active)
+    # Serialize each ORM user and wrap with pagination metadata.
     return PaginatedResponse(
         items=[_user_to_read(u) for u in users],
         total=total,
@@ -38,6 +51,13 @@ async def get_user(
     _admin: ProfileUsrUser = Depends(require_groups("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # Fetch a single user by id (admin only).
+    # Params:
+    #   user_id: the target user's UUID (from the path).
+    #   _admin: enforces "admin" group membership (value unused).
+    #   db: the async database session, injected by get_db.
+    # Returns: the user as a UserRead.
+    # Raises: HTTPException 404 if no user with that id exists.
     service = UserService(db)
     user = await service.get_by_id(user_id)
     if not user:
@@ -51,6 +71,14 @@ async def activate_user(
     _admin: ProfileUsrUser = Depends(require_groups("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # Activate a user account (admin only).
+    # Params:
+    #   user_id: the target user's UUID (from the path).
+    #   _admin: enforces "admin" group membership (value unused).
+    #   db: the async database session, injected by get_db.
+    # Returns: the updated user as a UserRead.
+    # Raises: HTTPException 404 if no user with that id exists.
+    # Set the account active flag to True via the service.
     service = UserService(db)
     user = await service.set_active(user_id, True)
     if not user:
@@ -64,6 +92,14 @@ async def deactivate_user(
     _admin: ProfileUsrUser = Depends(require_groups("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # Deactivate a user account (admin only).
+    # Params:
+    #   user_id: the target user's UUID (from the path).
+    #   _admin: enforces "admin" group membership (value unused).
+    #   db: the async database session, injected by get_db.
+    # Returns: the updated user as a UserRead.
+    # Raises: HTTPException 404 if no user with that id exists.
+    # Set the account active flag to False via the service.
     service = UserService(db)
     user = await service.set_active(user_id, False)
     if not user:
@@ -78,6 +114,15 @@ async def change_group(
     _admin: ProfileUsrUser = Depends(require_groups("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # Change a user's authorization group (admin only).
+    # Params:
+    #   user_id: the target user's UUID (from the path).
+    #   body: payload carrying the new group name (user_group).
+    #   _admin: enforces "admin" group membership (value unused).
+    #   db: the async database session, injected by get_db.
+    # Returns: the updated user as a UserRead.
+    # Raises: HTTPException 404 if the user (or their credentials) cannot be found.
+    # Assign the new group via the service, which updates the credentials row.
     service = UserService(db)
     user = await service.set_group(user_id, body.user_group)
     if not user:

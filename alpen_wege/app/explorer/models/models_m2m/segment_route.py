@@ -1,8 +1,11 @@
+# Standard library
 import uuid
 
+# Third-party
 from sqlalchemy import Boolean, ForeignKey, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, OwnedMixin, TimestampMixin
 
 

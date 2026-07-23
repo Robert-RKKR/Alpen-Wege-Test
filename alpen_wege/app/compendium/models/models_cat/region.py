@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 
+# Third-party
 from geoalchemy2 import Geometry
 from sqlalchemy import ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, ContentI18nMixin, OwnedMixin, TimestampMixin
 
 

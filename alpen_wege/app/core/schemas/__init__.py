@@ -1,3 +1,4 @@
+# Local application
 from .base import UUIDModel
 from .pagination import PaginatedResponse
 

@@ -1,3 +1,4 @@
+# Local application
 from .body_metric import ProfileSubBodyMetric
 from .pace_curve import ProfileSubPaceCurve
 from .point import ProfileSubPoint

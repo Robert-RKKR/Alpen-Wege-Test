@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 
+# Third-party
 from sqlalchemy import CheckConstraint, Integer, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, TimestampMixin, UserScopedMixin
 
 

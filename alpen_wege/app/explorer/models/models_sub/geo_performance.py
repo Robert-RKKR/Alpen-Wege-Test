@@ -1,9 +1,12 @@
+# Standard library
 import uuid
 from datetime import datetime
 
+# Third-party
 from sqlalchemy import DateTime, Integer, JSON, Real, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Local application
 from app.core.base import Base, TimestampMixin
 
 
