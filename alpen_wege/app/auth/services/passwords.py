@@ -1,7 +1,8 @@
 # Third-party
 from passlib.context import CryptContext
 
-# Shared password hashing context: uses bcrypt and auto-marks older schemes as deprecated.
+# Shared password hashing context: uses bcrypt and auto-marks older schemes as
+# deprecated.
 _ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

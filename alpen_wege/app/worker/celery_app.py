@@ -8,14 +8,16 @@ from app.config import get_settings
 # Cached application settings (Celery broker/result backend URLs).
 settings = get_settings()
 
-# The Celery application instance; broker carries tasks, backend stores results.
+# The Celery application instance; broker carries tasks, backend stores
+# results.
 celery_app = Celery(
     "alpen_wege",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
 )
 
-# Runtime config: JSON (de)serialization, UTC scheduling, and the periodic beat schedule.
+# Runtime config: JSON (de)serialization, UTC scheduling, and the periodic beat
+# schedule.
 celery_app.conf.update(
     task_serializer="json",
     accept_content=["json"],

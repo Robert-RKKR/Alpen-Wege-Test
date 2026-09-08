@@ -17,11 +17,15 @@ async def refresh_token(
 ):
     # Issue a fresh access token for the already-authenticated caller.
     # Params:
-    #   current_user: the authenticated, active user, injected by the dependency.
-    # Returns: a TokenResponse with a new access token and its lifetime in seconds.
+    #   current_user: the authenticated, active user, injected by the
+    # dependency.
+    # Returns: a TokenResponse with a new access token and its lifetime in
+    # seconds.
     # Mint a new token carrying the user's id and group.
     settings = get_settings()
-    token = create_access_token(current_user.id, current_user.credentials.user_group)
+    token = create_access_token(
+        current_user.id, current_user.credentials.user_group
+    )
     return TokenResponse(
         access_token=token,
         expires_in=settings.JWT_EXPIRE_MINUTES * 60,

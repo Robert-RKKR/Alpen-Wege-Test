@@ -21,7 +21,10 @@ def log_active_users():
         # Count users whose last_active_at falls within the past hour.
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         result = session.execute(
-            text("SELECT count(*) FROM profile_usr_user WHERE last_active_at > :since"),
+            text(
+                "SELECT count(*) FROM profile_usr_user "
+                "WHERE last_active_at > :since"
+            ),
             {"since": one_hour_ago},
         )
         count = result.scalar()
@@ -51,7 +54,8 @@ def aggregate_user_statistics(user_id: str):
                     coalesce(sum(gp.total_time_s), 0) as total_time_s
                 FROM explorer_agg_track t
                 LEFT JOIN explorer_sub_geo_record gr ON t.geo_record_id = gr.id
-                LEFT JOIN explorer_sub_geo_performance gp ON gr.geo_performance_id = gp.id
+                LEFT JOIN explorer_sub_geo_performance gp
+                    ON gr.geo_performance_id = gp.id
                 WHERE t.created_by = :uid
                 """
             ),

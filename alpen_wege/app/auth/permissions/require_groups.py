@@ -7,7 +7,8 @@ from app.users.models import ProfileUsrUser
 
 
 def require_groups(*allowed_groups: str):
-    # Build a FastAPI dependency that restricts a route to specific user groups.
+    # Build a FastAPI dependency that restricts a route to specific user
+    # groups.
     # Params:
     #   allowed_groups: one or more group names permitted to access the route.
     # Returns: an async dependency callable that yields the user if authorized.
@@ -16,7 +17,8 @@ def require_groups(*allowed_groups: str):
     ) -> ProfileUsrUser:
         # Inner dependency: verify the authenticated user's group is allowed.
         # Params:
-        #   current_user: the authenticated, active user, injected by the dependency.
+        #   current_user: the authenticated, active user, injected by the
+        # dependency.
         # Returns: the same user when their group is in allowed_groups.
         # Raises: HTTPException 403 if the user's group is not permitted.
         # Deny access when the user's group is not among the allowed ones.

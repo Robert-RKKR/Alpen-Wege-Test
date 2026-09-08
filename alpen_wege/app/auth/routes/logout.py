@@ -19,8 +19,10 @@ async def logout(
 ):
     # Log the caller out by revoking the access token used for this request.
     # Params:
-    #   request: the current request; its state holds the token's id and expiry.
-    #   _current_user: the authenticated user (dependency enforces authentication only).
+    #   request: the current request; its state holds the token's id and
+    # expiry.
+    #   _current_user: the authenticated user (dependency enforces
+    # authentication only).
     # Returns: nothing (HTTP 204 No Content).
     # Read the current token's id and expiry captured during authentication.
     jti = request.state.old_jti

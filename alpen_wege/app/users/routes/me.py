@@ -15,9 +15,12 @@ router = APIRouter()
 def _user_to_read(user: ProfileUsrUser) -> UserRead:
     # Map a ProfileUsrUser ORM object to its public UserRead schema.
     # Params:
-    #   user: the user ORM instance (its credentials relationship may be loaded or None).
-    # Returns: a UserRead populated from the user's fields, with user_group from credentials.
-    # Copy the exposed fields; user_group is pulled from credentials when present.
+    #   user: the user ORM instance (its credentials relationship may be loaded
+    # or None).
+    # Returns: a UserRead populated from the user's fields, with user_group
+    # from credentials.
+    # Copy the exposed fields; user_group is pulled from credentials when
+    # present.
     data = {
         "id": user.id,
         "email": user.email,
@@ -33,16 +36,21 @@ def _user_to_read(user: ProfileUsrUser) -> UserRead:
         "is_active": user.is_active,
         "created_at": user.created_at,
         "last_active_at": user.last_active_at,
-        "user_group": user.credentials.user_group if user.credentials else None,
+        "user_group": user.credentials.user_group
+        if user.credentials
+        else None,
     }
     return UserRead(**data)
 
 
 @router.get("/me", response_model=UserRead)
-async def get_me(current_user: ProfileUsrUser = Depends(get_current_active_user)):
+async def get_me(
+    current_user: ProfileUsrUser = Depends(get_current_active_user),
+):
     # Return the currently authenticated user's own profile.
     # Params:
-    #   current_user: the authenticated, active user, injected by the dependency.
+    #   current_user: the authenticated, active user, injected by the
+    # dependency.
     # Returns: the caller's profile as a UserRead.
     return _user_to_read(current_user)
 
@@ -56,7 +64,8 @@ async def update_me(
     # Update the authenticated user's own profile with the supplied fields.
     # Params:
     #   body: the update payload; only fields explicitly set are applied.
-    #   current_user: the authenticated, active user, injected by the dependency.
+    #   current_user: the authenticated, active user, injected by the
+    # dependency.
     #   db: the async database session, injected by get_db.
     # Returns: the updated profile as a UserRead.
     # exclude_unset ensures only provided fields are changed (partial update).

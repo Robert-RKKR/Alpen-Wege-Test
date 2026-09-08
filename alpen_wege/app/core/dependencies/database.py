@@ -9,10 +9,12 @@ from app.database import AsyncSessionLocal
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    # FastAPI dependency that yields a database session with transaction handling.
+    # FastAPI dependency that yields a database session with transaction
+    # handling.
     # Params: none.
     # Yields: an AsyncSession for use during the request.
-    # Behavior: commits when the request handler succeeds, rolls back on any exception.
+    # Behavior: commits when the request handler succeeds, rolls back on any
+    # exception.
     async with AsyncSessionLocal() as session:
         try:
             # Hand the session to the route handler.

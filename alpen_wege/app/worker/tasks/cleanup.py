@@ -10,10 +10,12 @@ logger = logging.getLogger(__name__)
 
 @celery_app.task
 def cleanup_orphaned_comments():
-    # Celery task: delete comments that point to tracks/routes which no longer exist.
+    # Celery task: delete comments that point to tracks/routes which no longer
+    # exist.
     # Params: none.
     # Returns: a status dict ({"status": "done"}) once cleanup completes.
-    # Use a synchronous session because Celery workers run outside the async event loop.
+    # Use a synchronous session because Celery workers run outside the async
+    # event loop.
     with SyncSessionLocal() as session:
         from sqlalchemy import text
 

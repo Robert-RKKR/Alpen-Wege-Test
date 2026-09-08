@@ -15,15 +15,18 @@ from app.users.routes import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Application lifespan handler: startup runs before `yield`, shutdown after.
+    # Application lifespan handler: startup runs before `yield`, shutdown
+    # after.
     # Params:
-    #   app: the FastAPI application instance (required by the lifespan protocol).
+    #   app: the FastAPI application instance (required by the lifespan
+    # protocol).
     # Yields: control back to FastAPI while the app is running.
     # Startup: connect Redis and ensure database tables/extensions exist.
     await init_redis()
     await create_tables()
     yield
-    # Shutdown: close Redis and dispose of the database engine's connection pool.
+    # Shutdown: close Redis and dispose of the database engine's connection
+    # pool.
     await close_redis()
     await async_engine.dispose()
 
@@ -46,7 +49,8 @@ def create_app() -> FastAPI:
     async def health():
         # Health-check endpoint reporting database and Redis connectivity.
         # Params: none.
-        # Returns: a dict with overall status, table count, and Redis connectivity.
+        # Returns: a dict with overall status, table count, and Redis
+        # connectivity.
         from app.database import AsyncSessionLocal
 
         # Query the number of public tables as a basic database liveness check.
@@ -59,7 +63,8 @@ def create_app() -> FastAPI:
             )
             table_count = result.scalar()
 
-        # Ping Redis; treat any failure as "not connected" rather than erroring out.
+        # Ping Redis; treat any failure as "not connected" rather than erroring
+        # out.
         try:
             redis = get_redis_pool()
             await redis.ping()

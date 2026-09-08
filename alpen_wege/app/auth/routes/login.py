@@ -25,8 +25,10 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     # Params:
     #   body: the login request payload (email + password).
     #   db: the async database session, injected by get_db.
-    # Returns: a TokenResponse containing the access token and its lifetime in seconds.
-    # Raises: HTTPException 401 for bad credentials, 403 if the account is deactivated.
+    # Returns: a TokenResponse containing the access token and its lifetime in
+    # seconds.
+    # Raises: HTTPException 401 for bad credentials, 403 if the account is
+    # deactivated.
     # Look up the user by email, eager-loading their credentials for the check.
     stmt = (
         select(ProfileUsrUser)
@@ -36,17 +38,22 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
-    # Reject unknown users and wrong passwords with the same generic 401 (no enumeration).
+    # Reject unknown users and wrong passwords with the same generic 401 (no
+    # enumeration).
     if (
         not user
         or not user.credentials
         or not verify_password(body.password, user.credentials.password_hash)
     ):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED, "Invalid credentials"
+        )
 
     # Valid credentials but a disabled account is forbidden, not unauthorized.
     if not user.is_active:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account is deactivated")
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, "Account is deactivated"
+        )
 
     # Record the successful login timestamp.
     user.credentials.last_login_at = datetime.now(timezone.utc)

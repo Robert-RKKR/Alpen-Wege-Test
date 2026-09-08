@@ -3,9 +3,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # Application configuration, loaded from environment variables / a .env file.
+    # Application configuration, loaded from environment variables / a .env
+    # file.
     # Each attribute below is an overridable setting with a sensible default.
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8"
+    )
 
     APP_NAME: str = "Alpen Wege"
     DEBUG: bool = False

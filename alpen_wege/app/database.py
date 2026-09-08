@@ -1,5 +1,9 @@
 # Third-party
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 
@@ -10,13 +14,17 @@ from app.config import get_settings
 settings = get_settings()
 
 # Async engine + session factory used by the FastAPI request path.
-async_engine = create_async_engine(settings.DATABASE_URL, pool_size=10, max_overflow=20)
+async_engine = create_async_engine(
+    settings.DATABASE_URL, pool_size=10, max_overflow=20
+)
 AsyncSessionLocal = async_sessionmaker(
     async_engine, class_=AsyncSession, expire_on_commit=False
 )
 
 # Sync engine + session factory used by Celery workers and offline scripts.
-sync_engine = create_engine(settings.DATABASE_URL_SYNC, pool_size=5, max_overflow=10)
+sync_engine = create_engine(
+    settings.DATABASE_URL_SYNC, pool_size=5, max_overflow=10
+)
 SyncSessionLocal = sessionmaker(sync_engine, expire_on_commit=False)
 
 
@@ -37,7 +45,8 @@ def _create_postgis_extension(dbapi_connection, connection_record):
 
 
 async def create_tables():
-    # Create all database tables (and required extensions) from the ORM metadata.
+    # Create all database tables (and required extensions) from the ORM
+    # metadata.
     # Called once on application startup.
     # Params: none.
     # Returns: nothing.
@@ -53,7 +62,8 @@ async def create_tables():
     import app.social.models  # noqa: F401
     import app.auth.models  # noqa: F401
 
-    # Open a transaction, ensure extensions exist, then emit CREATE TABLE for all models.
+    # Open a transaction, ensure extensions exist, then emit CREATE TABLE for
+    # all models.
     async with async_engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS moddatetime"))

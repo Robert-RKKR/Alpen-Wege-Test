@@ -30,7 +30,8 @@ async def list_users(
     #   skip: number of records to skip (offset >= 0).
     #   limit: page size (1..200).
     #   is_active: optional filter on account active state.
-    #   _admin: enforces that the caller is in the "admin" group (value unused).
+    #   _admin: enforces that the caller is in the "admin" group (value
+    # unused).
     #   db: the async database session, injected by get_db.
     # Returns: a PaginatedResponse of UserRead items plus paging metadata.
     # Fetch the page of users and the total match count from the service.
@@ -121,7 +122,8 @@ async def change_group(
     #   _admin: enforces "admin" group membership (value unused).
     #   db: the async database session, injected by get_db.
     # Returns: the updated user as a UserRead.
-    # Raises: HTTPException 404 if the user (or their credentials) cannot be found.
+    # Raises: HTTPException 404 if the user (or their credentials) cannot be
+    # found.
     # Assign the new group via the service, which updates the credentials row.
     service = UserService(db)
     user = await service.set_group(user_id, body.user_group)

@@ -16,7 +16,8 @@ class UserService:
     def __init__(self, db: AsyncSession):
         # Store the database session used by all methods on this service.
         # Params:
-        #   db: the async database session for the current request/unit of work.
+        #   db: the async database session for the current request/unit of
+        # work.
         self.db = db
 
     async def get_by_id(self, user_id: UUID) -> ProfileUsrUser | None:
@@ -32,7 +33,9 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def update_profile(self, user: ProfileUsrUser, data: dict) -> ProfileUsrUser:
+    async def update_profile(
+        self, user: ProfileUsrUser, data: dict
+    ) -> ProfileUsrUser:
         # Apply a partial update to a user's profile fields.
         # Params:
         #   user: the user instance to modify.
@@ -54,25 +57,36 @@ class UserService:
         #   skip: number of rows to skip (offset).
         #   limit: maximum number of rows to return.
         #   is_active: if set, only users with this active state are returned.
-        # Returns: a (users, total) tuple where total is the unpaginated match count.
+        # Returns: a (users, total) tuple where total is the unpaginated match
+        # count.
         # Base queries: one for the page of rows, one for the total count.
-        stmt = select(ProfileUsrUser).options(selectinload(ProfileUsrUser.credentials))
+        stmt = select(ProfileUsrUser).options(
+            selectinload(ProfileUsrUser.credentials)
+        )
         count_stmt = select(func.count()).select_from(ProfileUsrUser)
 
         # Apply the active-state filter to both queries when provided.
         if is_active is not None:
             stmt = stmt.where(ProfileUsrUser.is_active == is_active)
-            count_stmt = count_stmt.where(ProfileUsrUser.is_active == is_active)
+            count_stmt = count_stmt.where(
+                ProfileUsrUser.is_active == is_active
+            )
 
         # Total count before pagination (default 0 if the table is empty).
         total = (await self.db.execute(count_stmt)).scalar() or 0
         # Apply pagination and order newest-first, then fetch the page.
-        stmt = stmt.offset(skip).limit(limit).order_by(ProfileUsrUser.created_at.desc())
+        stmt = (
+            stmt.offset(skip)
+            .limit(limit)
+            .order_by(ProfileUsrUser.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         users = list(result.scalars().all())
         return users, total
 
-    async def set_active(self, user_id: UUID, is_active: bool) -> ProfileUsrUser | None:
+    async def set_active(
+        self, user_id: UUID, is_active: bool
+    ) -> ProfileUsrUser | None:
         # Activate or deactivate a user account.
         # Params:
         #   user_id: the user's UUID.
@@ -85,12 +99,15 @@ class UserService:
         await self.db.flush()
         return user
 
-    async def set_group(self, user_id: UUID, user_group: str) -> ProfileUsrUser | None:
+    async def set_group(
+        self, user_id: UUID, user_group: str
+    ) -> ProfileUsrUser | None:
         # Change a user's authorization group.
         # Params:
         #   user_id: the user's UUID.
         #   user_group: the new group name to assign.
-        # Returns: the updated user, or None if the user or their credentials are missing.
+        # Returns: the updated user, or None if the user or their credentials
+        # are missing.
         user = await self.get_by_id(user_id)
         # The group lives on the credentials row, so both must exist.
         if not user or not user.credentials:
