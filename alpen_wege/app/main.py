@@ -11,6 +11,9 @@ from app.redis import init_redis, close_redis, get_redis_pool
 from app.auth.middleware import TokenRefreshMiddleware
 from app.auth.routes import router as auth_router
 from app.users.routes import router as users_router
+from app.explorer.routes import router as explorer_router
+from app.core.routes import router as core_router
+from app.compendium.routes import router as compendium_router
 
 
 @asynccontextmanager
@@ -44,6 +47,9 @@ def create_app() -> FastAPI:
     api_v1_prefix = "/api/v1"
     app.include_router(auth_router, prefix=api_v1_prefix)
     app.include_router(users_router, prefix=api_v1_prefix)
+    app.include_router(explorer_router, prefix=api_v1_prefix)
+    app.include_router(core_router, prefix=api_v1_prefix)
+    app.include_router(compendium_router, prefix=api_v1_prefix)
 
     @app.get("/health")
     async def health():

@@ -8,6 +8,9 @@ from starlette.responses import Response
 
 # Local application
 from app.auth.services.jwt import blacklist_token, create_access_token
+from app.config import get_settings
+
+settings = get_settings()
 
 
 class TokenRefreshMiddleware(BaseHTTPMiddleware):
@@ -28,26 +31,21 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
         # request.state.
         response = await call_next(request)
 
-        # Only rotate when a user was authenticated and the request succeeded
-        # (<400).
         user_id = getattr(request.state, "authenticated_user_id", None)
         if user_id and response.status_code < 400:
-            # Pull the current token's id/expiry and the user's group from
-            # request state.
             old_jti = request.state.old_jti
             old_exp = request.state.old_token_exp
             user_group = request.state.authenticated_user_group
 
-            # Issue a replacement token for the same user.
-            new_token = create_access_token(user_id, user_group)
+            now_ts = int(datetime.now(timezone.utc).timestamp())
+            remaining = old_exp - now_ts
+            total_lifetime = settings.JWT_EXPIRE_MINUTES * 60
 
-            # Revoke the old token for whatever lifetime it had left (avoid
-            # reuse).
-            remaining = old_exp - int(datetime.now(timezone.utc).timestamp())
-            if remaining > 0:
-                await blacklist_token(old_jti, remaining)
-
-            # Hand the new token back to the client via a response header.
-            response.headers["X-Access-Token"] = new_token
+            # Only rotate when less than half the token's lifetime remains.
+            if remaining < total_lifetime / 2:
+                new_token = create_access_token(user_id, user_group)
+                if remaining > 0:
+                    await blacklist_token(old_jti, remaining)
+                response.headers["X-Access-Token"] = new_token
 
         return response
