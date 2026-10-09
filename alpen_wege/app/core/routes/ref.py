@@ -1,13 +1,13 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db
 from app.core.utils.csv_import import CsvImportResult, csv_upload_description, import_csv
-from app.auth.dependencies import get_current_active_user
-from app.users.models import ProfileUsrUser
+from app.core.utils.responses import ApiResponse, ok, ok_list
+from app.profile.permissions import resource_access, AccessContext, check_object_access
 from app.core.models.models_ref import (
     CoreRefAchievementCategory,
     CoreRefAchievementScope,
@@ -43,82 +43,100 @@ from app.core.schemas.ref import (
 )
 
 
-def _build_ref_router(*, model, create_schema, update_schema, read_schema, slug: str, tag: str = "ref") -> APIRouter:
+def _build_ref_router(
+    *,
+    model,
+    create_schema,
+    update_schema,
+    read_schema,
+    slug: str,
+    resource_key: str = "ref",
+) -> APIRouter:
+    tag = f"Reference - {slug.replace('-', ' ').title()}"
     router = APIRouter(prefix=f"/{slug}", tags=[tag])
 
-    @router.get("", response_model=list[read_schema])
+    @router.get("", response_model=ApiResponse[list[read_schema]])
     async def list_items(
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        limit: int = 1000,
+        offset: int = 0,
+        access: AccessContext = Depends(resource_access(resource_key, "read")),
         db: AsyncSession = Depends(get_db),
     ):
-        result = await db.execute(select(model).order_by(model.name))
-        return result.scalars().all()
+        count_stmt = select(func.count()).select_from(model)
+        if access.scope == "own":
+            count_stmt = count_stmt.where(model.created_by == access.user.id)
+        total = (await db.execute(count_stmt)).scalar()
 
-    @router.post("", response_model=read_schema, status_code=status.HTTP_201_CREATED)
+        stmt = select(model).order_by(model.name).limit(limit).offset(offset)
+        if access.scope == "own":
+            stmt = stmt.where(model.created_by == access.user.id)
+        result = await db.execute(stmt)
+        return ok_list(result.scalars().all(), total=total, limit=limit, offset=offset)
+
+    @router.post("", response_model=ApiResponse[read_schema], status_code=status.HTTP_201_CREATED)
     async def create_item(
         body: create_schema,
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        access: AccessContext = Depends(resource_access(resource_key, "create")),
         db: AsyncSession = Depends(get_db),
     ):
-        obj = model(**body.model_dump(exclude_unset=True), created_by=user.id)
+        obj = model(**body.model_dump(exclude_unset=True), created_by=access.user.id)
         db.add(obj)
         await db.commit()
         await db.refresh(obj)
-        return obj
+        return ok(obj, code=201, message="Created")
 
-    @router.get("/{item_id}", response_model=read_schema)
+    @router.get("/{item_id}", response_model=ApiResponse[read_schema])
     async def get_item(
         item_id: UUID,
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        access: AccessContext = Depends(resource_access(resource_key, "read")),
         db: AsyncSession = Depends(get_db),
     ):
         obj = await db.get(model, item_id)
-        if not obj:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"{slug} not found")
-        return obj
+        check_object_access(access, obj, not_found_msg=f"{slug} not found")
+        return ok(obj)
 
-    @router.patch("/{item_id}", response_model=read_schema)
+    @router.patch("/{item_id}", response_model=ApiResponse[read_schema])
     async def update_item(
         item_id: UUID,
         body: update_schema,
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        access: AccessContext = Depends(resource_access(resource_key, "update")),
         db: AsyncSession = Depends(get_db),
     ):
         obj = await db.get(model, item_id)
-        if not obj:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"{slug} not found")
+        check_object_access(access, obj, not_found_msg=f"{slug} not found")
         for field, value in body.model_dump(exclude_unset=True).items():
             setattr(obj, field, value)
         await db.commit()
         await db.refresh(obj)
-        return obj
+        return ok(obj)
 
-    @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+    @router.delete("/{item_id}", response_model=ApiResponse[None])
     async def delete_item(
         item_id: UUID,
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        access: AccessContext = Depends(resource_access(resource_key, "delete")),
         db: AsyncSession = Depends(get_db),
     ):
         obj = await db.get(model, item_id)
-        if not obj:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"{slug} not found")
+        check_object_access(access, obj, not_found_msg=f"{slug} not found")
         await db.delete(obj)
         await db.commit()
+        return ok(None, message="Deleted")
 
     _desc = csv_upload_description(model)
 
     @router.post(
         "/upload-csv",
-        response_model=CsvImportResult,
+        response_model=ApiResponse[CsvImportResult],
         summary=f"Import {slug} from CSV",
         description=_desc,
     )
     async def upload_csv(
         file: UploadFile = File(..., description="CSV file with header row"),
-        user: ProfileUsrUser = Depends(get_current_active_user),
+        access: AccessContext = Depends(resource_access(resource_key, "create")),
         db: AsyncSession = Depends(get_db),
     ):
-        return await import_csv(file, model, user.id, db)
+        result = await import_csv(file, model, access.user.id, db)
+        return ok(result, code=201, message="Import complete")
 
     return router
 

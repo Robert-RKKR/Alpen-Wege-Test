@@ -1,0 +1,8 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+5dc5e256-fe2f-4085-b7d5-08ccc275ed8c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Very Easy,Sehr leicht,Bardzo łatwy,#58D68D,difficulty_very_easy,0.8
+e33c59a4-93c2-497d-8a08-96402f912632,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Easy,Leicht,Łatwy,#2ECC71,difficulty_easy,1
+c3d16671-e88c-40e2-b68c-1afe59fc72e4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Moderate,Mittel,Umiarkowany,#F1C40F,difficulty_moderate,1.5
+2258d05e-ea1a-44cf-9118-d6732abb08b4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Difficult,Schwer,Trudny,#E67E22,difficulty_difficult,2
+2a5a7bc0-b6c4-4760-8434-e658cfbe4c24,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Very Difficult,Sehr schwer,Bardzo trudny,#E74C3C,difficulty_very_difficult,2.5
+8ed64692-214c-4f38-9d64-e5e38dd46050,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Expert,Experte,Ekspert,#8E44AD,difficulty_expert,3
+aa144349-baf7-429c-b1c2-b959a3aede98,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Extreme,Extrem,Ekstremalny,#4A235A,difficulty_extreme,4

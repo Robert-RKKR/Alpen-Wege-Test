@@ -53,14 +53,12 @@ async def create_tables():
     from app.core.base import Base
 
     # Force import all models so they register with Base.metadata
-    import app.users.models  # noqa: F401
     import app.core.models  # noqa: F401
     import app.assets.models  # noqa: F401
     import app.compendium.models  # noqa: F401
     import app.explorer.models  # noqa: F401
     import app.profile.models  # noqa: F401
     import app.social.models  # noqa: F401
-    import app.auth.models  # noqa: F401
 
     # Open a transaction, ensure extensions exist, then emit CREATE TABLE for
     # all models.

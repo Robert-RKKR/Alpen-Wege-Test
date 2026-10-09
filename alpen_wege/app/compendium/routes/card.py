@@ -1,18 +1,18 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.dependencies import get_db
 from app.core.utils.csv_import import CsvImportResult, csv_upload_description, import_csv
-from app.auth.dependencies import get_current_active_user
-from app.users.models import ProfileUsrUser
+from app.core.utils.responses import ApiResponse, ok, ok_list
+from app.profile.permissions import resource_access, AccessContext, check_object_access
 from app.compendium.models.models_cat.card import CompendiumCatCard
 from app.compendium.schemas.card import CardCreate, CardRead, CardUpdate
 
-router = APIRouter(prefix="/cards", tags=["cards"])
+router = APIRouter(prefix="/cards", tags=["Compendium - Card"])
 
 _EAGER = [
     selectinload(CompendiumCatCard.rarity),
@@ -21,23 +21,40 @@ _EAGER = [
 ]
 
 
-@router.get("", response_model=list[CardRead])
+def _apply_scope(stmt, model, access: AccessContext):
+    if access.scope == "own":
+        stmt = stmt.where(model.created_by == access.user.id)
+    elif access.scope == "public":
+        stmt = stmt.where(
+            (model.created_by == access.user.id) | (model.is_public == True)
+        )
+    return stmt
+
+
+@router.get("", response_model=ApiResponse[list[CardRead]])
 async def list_cards(
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    limit: int = 1000,
+    offset: int = 0,
+    access: AccessContext = Depends(resource_access("card", "read")),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(CompendiumCatCard).options(*_EAGER).order_by(CompendiumCatCard.name)
+    count_stmt = select(func.count()).select_from(CompendiumCatCard)
+    count_stmt = _apply_scope(count_stmt, CompendiumCatCard, access)
+    total = (await db.execute(count_stmt)).scalar()
+    stmt = select(CompendiumCatCard).options(*_EAGER).order_by(CompendiumCatCard.name).limit(limit).offset(offset)
+    stmt = _apply_scope(stmt, CompendiumCatCard, access)
     result = await db.execute(stmt)
-    return result.scalars().all()
+    items = result.scalars().all()
+    return ok_list(items, total=total, limit=limit, offset=offset)
 
 
-@router.post("", response_model=CardRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ApiResponse[CardRead], status_code=status.HTTP_201_CREATED)
 async def create_card(
     body: CardCreate,
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    access: AccessContext = Depends(resource_access("card", "create")),
     db: AsyncSession = Depends(get_db),
 ):
-    obj = CompendiumCatCard(**body.model_dump(exclude_unset=True), created_by=user.id)
+    obj = CompendiumCatCard(**body.model_dump(exclude_unset=True), created_by=access.user.id)
     db.add(obj)
     await db.commit()
     stmt = (
@@ -46,13 +63,13 @@ async def create_card(
         .options(*_EAGER)
     )
     result = await db.execute(stmt)
-    return result.scalar_one()
+    return ok(result.scalar_one(), code=201, message="Created")
 
 
-@router.get("/{card_id}", response_model=CardRead)
+@router.get("/{card_id}", response_model=ApiResponse[CardRead])
 async def get_card(
     card_id: UUID,
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    access: AccessContext = Depends(resource_access("card", "read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -62,21 +79,19 @@ async def get_card(
     )
     result = await db.execute(stmt)
     obj = result.scalar_one_or_none()
-    if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Card not found")
-    return obj
+    check_object_access(access, obj, not_found_msg="Card not found")
+    return ok(obj)
 
 
-@router.patch("/{card_id}", response_model=CardRead)
+@router.patch("/{card_id}", response_model=ApiResponse[CardRead])
 async def update_card(
     card_id: UUID,
     body: CardUpdate,
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    access: AccessContext = Depends(resource_access("card", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     obj = await db.get(CompendiumCatCard, card_id)
-    if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Card not found")
+    check_object_access(access, obj, not_found_msg="Card not found")
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
     await db.commit()
@@ -86,31 +101,32 @@ async def update_card(
         .options(*_EAGER)
     )
     result = await db.execute(stmt)
-    return result.scalar_one()
+    return ok(result.scalar_one())
 
 
-@router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{card_id}", response_model=ApiResponse[None])
 async def delete_card(
     card_id: UUID,
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    access: AccessContext = Depends(resource_access("card", "delete")),
     db: AsyncSession = Depends(get_db),
 ):
     obj = await db.get(CompendiumCatCard, card_id)
-    if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Card not found")
+    check_object_access(access, obj, not_found_msg="Card not found")
     await db.delete(obj)
     await db.commit()
+    return ok(None, message="Deleted")
 
 
 @router.post(
     "/upload-csv",
-    response_model=CsvImportResult,
+    response_model=ApiResponse[CsvImportResult],
     summary="Import cards from CSV",
     description=csv_upload_description(CompendiumCatCard),
 )
 async def upload_csv(
     file: UploadFile = File(..., description="CSV file with header row"),
-    user: ProfileUsrUser = Depends(get_current_active_user),
+    access: AccessContext = Depends(resource_access("card", "create")),
     db: AsyncSession = Depends(get_db),
 ):
-    return await import_csv(file, CompendiumCatCard, user.id, db)
+    result = await import_csv(file, CompendiumCatCard, access.user.id, db)
+    return ok(result, code=201, message="Import complete")

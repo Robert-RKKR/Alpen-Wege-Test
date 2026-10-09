@@ -1,4 +1,5 @@
 # Local application
+from .resource_type import CoreRefResourceType
 from .models_ref import (
     CoreRefAchievementCategory,
     CoreRefAchievementScope,
@@ -22,6 +23,7 @@ from .models_ref import (
 )
 
 __all__ = [
+    "CoreRefResourceType",
     "CoreRefAchievementCategory",
     "CoreRefAchievementScope",
     "CoreRefAchievementType",

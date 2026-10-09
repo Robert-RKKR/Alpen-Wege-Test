@@ -1,0 +1,16 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+84da3ac0-1c72-43cd-8128-2bc4d8431e6f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Dry,Trocken,Suchy,#E67E22,trail_dry,1
+47c80a78-9ddb-432a-892c-0e435f6c80c4,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Muddy,Schlammig,Błotnisty,#935116,trail_muddy,1
+721a5c1f-0175-48be-b03a-b0712d88dc56,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wet,Nass,Mokry,#3498DB,trail_wet,1
+e454623b-7a54-4a7c-af6f-acf8e109815c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Snow Covered,Schneebedeckt,Pokryty śniegiem,#ECF0F1,trail_snow,1
+d5c2e045-70fd-4744-b580-7ce9d4a7a18f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Icy,Vereist,Oblodzony,#5DADE2,trail_icy,1
+d1d4e8ef-9630-4a81-a266-929fa0c9f3d6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Overgrown,Überwachsen,Zarośnięty,#2ECC71,trail_overgrown,1
+566831b1-34f2-4e70-9e00-fb29835c5e5b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rocky,Felsig,Kamienisty,#7F8C8D,trail_rocky,1
+87eeb280-2025-4cc2-a43a-2d48a02a70bb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rooty,Wurzelig,Korzenisty,#6E2C00,trail_rooty,1
+66360468-3bc2-406b-ab70-50d938f45793,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Loose Gravel,Lockerer Schotter,Luźny żwir,#A6ACAF,trail_loose_gravel,1
+0263c9f1-303c-4ac3-82c1-f9d232945b7f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Washed Out,Ausgewaschen,Rozmyty,#B9770E,trail_washed_out,1
+53ffb87a-0834-4f03-a755-0b3071e7cd80,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Flooded,Überflutet,Zalany,#2874A6,trail_flooded,1
+70900db3-f1b4-441d-ab88-aea775d09719,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Boggy,Sumpfig,Bagnisty,#4D5656,trail_boggy,1
+3dd4b54a-d9f2-474e-9523-77f152294a21,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fallen Trees,Umgestürzte Bäume,Powalone drzewa,#784212,trail_fallen_trees,1
+495dca4b-b281-4943-a126-0b461ef12a4e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Well-Maintained,Gut gepflegt,Dobrze utrzymany,#27AE60,trail_well_maintained,1
+d2960673-28d0-4130-8365-a2c37f1ec39e,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Closed,Gesperrt,Zamknięty,#C0392B,trail_closed,1

@@ -1,0 +1,14 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+f34d1f4a-6f28-47f8-bb96-b85ba60717ac,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Powder,Pulverschnee,Puch,#ECF0F1,snow_powder,1
+9ade12fe-1864-4477-8b89-3571478542d5,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Packed Powder,Gepresster Pulverschnee,Ubity puch,#D6EAF8,snow_packed_powder,1
+d7692367-1398-4c95-b739-1314496a8982,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Packed,Festgefahren,Ubity,#BDC3C7,snow_packed,1
+933a30f2-8496-4b03-befc-81fcd44fb5c7,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wet,Nass,Mokry,#85C1E9,snow_wet,1
+98b55aec-180c-4cfe-b678-5270becfb4f9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Icy,Vereist,Oblodzony,#5DADE2,snow_icy,1
+69e64a4f-59e9-40f3-aa10-dee09afbc4f8,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Crusty,Bruchharsch,Zlodowaciały,#AEB6BF,snow_crusty,1
+dc8b590a-5207-4726-a12b-4f4cbd1e901c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Slushy,Sulzschnee,Rozmokły,#A9CCE3,snow_slushy,1
+bddd5d07-a50b-428b-8042-661292df1b25,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Corn,Firnschnee,Firn,#F5CBA7,snow_corn,1
+7255f66b-6db7-49d6-8b54-bbb6208388db,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Wind-Blown,Windverfrachtet,Nawiany,#D5DBDB,snow_wind_blown,1
+7f823795-c48e-4e24-b047-d2635d2117b0,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Fresh,Neuschnee,Świeży,#FBFCFC,snow_fresh,1
+70db7560-b3ed-4385-a262-adb5f798f5c1,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Firn,Firn,Firn stary,#CACFD2,snow_firn,1
+4aeea269-bcd7-4362-8654-df209a35a794,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Sastrugi,Sastrugi,Zastrugi,#B2BABB,snow_sastrugi,1
+024770b2-7214-4a66-8941-c1d64fafcbe9,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,No Snow,Kein Schnee,Brak śniegu,#7F8C8D,snow_none,1

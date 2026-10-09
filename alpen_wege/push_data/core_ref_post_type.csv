@@ -1,0 +1,16 @@
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
+988f0b5d-8cf1-47a4-a5d1-34d8853dcd6f,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Trip Report,Tourenbericht,Relacja z wycieczki,#3498DB,post_trip_report,1
+09414220-de63-4517-8bc5-1b0b7b92311a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Photo,Foto,Zdjęcie,#2ECC71,post_photo,1
+60885cdb-789c-4ad6-9856-534a52407280,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Video,Video,Wideo,#E74C3C,post_video,1
+d0d44ebb-ead7-44e7-b52b-55715f1f53ad,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Condition Update,Zustandsmeldung,Aktualizacja warunków,#E67E22,post_condition,1
+a6940240-634e-41fd-8059-5a7e78a7805b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Question,Frage,Pytanie,#9B59B6,post_question,1
+bcde7c53-6ce6-435c-9993-344c949e5bf6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Announcement,Ankündigung,Ogłoszenie,#C0392B,post_announcement,1
+0f6f16f2-85f2-490f-91ed-4a373d1ca405,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Route Share,Route geteilt,Udostępniona trasa,#16A085,post_route_share,1
+0b9019b8-cb73-4c5a-9316-f678c56e2d0d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Gear Review,Ausrüstungstest,Recenzja sprzętu,#34495E,post_gear_review,1
+3919ffb8-33eb-4b97-83f2-7f3c19ce4666,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tip,Tipp,Wskazówka,#F1C40F,post_tip,1
+2b536618-fddb-4586-a9fa-c47a2310d3ae,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Event,Veranstaltung,Wydarzenie,#F39C12,post_event,1
+bfbed8ca-bb8e-468a-b2f7-42ddd4b1fc87,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Meetup,Treffen,Spotkanie,#2980B9,post_meetup,1
+6c641222-bd31-446b-87e2-f0892e02eebb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Warning,Warnung,Ostrzeżenie,#E74C3C,post_warning,1
+41cde4b3-a869-4a47-a8d9-a07447a724af,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Lost & Found,Fundsachen,Rzeczy znalezione,#7F8C8D,post_lost_found,1
+a06aefce-caab-4e7e-9157-b57098d9dceb,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Poll,Umfrage,Ankieta,#8E44AD,post_poll,1
+ae36a899-747b-46dc-8112-0acff2c39c00,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Live Update,Live-Update,Relacja na żywo,#1ABC9C,post_live,1

@@ -1,49 +1,96 @@
 # Standard library
+import logging
+import uuid
 from contextlib import asynccontextmanager
 
 # Third-party
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Local application
 from app.database import async_engine, create_tables
 from app.redis import init_redis, close_redis, get_redis_pool
-from app.auth.middleware import TokenRefreshMiddleware
-from app.auth.routes import router as auth_router
-from app.users.routes import router as users_router
+from app.profile.middleware import TokenRefreshMiddleware
+from app.profile.routes import auth_router
+from app.profile.routes import users_router
 from app.explorer.routes import router as explorer_router
 from app.core.routes import router as core_router
 from app.compendium.routes import router as compendium_router
+from app.core.utils.responses import fail, request_id_ctx
+
+logger = logging.getLogger(__name__)
+
+
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        rid = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        request_id_ctx.set(rid)
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = rid
+        return response
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Application lifespan handler: startup runs before `yield`, shutdown
-    # after.
-    # Params:
-    #   app: the FastAPI application instance (required by the lifespan
-    # protocol).
-    # Yields: control back to FastAPI while the app is running.
-    # Startup: connect Redis and ensure database tables/extensions exist.
     await init_redis()
     await create_tables()
     yield
-    # Shutdown: close Redis and dispose of the database engine's connection
-    # pool.
     await close_redis()
     await async_engine.dispose()
 
 
 def create_app() -> FastAPI:
-    # Application factory: build and configure the FastAPI instance.
-    # Params: none.
-    # Returns: the fully configured FastAPI application.
     app = FastAPI(title="Alpen Wege", version="0.1.0", lifespan=lifespan)
 
-    # Rotate access tokens on every successful authenticated request.
+    app.add_middleware(RequestIdMiddleware)
     app.add_middleware(TokenRefreshMiddleware)
 
-    # Mount the feature routers under a shared versioned API prefix.
+    # ---- Exception handlers ----
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exc_handler(request: Request, exc: StarletteHTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=fail(exc.status_code, str(exc.detail)),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exc_handler(request: Request, exc: RequestValidationError):
+        errors = []
+        for err in exc.errors():
+            field = ".".join(str(loc) for loc in err["loc"] if loc != "body")
+            errors.append(
+                {"field": field or None, "code": err["type"], "message": err["msg"]}
+            )
+        return JSONResponse(
+            status_code=422,
+            content=fail(
+                422,
+                "Validation failed",
+                error_message=f"{len(errors)} validation error(s)",
+                errors=errors,
+            ),
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exc_handler(request: Request, exc: Exception):
+        rid = request_id_ctx.get("")
+        logger.error("Unhandled exception [request_id=%s]: %s", rid, exc, exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content=fail(
+                500,
+                "Internal server error",
+                error_message="An unexpected error occurred. Reference the request id when contacting support.",
+            ),
+        )
+
+    # ---- Routers ----
+
     api_v1_prefix = "/api/v1"
     app.include_router(auth_router, prefix=api_v1_prefix)
     app.include_router(users_router, prefix=api_v1_prefix)
@@ -53,13 +100,9 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     async def health():
-        # Health-check endpoint reporting database and Redis connectivity.
-        # Params: none.
-        # Returns: a dict with overall status, table count, and Redis
-        # connectivity.
         from app.database import AsyncSessionLocal
+        from app.core.utils.responses import ok
 
-        # Query the number of public tables as a basic database liveness check.
         async with AsyncSessionLocal() as session:
             result = await session.execute(
                 text(
@@ -69,8 +112,6 @@ def create_app() -> FastAPI:
             )
             table_count = result.scalar()
 
-        # Ping Redis; treat any failure as "not connected" rather than erroring
-        # out.
         try:
             redis = get_redis_pool()
             await redis.ping()
@@ -78,11 +119,11 @@ def create_app() -> FastAPI:
         except Exception:
             redis_ok = False
 
-        return {
+        return ok({
             "status": "ok",
             "database_tables": table_count,
             "redis_connected": redis_ok,
-        }
+        })
 
     return app
 
