@@ -2,13 +2,13 @@
 from uuid import UUID
 
 # Third-party
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local application
 from app.core.dependencies import get_db
-from app.core.utils.responses import ApiResponse, ok, ok_list
+from app.core.utils.responses import ApiResponse, AppError, ok, ok_list
 from app.core.utils.csv_import import CsvImportResult, csv_upload_description, import_csv
 from app.profile.permissions import require_groups
 from app.profile.services.access_cache import invalidate_policy_cache
@@ -68,7 +68,12 @@ async def create_resource_type(
         select(CoreRefResourceType).where(CoreRefResourceType.key == body.key)
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(status.HTTP_409_CONFLICT, "Resource type key already exists")
+        raise AppError(
+            status.HTTP_409_CONFLICT,
+            "Duplicate entry",
+            error_message="A resource type with this key already exists.",
+            error_errors=[{"field": "key", "code": "conflict", "message": "Key already in use"}],
+        )
     obj = CoreRefResourceType(**body.model_dump(exclude_unset=True), created_by=admin.id)
     db.add(obj)
     await db.commit()
@@ -84,7 +89,11 @@ async def get_resource_type(
 ):
     obj = await db.get(CoreRefResourceType, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resource type not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No resource type exists with the given ID.",
+        )
     return ok(obj)
 
 
@@ -97,7 +106,11 @@ async def update_resource_type(
 ):
     obj = await db.get(CoreRefResourceType, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resource type not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No resource type exists with the given ID.",
+        )
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
     await db.commit()
@@ -114,7 +127,11 @@ async def delete_resource_type(
 ):
     obj = await db.get(CoreRefResourceType, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resource type not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No resource type exists with the given ID.",
+        )
     await db.delete(obj)
     await db.commit()
     await invalidate_policy_cache()
@@ -204,7 +221,12 @@ async def create_access_policy(
 ):
     rt = await db.get(CoreRefResourceType, body.resource_type_id)
     if not rt:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resource type not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="The referenced resource type does not exist.",
+            error_errors=[{"field": "resource_type_id", "code": "not_found", "message": "Resource type does not exist"}],
+        )
 
     existing = await db.execute(
         select(ProfileAccessPolicy).where(
@@ -214,7 +236,12 @@ async def create_access_policy(
         )
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(status.HTTP_409_CONFLICT, "Policy already exists for this group/resource/action")
+        raise AppError(
+            status.HTTP_409_CONFLICT,
+            "Duplicate entry",
+            error_message="An access policy for this combination already exists.",
+            error_errors=[{"field": "user_group+resource_type_id+action", "code": "conflict", "message": "Policy combination already exists"}],
+        )
 
     obj = ProfileAccessPolicy(**body.model_dump())
     db.add(obj)
@@ -232,7 +259,11 @@ async def get_access_policy(
 ):
     obj = await db.get(ProfileAccessPolicy, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Access policy not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No access policy exists with the given ID.",
+        )
     return ok(obj)
 
 
@@ -245,7 +276,11 @@ async def update_access_policy(
 ):
     obj = await db.get(ProfileAccessPolicy, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Access policy not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No access policy exists with the given ID.",
+        )
     obj.scope = body.scope
     await db.commit()
     await db.refresh(obj)
@@ -261,7 +296,11 @@ async def delete_access_policy(
 ):
     obj = await db.get(ProfileAccessPolicy, item_id)
     if not obj:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Access policy not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No access policy exists with the given ID.",
+        )
     await db.delete(obj)
     await db.commit()
     await invalidate_policy_cache()

@@ -2,9 +2,10 @@
 from uuid import UUID
 
 # Third-party
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 
 # Local application
+from app.core.utils.responses import AppError
 from app.profile.dependencies import get_current_active_user
 from app.profile.models import ProfileUsrUser
 
@@ -34,9 +35,10 @@ def require_owner_or_groups(target_user_id: UUID, *allowed_groups: str):
         is_privileged = current_user.credentials.user_group in allowed_groups
         # Deny only when the caller is neither the owner nor privileged.
         if not is_self and not is_privileged:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Cannot access another user's resource",
+            raise AppError(
+                status.HTTP_403_FORBIDDEN,
+                "Access denied",
+                error_message="You can only access resources that belong to your own account.",
             )
         return current_user
 

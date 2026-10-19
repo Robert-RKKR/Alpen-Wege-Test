@@ -2,7 +2,7 @@
 from uuid import UUID
 
 # Third-party
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 
 # Local application
 from app.core.dependencies import get_db
+from app.core.utils.responses import AppError
 from app.profile.models import ProfileUsrUser
 from app.profile.services.jwt import decode_token, is_token_blacklisted
 
@@ -36,13 +37,19 @@ async def get_current_user(
     try:
         payload = decode_token(token)
     except ValueError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
+        raise AppError(
+            status.HTTP_401_UNAUTHORIZED,
+            "Authentication failed",
+            error_message="The access token is invalid, expired, or malformed. Please log in again.",
+        )
 
     # Reject tokens that have been explicitly revoked (e.g. logout / rotation).
     jti = payload.get("jti")
     if not jti or await is_token_blacklisted(jti):
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, "Token has been revoked"
+        raise AppError(
+            status.HTTP_401_UNAUTHORIZED,
+            "Authentication failed",
+            error_message="This session has been revoked. Please log in again to get a new token.",
         )
 
     # Load the user (and their credentials) named by the token subject claim.
@@ -58,7 +65,11 @@ async def get_current_user(
     # A token referencing a deleted/credential-less user is treated as
     # unauthorized.
     if not user or not user.credentials:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
+        raise AppError(
+            status.HTTP_401_UNAUTHORIZED,
+            "Authentication failed",
+            error_message="The account associated with this token no longer exists.",
+        )
 
     # Stash identity/token details on request.state so TokenRefreshMiddleware
     # can rotate.
@@ -80,7 +91,9 @@ async def get_current_active_user(
     # Returns: the same user when the account is active.
     # Raises: HTTPException 403 if the account has been deactivated.
     if not user.is_active:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Account is deactivated"
+        raise AppError(
+            status.HTTP_403_FORBIDDEN,
+            "Account suspended",
+            error_message="Your account has been deactivated. Contact an administrator to restore access.",
         )
     return user

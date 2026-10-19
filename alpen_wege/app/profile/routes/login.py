@@ -2,14 +2,14 @@
 from datetime import datetime, timezone
 
 # Third-party
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 # Local application
 from app.core.dependencies import get_db
-from app.core.utils.responses import ApiResponse, ok
+from app.core.utils.responses import ApiResponse, AppError, ok
 from app.profile.schemas import LoginRequest, TokenResponse
 from app.profile.services.jwt import create_access_token
 from app.profile.services.passwords import verify_password
@@ -45,14 +45,18 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
         or not user.credentials
         or not verify_password(body.password, user.credentials.password_hash)
     ):
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, "Invalid credentials"
+        raise AppError(
+            status.HTTP_401_UNAUTHORIZED,
+            "Login failed",
+            error_message="The email or password you entered is incorrect.",
         )
 
     # Valid credentials but a disabled account is forbidden, not unauthorized.
     if not user.is_active:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Account is deactivated"
+        raise AppError(
+            status.HTTP_403_FORBIDDEN,
+            "Account suspended",
+            error_message="Your account has been deactivated. Contact an administrator to restore access.",
         )
 
     # Record the successful login timestamp.

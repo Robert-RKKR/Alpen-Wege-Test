@@ -2,12 +2,12 @@
 from uuid import UUID
 
 # Third-party
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local application
 from app.core.dependencies import get_db
-from app.core.utils.responses import ApiResponse, ok, ok_list
+from app.core.utils.responses import ApiResponse, AppError, ok, ok_list
 from app.profile.permissions import require_groups
 from app.profile.models import ProfileUsrUser
 from app.profile.schemas import UserRead, AdminGroupUpdate
@@ -40,7 +40,11 @@ async def get_user(
     service = UserService(db)
     user = await service.get_by_id(user_id)
     if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No user exists with the given ID.",
+        )
     return ok(_user_to_read(user))
 
 
@@ -53,7 +57,11 @@ async def activate_user(
     service = UserService(db)
     user = await service.set_active(user_id, True)
     if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No user exists with the given ID.",
+        )
     return ok(_user_to_read(user), message="User activated")
 
 
@@ -66,7 +74,11 @@ async def deactivate_user(
     service = UserService(db)
     user = await service.set_active(user_id, False)
     if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No user exists with the given ID.",
+        )
     return ok(_user_to_read(user), message="User deactivated")
 
 
@@ -80,5 +92,9 @@ async def change_group(
     service = UserService(db)
     user = await service.set_group(user_id, body.user_group)
     if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        raise AppError(
+            status.HTTP_404_NOT_FOUND,
+            "Not found",
+            error_message="No user exists with the given ID.",
+        )
     return ok(_user_to_read(user), message="Group updated")

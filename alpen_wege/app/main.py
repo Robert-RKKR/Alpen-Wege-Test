@@ -20,7 +20,7 @@ from app.profile.routes import users_router
 from app.explorer.routes import router as explorer_router
 from app.core.routes import router as core_router
 from app.compendium.routes import router as compendium_router
-from app.core.utils.responses import fail, request_id_ctx
+from app.core.utils.responses import AppError, fail, request_id_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,16 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exc_handler(request: Request, exc: StarletteHTTPException):
+        if isinstance(exc, AppError):
+            return JSONResponse(
+                status_code=exc.status_code,
+                content=fail(
+                    exc.status_code,
+                    exc.response_message,
+                    error_message=exc.error_message,
+                    errors=exc.error_errors or None,
+                ),
+            )
         return JSONResponse(
             status_code=exc.status_code,
             content=fail(exc.status_code, str(exc.detail)),
@@ -71,7 +81,7 @@ def create_app() -> FastAPI:
             content=fail(
                 422,
                 "Validation failed",
-                error_message=f"{len(errors)} validation error(s)",
+                error_message=f"The request contains {len(errors)} invalid field(s). Check error_errors for details.",
                 errors=errors,
             ),
         )

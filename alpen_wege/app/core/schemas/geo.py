@@ -13,7 +13,7 @@ class GeoPoint(BaseModel):
     @classmethod
     def validate_coords(cls, v):
         if len(v) != 2:
-            raise ValueError("Point needs exactly [lon, lat]")
+            raise ValueError("Coordinates must be an array of exactly two numbers: [longitude, latitude].")
         return v
 
 

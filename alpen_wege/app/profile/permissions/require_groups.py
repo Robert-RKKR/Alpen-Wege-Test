@@ -1,7 +1,8 @@
 # Third-party
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 
 # Local application
+from app.core.utils.responses import AppError
 from app.profile.dependencies import get_current_active_user
 from app.profile.models import ProfileUsrUser
 
@@ -23,9 +24,10 @@ def require_groups(*allowed_groups: str):
         # Raises: HTTPException 403 if the user's group is not permitted.
         # Deny access when the user's group is not among the allowed ones.
         if current_user.credentials.user_group not in allowed_groups:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Requires one of: {', '.join(allowed_groups)}",
+            raise AppError(
+                status.HTTP_403_FORBIDDEN,
+                "Insufficient privileges",
+                error_message="This action requires a higher access level than your current role allows.",
             )
         return current_user
 

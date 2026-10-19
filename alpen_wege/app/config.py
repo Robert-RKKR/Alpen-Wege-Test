@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     JWT_SECRET_KEY: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRE_MINUTES: int = 5
+    JWT_EXPIRE_MINUTES: int = 999
 
     FIRST_ADMIN_EMAIL: str | None = None
 

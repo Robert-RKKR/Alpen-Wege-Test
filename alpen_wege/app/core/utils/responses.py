@@ -3,6 +3,7 @@ import uuid
 from contextvars import ContextVar
 from typing import Any, Generic, TypeVar
 
+from fastapi import HTTPException
 from pydantic import BaseModel
 
 T = TypeVar("T")
@@ -83,6 +84,21 @@ def ok_list(
         },
         "response_data": items,
     }
+
+
+class AppError(HTTPException):
+    def __init__(
+        self,
+        status_code: int,
+        response_message: str,
+        *,
+        error_message: str = "",
+        error_errors: list[dict] | None = None,
+    ):
+        super().__init__(status_code=status_code, detail=response_message)
+        self.response_message = response_message
+        self.error_message = error_message or response_message
+        self.error_errors = error_errors or []
 
 
 def fail(

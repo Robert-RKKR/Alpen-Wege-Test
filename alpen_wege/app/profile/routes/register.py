@@ -1,10 +1,10 @@
 # Third-party
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local application
 from app.core.dependencies import get_db
-from app.core.utils.responses import ApiResponse, ok
+from app.core.utils.responses import ApiResponse, AppError, ok
 from app.profile.schemas import RegisterRequest, TokenResponse
 from app.profile.services.jwt import create_access_token
 from app.profile.services.passwords import hash_password
@@ -38,8 +38,11 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
         )
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(
-            status.HTTP_409_CONFLICT, "Email or username already taken"
+        raise AppError(
+            status.HTTP_409_CONFLICT,
+            "Registration conflict",
+            error_message="An account with this email or username already exists.",
+            error_errors=[{"field": "email/username", "code": "conflict", "message": "Already registered"}],
         )
 
     # Create the user row and flush so its generated id is available for
