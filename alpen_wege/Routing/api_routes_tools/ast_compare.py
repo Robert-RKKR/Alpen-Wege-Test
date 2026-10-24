@@ -1,6 +1,6 @@
 """Behaviour check for the routes migration: compare the CODE of every route function before and after.
 
-    python scripts/ast_compare.py OLD_REPO_ROOT NEW_REPO_ROOT [--phase 1|2]
+    python scripts/ast_compare.py OLD_REPO_ROOT NEW_REPO_ROOT [--phase 1|2|3]
 
 `route_map.py` checks what the routes declare (URLs, permissions, shapes). This script checks what the
 functions DO: it parses every function in the route files (and in upload_limit.py and current_user.py),
@@ -10,7 +10,10 @@ ignored. A dropped call, a typo in a path inside a body, a swapped argument, a c
 show up as "only in old" / "only in new".
 
 --phase 1 (default 2) only allows the rewrites of the structure phase; use it at the end of phase 1, when the
-Location helper and the URL constants are not in place yet.
+Location helper and the URL constants are not in place yet. --phase 3 is for the uniform-layout step: no rewrites
+at all (old and new tree must have the same URLs), the old factory `build_ref_router` may disappear, and the
+explicit endpoint functions of the reference tables (app/core/routes/ref/<table>/) may be new; those are checked
+by route_map.py (same models and schemas), the tests and the live run instead.
 
 It does not run anything and imports nothing from the app, so it also works on a plain checkout.
 """
@@ -46,6 +49,9 @@ CHANGES_PHASE2 = [
     (r'tokenUrl="/api/v1/auth/login"', 'tokenUrl=f"{API_V1}/profile/auth/login"'),
 ]
 CHANGES = list(CHANGES_PHASE1)  # set in main() from --phase
+PHASE = [2]
+# phase 3: the explicit reference-table endpoint functions replace the factory (see the module doc)
+REF_EXPLICIT = re.compile(r"^app/core/routes/ref/(?!resource_type/)[^/]+/[^/]+\.py$")
 # RENAMES are pure name changes, applied to both sides (some files keep the old name, others get the new one).
 RENAMES = [
     (r"\b_EAGER\b", "EAGER"),
@@ -69,7 +75,8 @@ def _normalise(source: str, old_side: bool) -> str:
             source = re.sub(pattern, replacement, source)
     for pattern, replacement in RENAMES:
         source = re.sub(pattern, replacement, source)
-    return source
+    # helpers moved into a _shared.py lose their leading underscore (_serve -> serve): same on both sides
+    return re.sub(r"(?<![\w.])_(?=[A-Za-z])", "", source)
 
 
 def _assign_name(node):
@@ -79,7 +86,7 @@ def _assign_name(node):
 
 def _collect(root: Path, old_side: bool) -> dict[str, tuple[str, str, tuple]]:
     files = sorted(root.glob(ROUTE_FILES)) + [root / f for f in EXTRA_FILES]
-    if not old_side:
+    if not old_side or PHASE[0] == 3:   # in phase 3 the old tree already has scope.py
         files += [root / f for f in NEW_ONLY_FILES]
     found: list[tuple[str, str, str, tuple]] = []
     for path in files:
@@ -137,8 +144,12 @@ def compare(old_root: Path, new_root: Path) -> list[str]:
         if o > n:
             if (name, args_of.get(key, ())) in ALLOWED_ONLY_OLD:
                 continue
+            if PHASE[0] == 3 and name == "build_ref_router":
+                continue
             problems.append(f"ONLY IN OLD  {name}  ({where_old.get(key)}): not found unchanged in the new tree")
         else:
+            if PHASE[0] == 3 and REF_EXPLICIT.match(where_new.get(key, "")):
+                continue
             problems.append(f"ONLY IN NEW  {name}  ({where_new.get(key)}): differs from every old definition")
     total = len(old)
     print(f"compared {total} definitions of the old tree with {len(new)} of the new tree")
@@ -152,10 +163,11 @@ def main() -> int:
         i = args.index("--phase")
         phase = int(args[i + 1])
         del args[i:i + 2]
-    if len(args) != 2 or phase not in (1, 2):
+    if len(args) != 2 or phase not in (1, 2, 3):
         print(__doc__)
         return 2
-    CHANGES[:] = CHANGES_PHASE1 + (CHANGES_PHASE2 if phase == 2 else [])
+    PHASE[0] = phase
+    CHANGES[:] = [] if phase == 3 else CHANGES_PHASE1 + (CHANGES_PHASE2 if phase == 2 else [])
     problems = compare(Path(args[0]), Path(args[1]))
     for p in problems:
         print(p)

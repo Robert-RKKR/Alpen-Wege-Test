@@ -520,7 +520,8 @@ def management_folder():
         request("Celery workers", "GET", "management/celery/workers"),
         request("Registered tasks", "GET", "management/celery/tasks/registered"),
         request("Active tasks", "GET", "management/celery/tasks/active"),
-        request("Task detail", "GET", "management/celery/tasks/{{job_id}}", desc="A job id is also its Celery task id."),
+        request("Task detail", "GET", "management/celery/tasks/{{job_id}}", status=[200, 404],
+                desc="A job id is also its Celery task id. Needs `job_id` (set by an upload or rescan, or by List my jobs); answers 404 when the task is unknown."),
         request("Beat schedule", "GET", "management/celery/beat"),
     ])
     ws = folder("ws", [

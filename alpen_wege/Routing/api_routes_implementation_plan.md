@@ -3,6 +3,8 @@
 Plan v3, 2026-10-24. **No code in your repo has been changed.** v1 and v2 of this plan were each checked by an independent reviewer; their findings are fixed here (Appendix D).
 Background and reasons: `api_routes_structure_proposal.md`. Tools and scripts: folder `api_routes_tools/` (read its `README.md`).
 
+> **Update 2026-10-24 (later): Phase 3.** The file-or-folder rule of this plan (size S file, size L folder) was replaced by one layout for every resource: a folder with one file per action, and type folders `m2m/`, `ref/`, `sub/`. Phase 3 is delivered and verified: see `api_routes_phase3_uniform_layout.md`. Where this plan says "size S", `poi.py`-style single files, `ref/_factory.py` or "6 known failing tests" (your fixes removed them; the suite is now 64 passed), the Phase 3 document is right. The file counts and hashes in sections 3 and 6 are from before Phase 3 (now 505 files, hash `55209df87733162f`).
+
 ## 0. What happens, in short
 
 1. **Phase 1, structure.** The route files are reorganised into one standard. A resource is a **size S** unit (one file, for example `country.py`) or a **size L** unit (one folder, for example `poi/`, with one file per endpoint); both export `router`. **No URL changes.** Check: the route table is identical.

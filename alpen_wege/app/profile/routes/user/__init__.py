@@ -1,8 +1,8 @@
 from ._router import router
-from . import me, admin
+from . import get_me, update_me, get_many, get_one, activate, deactivate, change_group
 
 # Importing a module registers its endpoint on `router`. List every endpoint module here;
-# fixed paths (/upload-csv, /stats) come before /{id} paths.
-ENDPOINT_MODULES = (me, admin,)
+# fixed paths (/me) come before /{user_id} paths.
+ENDPOINT_MODULES = (get_me, update_me, get_many, get_one, activate, deactivate, change_group,)
 
 __all__ = ["router"]

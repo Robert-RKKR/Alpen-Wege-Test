@@ -9723,7 +9723,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                      "pm.test(\"Status code is one of 200, 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
                     ]
                   }
                 }
@@ -9746,7 +9746,7 @@
                     "{{job_id}}"
                   ]
                 },
-                "description": "A job id is also its Celery task id."
+                "description": "A job id is also its Celery task id. Needs `job_id` (set by an upload or rescan, or by List my jobs); answers 404 when the task is unknown."
               }
             },
             {

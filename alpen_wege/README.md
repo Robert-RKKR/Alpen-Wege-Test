@@ -371,13 +371,26 @@ Open **http://localhost:8000/docs** — every `upload-csv` endpoint shows a full
 
 Every endpoint is `/api/v1/{app}/{resource}`: `app` is the app folder that holds the route file (`core`, `compendium`, `explorer`, `profile`, `management`), `resource` is plural and kebab-case (for example `poi-regions`). Examples: `/api/v1/compendium/pois`, `/api/v1/profile/auth/login`, `/api/v1/management/settings`. Only `/health` and the documentation URLs (`/docs`, `/openapi.json`) are outside. The app prefix is written once, in each app's `routes/__init__.py`.
 
-Inside an app's `routes/` folder every resource is one unit that exports `router`:
+Inside an app's `routes/` folder **every resource is a folder** with one file per action. There are no loose resource files:
 
-- **Size S, one file** (`country.py`): standard CRUD and CSV upload in one file, under about 250 lines.
-- **Size L, one folder** (`poi/`): `_router.py` (the `APIRouter` with prefix and tag), `_shared.py` (helpers used by several endpoints), `__init__.py` (imports the endpoint modules, fixed paths such as `/upload-csv` first) and one file per endpoint (`get_many.py`, `get_one.py`, `create.py`, `update.py`, `delete.py`, `rescan.py`, ...). Use it when the resource has a custom workflow endpoint or the file passes about 250 lines. Endpoint files import the shared router from `._router`; they never create their own (FastAPI refuses child routers with empty paths).
-- Changing size touches no other file: `from .poi import router` is the same for a file and a folder.
-- Helpers used by several resources live in `app/core/utils/` (`scope.py`, `api_paths.py`); route files never import from other route files; URLs are never written as strings in route files (`api_paths.py` builds the `Location` header and names the upload path).
-- Check after any change to routes: `python scripts/route_map.py dump route_dumps/x.json`, then `compare` against an earlier dump, `probe` and `names` (see `scripts/route_map.py`); `tests/test_routes_standard.py` and `tests/test_api_paths.py` enforce the main rules.
+```
+routes/
+  country/                 # a resource = a folder (compendium)
+    __init__.py            # imports the endpoint files (fixed paths such as /upload-csv first), exports `router`
+    _router.py             # the one APIRouter of the resource: prefix and Swagger tag
+    _shared.py             # helpers used by several endpoint files (only when needed)
+    get_many.py  get_one.py  create.py  update.py  delete.py  upload_csv.py
+  poi/                     # special actions get their own file: rescan.py
+  m2m/                     # type folder for link tables: poi_region/ ...
+  ref/                     # type folder for reference tables (core): company/ ... resource_type/
+```
+
+- **One concept in every app.** Regular models and features sit directly in `routes/` (`country/`, `track/`, `auth/`, `celery/`, `ws/`, ...). Only the special kinds of tables get a type folder, with the same names as in `models/`: `m2m/`, `ref/` and later `sub/`. Nothing else groups resources, and a resource folder never contains folders.
+- **File names are actions:** `get_many`, `get_one`, `create`, `update`, `delete`, `upload_csv`, and special ones (`rescan`, `geometry`, `restore`, `stats`, `compare`, ...). Several actions that belong together in one workflow still get one file each.
+- **`_router.py`** holds the one `APIRouter` object of the resource (for example the prefix `cards` and the tag `Compendium - Card`). Every endpoint file imports it and registers its function on it; `__init__.py` imports all endpoint files. Endpoint files never create their own router, because FastAPI refuses sub-routers with an empty path (the list and create endpoints).
+- **`post/` is the Post model** (editorial posts, `/compendium/posts`), not the HTTP method. The reference tables are written out like every other model, not generated.
+- Helpers used by several resources live in `app/core/utils/` (`scope.py`, `api_paths.py`); route files never import from other resources; URLs are never written as strings in route files (`api_paths.py` builds the `Location` header and names the upload path).
+- Check after any change to routes: `python scripts/route_map.py dump route_dumps/x.json`, then `compare` against an earlier dump, `probe` and `names` (see `scripts/route_map.py`); `tests/test_routes_standard.py` and `tests/test_api_paths.py` enforce the rules above.
 
 ---
 
@@ -390,14 +403,14 @@ app/
 │   ├── middleware/        # TokenRefreshMiddleware (auto-rotation)
 │   ├── models/            # ProfileUsrUser, credentials, access policies, ...
 │   ├── permissions/       # require_groups, resource_access
-│   ├── routes/            # auth/ (register, login, refresh, logout), user/ (me, admin), access_policy.py
+│   ├── routes/            # auth/ (register, login, refresh, logout), user/ (me, admin), access_policy/
 │   ├── schemas/           # RegisterRequest, LoginRequest, TokenResponse, UserRead, UserUpdate
 │   └── services/          # jwt (create/verify/blacklist), passwords (bcrypt)
 ├── core/                  # Shared base + reference data
 │   ├── base.py            # DeclarativeBase, all mixins
 │   ├── dependencies.py    # get_db session provider
 │   ├── models/            # 19 CoreRef* models
-│   ├── routes/            # ref/ (one small file per reference table + shared factory), resource_type.py
+│   ├── routes/            # ref/ (one folder per reference table, plus resource_type/)
 │   ├── schemas/           # ref.py (6 schema classes), geo.py (GeoJSON utils)
 │   └── utils/             # csv_import.py (shared CSV bulk import)
 ├── management/            # Event log, jobs, runtime settings, WebSocket, Celery API
@@ -411,11 +424,11 @@ app/
 │   ├── models/
 │   │   ├── models_cat/    # Country, Region, POI, Card, Post
 │   │   └── models_m2m/    # PoiRegion
-│   ├── routes/            # one file per entity, poi/ and card/ are folders (they also have rescan) + CSV upload
+│   ├── routes/            # one folder per entity (country/, poi/, ...), m2m/poi_region/
 │   └── schemas/           # Create/Update/Read/SlimRead per entity
 ├── explorer/              # User activity data
 │   ├── models/            # ExplorerAggGear, ...
-│   ├── routes/            # gear.py (CRUD + CSV upload), track/ (GPX upload, geometry, performance, archive)
+│   ├── routes/            # gear/ (CRUD + CSV upload), track/ (GPX upload, geometry, performance, archive)
 │   └── schemas/           # GearCreate/Update/Read
 ├── config.py              # Pydantic settings
 ├── database.py            # Async engine + session factory

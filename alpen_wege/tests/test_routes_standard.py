@@ -7,11 +7,16 @@ ROOT = Path(__file__).resolve().parents[1]
 APP_DIR = ROOT / "app"
 API_APPS = {"core", "compendium", "explorer", "profile", "management", "social", "assets"}
 NOT_UNDER_API = {"/health"}  # the documentation URLs are not API routes
-MAX_ROUTE_FILE_LINES = 300   # the standard says about 250; the test leaves some room
+TYPE_FOLDERS = {"m2m", "ref", "sub"}  # the only folders that group resources; every other folder IS a resource
+MAX_ROUTE_FILE_LINES = 300   # a single endpoint file; the standard expects far less
 
 
 def _routes_dirs() -> list[Path]:
     return sorted(APP_DIR.glob("*/routes"))
+
+
+def _package_dirs(routes_dir: Path) -> list[Path]:
+    return sorted(p for p in routes_dir.rglob("*") if p.is_dir() and (p / "__init__.py").exists())
 
 
 def _imported_from_package(init_file: Path) -> set[str]:
@@ -62,29 +67,56 @@ def test_no_module_reads_a_name_it_does_not_define():
     assert not problems, problems
 
 
-def test_no_resource_is_both_a_file_and_a_folder():
-    # With poi.py and poi/ side by side Python silently uses the folder.
-    both = [str(f.relative_to(ROOT)) for d in _routes_dirs() for f in d.glob("*.py") if (d / f.stem).is_dir()]
-    assert not both, f"file and folder with the same name: {both}"
+def test_routes_folders_hold_only_folders():
+    # Every resource is a folder. A loose .py file next to __init__.py is a resource that was not given its folder.
+    loose = [str(f.relative_to(ROOT)) for d in _routes_dirs() for f in d.glob("*.py") if f.name != "__init__.py"]
+    assert not loose, f"resources must be folders: {loose}"
 
 
-def test_every_endpoint_file_in_a_folder_is_imported():
-    # An endpoint file that its folder's __init__.py does not import adds no route, and nothing fails.
+def test_type_folders_only_for_m2m_ref_sub():
+    # m2m, ref and sub group resources; they hold only resource folders. Any other folder is a resource itself:
+    # it has _router.py and no sub-folder with resources.
+    wrong = []
+    for d in _routes_dirs():
+        for folder in _package_dirs(d):
+            is_type_folder = (folder / "_router.py").exists() is False
+            children_dirs = [c for c in folder.iterdir() if c.is_dir() and (c / "__init__.py").exists()]
+            if is_type_folder:
+                if folder.name not in TYPE_FOLDERS:
+                    wrong.append(f"{folder.relative_to(ROOT)}: a folder without _router.py must be one of {sorted(TYPE_FOLDERS)}")
+                loose = [f.name for f in folder.glob("*.py") if f.name != "__init__.py"]
+                if loose:
+                    wrong.append(f"{folder.relative_to(ROOT)}: type folders hold only resource folders, found {loose}")
+            elif children_dirs:
+                wrong.append(f"{folder.relative_to(ROOT)}: a resource folder cannot contain folders")
+    assert not wrong, wrong
+
+
+def test_every_module_in_a_routes_folder_is_imported():
+    # An endpoint file (or a resource folder in a type folder) that its folder's __init__.py does not import adds no
+    # route, and nothing fails.
     missing = []
     for d in _routes_dirs():
-        for folder in sorted(p for p in d.iterdir() if p.is_dir() and (p / "__init__.py").exists()):
+        for folder in _package_dirs(d):
             wanted = {f.stem for f in folder.glob("*.py") if not f.stem.startswith("_")}
-            for stem in sorted(wanted - _imported_from_package(folder / "__init__.py")):
-                missing.append(f"{folder.relative_to(ROOT)}/{stem}.py")
+            wanted |= {c.name for c in folder.iterdir()
+                       if c.is_dir() and (c / "__init__.py").exists() and not c.name.startswith("_")}
+            for name in sorted(wanted - _imported_from_package(folder / "__init__.py")):
+                missing.append(f"{folder.relative_to(ROOT)}/{name}")
     assert not missing, f"not imported by their __init__.py: {missing}"
 
 
-def test_route_files_stay_small():
-    # Standard rule 2: a bigger resource becomes a folder.
+def test_no_resource_is_both_a_file_and_a_folder():
+    # With poi.py and poi/ side by side Python silently uses the folder.
+    both = [str(f.relative_to(ROOT)) for d in _routes_dirs() for f in d.rglob("*.py") if (f.parent / f.stem).is_dir()]
+    assert not both, f"file and folder with the same name: {both}"
+
+
+def test_endpoint_files_stay_small():
     big = []
     for d in _routes_dirs():
-        for f in d.glob("*.py"):
+        for f in d.rglob("*.py"):
             lines = len(f.read_text(encoding="utf-8").splitlines())
             if lines > MAX_ROUTE_FILE_LINES:
                 big.append(f"{f.relative_to(ROOT)} ({lines} lines)")
-    assert not big, f"turn into a folder: {big}"
+    assert not big, f"split the file: {big}"

@@ -27,9 +27,9 @@ route) and that every secured route answers 401.
 but the module does not define (a forgotten import or a renamed helper that is only used inside a function
 body). Nothing else in the toolset sees this kind of mistake; it needs no database.
 
-`dump` also records, per route, what the function captured from the factory that built it (the 19 reference
-tables share function names, the permission key and the schemas: only the captured model and slug tell them
-apart), and the middleware list and exception handlers of the app.
+`dump` also records, per route, the classes the function uses (ORM models, schemas, errors: the reference tables
+share function names, the permission key and part of their schemas, only the model they use tells them apart),
+and the middleware list and exception handlers of the app.
 """
 # Standard library
 import argparse
@@ -43,7 +43,7 @@ HTTP_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
 PRIMITIVE = (str, int, float, bool, type(None))
 COMPARED_FIELDS = (
     "name", "tags", "status", "summary", "description", "deprecated",
-    "parameters", "request_body", "responses", "security", "permissions", "endpoint_closure",
+    "parameters", "request_body", "responses", "security", "permissions", "uses",
 )
 
 
@@ -66,21 +66,37 @@ def _closure_values(call) -> dict:
     return out
 
 
-def _endpoint_closure(fn) -> dict:
-    # What a route function captured from the factory that built it (model class, schemas, slug): 19 reference tables
-    # share the same function names, so only this tells them apart.
-    out = {}
-    names = getattr(getattr(fn, "__code__", None), "co_freevars", ())
-    for name, cell in zip(names, getattr(fn, "__closure__", None) or ()):
+def _endpoint_uses(fn) -> list:
+    # The classes (ORM models, schemas, errors) that a route function uses: captured from the factory that built it
+    # or read from its module's globals. Same models and schemas before and after a move means the same behaviour
+    # where it matters most; a swapped model or schema shows up here.
+    import types
+
+    found: set[str] = set()
+
+    def add(value):
+        if isinstance(value, type):
+            found.add(f"{value.__module__}.{value.__qualname__}")
+
+    for cell in getattr(fn, "__closure__", None) or ():
         try:
-            value = cell.cell_contents
+            add(cell.cell_contents)
         except ValueError:
             continue
-        if isinstance(value, PRIMITIVE):
-            out[name] = value
-        elif isinstance(value, type):
-            out[name] = f"{value.__module__}.{value.__qualname__}"
-    return out
+    module_globals = getattr(fn, "__globals__", {})
+
+    def walk(code):
+        for name in code.co_names:
+            if name in module_globals:
+                add(module_globals[name])
+        for const in code.co_consts:
+            if isinstance(const, types.CodeType):
+                walk(const)
+
+    code = getattr(fn, "__code__", None)
+    if code is not None:
+        walk(code)
+    return sorted(found)
 
 
 def _call_name(call) -> str:
@@ -191,7 +207,7 @@ def dump() -> dict:
                 "name": original.name,
                 "status": original.status_code,
                 "permissions": _permissions(getattr(route, "dependant", None)),
-                "endpoint_closure": _endpoint_closure(original.endpoint),
+                "uses": _endpoint_uses(original.endpoint),
             }
             op = spec.get("paths", {}).get(path, {}).get(method.lower())
             if op is not None:

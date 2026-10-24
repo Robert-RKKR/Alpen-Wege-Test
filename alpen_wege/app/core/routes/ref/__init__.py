@@ -20,6 +20,7 @@ from . import (
     sport_type,
     difficulty_sport,
     compendium_type,
+    resource_type,
 )
 
 router = APIRouter()
@@ -42,3 +43,4 @@ router.include_router(weather_condition.router)
 router.include_router(sport_type.router)
 router.include_router(difficulty_sport.router)
 router.include_router(compendium_type.router)
+router.include_router(resource_type.router)
