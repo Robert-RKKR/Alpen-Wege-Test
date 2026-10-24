@@ -2,23 +2,27 @@
 import logging
 from datetime import datetime, timedelta, timezone
 
+# Third-party
+import redis as sync_redis
+from celery import shared_task
+from sqlalchemy import text
+
 # Local application
+from app.worker import model_registry  # noqa: F401
 from app.worker.celery_app import celery_app
+from app.config import get_settings
 from app.database import SyncSessionLocal
+from app.explorer.services.track_statistics import (
+    recompute_user_statistics as _recompute,
+)
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 @celery_app.task
 def log_active_users():
-    # Celery task: count and log users active within the last hour.
-    # Params: none.
-    # Returns: a dict {"active_users": <count>}.
-    # Synchronous session: Celery workers run outside the async event loop.
     with SyncSessionLocal() as session:
-        from sqlalchemy import text
-
-        # Count users whose last_active_at falls within the past hour.
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         result = session.execute(
             text(
@@ -33,61 +37,23 @@ def log_active_users():
     return {"active_users": count}
 
 
-@celery_app.task
-def aggregate_user_statistics(user_id: str):
-    # Celery task: recompute and upsert lifetime activity totals for one user.
-    # Params:
-    #   user_id: the user's id whose statistics should be aggregated.
-    # Returns: a dict {"user_id": ..., "status": "done"}.
-    # Synchronous session: Celery workers run outside the async event loop.
+@shared_task(
+    bind=True,
+    name="stats.recompute_user",
+    acks_late=True,
+    soft_time_limit=120,
+    time_limit=150,
+)
+def recompute_user_statistics(self, user_id: str):
+    try:
+        r = sync_redis.from_url(settings.REDIS_URL, decode_responses=True)
+        r.delete(f"stats:pending:{user_id}")
+    except Exception:
+        logger.warning("Could not delete stats:pending key for %s", user_id)
+
     with SyncSessionLocal() as session:
-        from sqlalchemy import text
-
-        # Aggregate counts/distance/elevation/time across the user's tracks.
-        result = session.execute(
-            text(
-                """
-                SELECT
-                    count(*) as total_activities,
-                    coalesce(sum(gr.distance_m), 0) as total_distance_m,
-                    coalesce(sum(gr.elevation_gain_m), 0) as total_elevation_m,
-                    coalesce(sum(gp.total_time_s), 0) as total_time_s
-                FROM explorer_agg_track t
-                LEFT JOIN explorer_sub_geo_record gr ON t.geo_record_id = gr.id
-                LEFT JOIN explorer_sub_geo_performance gp
-                    ON gr.geo_performance_id = gp.id
-                WHERE t.created_by = :uid
-                """
-            ),
-            {"uid": user_id},
-        )
-        row = result.one()
-
-        # Upsert the aggregated totals into the "all"-scope statistics row.
-        session.execute(
-            text(
-                """
-                INSERT INTO profile_sub_statistic
-                    (user_id, scope, total_distance_m, total_elevation_m,
-                     total_activities, total_time_s)
-                VALUES (:uid, 'all', :dist, :elev, :acts, :time)
-                ON CONFLICT (user_id, scope, scope_year, scope_month)
-                DO UPDATE SET
-                    total_distance_m = EXCLUDED.total_distance_m,
-                    total_elevation_m = EXCLUDED.total_elevation_m,
-                    total_activities = EXCLUDED.total_activities,
-                    total_time_s = EXCLUDED.total_time_s
-                """
-            ),
-            {
-                "uid": user_id,
-                "dist": row.total_distance_m,
-                "elev": row.total_elevation_m,
-                "acts": row.total_activities,
-                "time": row.total_time_s,
-            },
-        )
+        counts = _recompute(session, user_id)
         session.commit()
 
-    logger.info("Aggregated statistics for user %s", user_id)
-    return {"user_id": user_id, "status": "done"}
+    logger.info("Stats recompute done for user %s: %s", user_id, counts)
+    return {"user_id": user_id, "status": "done", **counts}

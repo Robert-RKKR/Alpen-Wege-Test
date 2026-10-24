@@ -12,7 +12,12 @@ from app.core.base import Base, TimestampMixin, UserScopedMixin
 
 class ProfileM2mUserPoi(TimestampMixin, UserScopedMixin, Base):
     __tablename__ = "profile_m2m_user_poi"
-    __table_args__ = (UniqueConstraint("user_id", "poi_id"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "poi_id", "track_id",
+            name="uq_profile_m2m_user_poi_visit",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
@@ -26,18 +31,16 @@ class ProfileM2mUserPoi(TimestampMixin, UserScopedMixin, Base):
         ForeignKey("compendium_cat_poi.id", ondelete="CASCADE"),
         nullable=False,
         comment=(
-            "Foreign key to compendium_cat_poi identifying the Point of "
-            "Interest the user has visited or collected. Unique per user "
-            "(each POI can only be collected once). Cascades on delete."
+            "FK to compendium_cat_poi. One row per (user, POI, track) visit. "
+            "Cascades on POI delete."
         ),
     )
     collected_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         comment=(
-            "Timezone-aware timestamp of when the user visited or collected "
-            "this POI, typically recorded automatically when a GPS track "
-            "passes near the POI location."
+            "Timezone-aware timestamp of the visit, interpolated from the "
+            "GPX track or falling back to recorded_at / created_at."
         ),
     )
     comment: Mapped[str | None] = mapped_column(
@@ -50,8 +53,7 @@ class ProfileM2mUserPoi(TimestampMixin, UserScopedMixin, Base):
     track_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("explorer_agg_track.id", ondelete="SET NULL"),
         comment=(
-            "Optional foreign key to explorer_agg_track linking this POI "
-            "visit to the recorded track during which the POI was visited. "
-            "Set to NULL if the referenced track is deleted."
+            "FK to explorer_agg_track. The track during which this visit was "
+            "recorded. SET NULL if the track is deleted."
         ),
     )

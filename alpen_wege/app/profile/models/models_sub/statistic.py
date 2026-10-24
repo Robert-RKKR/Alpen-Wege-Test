@@ -5,6 +5,7 @@ import uuid
 from sqlalchemy import (
     BigInteger,
     CheckConstraint,
+    ForeignKey,
     Integer,
     Text,
     UniqueConstraint,
@@ -20,7 +21,15 @@ from app.core.base import Base, TimestampMixin, UserScopedMixin
 class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
     __tablename__ = "profile_sub_statistic"
     __table_args__ = (
-        UniqueConstraint("user_id", "scope", "scope_year", "scope_month"),
+        UniqueConstraint(
+            "user_id",
+            "sport_type_id",
+            "scope",
+            "scope_year",
+            "scope_month",
+            name="uq_profile_sub_statistic_bucket",
+            postgresql_nulls_not_distinct=True,
+        ),
         CheckConstraint(
             "scope IN ('all', 'year', 'month')",
             name="ck_profile_sub_statistic_scope",
@@ -39,22 +48,29 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         Text,
         nullable=False,
         comment=(
-            "Time scope for aggregation. Constrained by CHECK to one of: "
-            "(lifetime), (calendar year), (calendar month)."
+            "Time scope for aggregation: 'all' (lifetime), 'year' (calendar "
+            "year), 'month' (calendar month)."
         ),
     )
     scope_year: Mapped[int | None] = mapped_column(
         Integer,
         comment=(
-            "Calendar year for or scoped statistics (e.g. 2024). NULL when "
-            "scope is (lifetime aggregation)."
+            "Calendar year (UTC) for year and month scoped statistics. "
+            "NULL for scope 'all'."
         ),
     )
     scope_month: Mapped[int | None] = mapped_column(
         Integer,
         comment=(
-            "Calendar month (1-12) for scoped statistics. NULL when scope is "
-            "or ."
+            "Calendar month 1-12 (UTC) for month scoped statistics. "
+            "NULL for scope 'all' and 'year'."
+        ),
+    )
+    sport_type_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("core_ref_sport_type.id", ondelete="CASCADE"),
+        comment=(
+            "FK to core_ref_sport_type. NULL means all-sports aggregate. "
+            "CASCADE on sport type delete."
         ),
     )
     total_distance_m: Mapped[int] = mapped_column(
@@ -63,8 +79,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Cumulative distance in meters across all activities within the "
-            "given scope. Stored as bigint to accommodate lifetime totals "
-            "without overflow."
+            "given scope."
         ),
     )
     total_distance_graph = mapped_column(
@@ -82,8 +97,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Cumulative elevation gain in meters across all activities within "
-            "the given scope. Stored as bigint to accommodate lifetime totals "
-            "without overflow."
+            "the given scope."
         ),
     )
     total_elevation_graph = mapped_column(
@@ -119,8 +133,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Cumulative time spent on activities in seconds within the given "
-            "scope. Stored as bigint to accommodate lifetime totals without "
-            "overflow."
+            "scope."
         ),
     )
     total_time_graph = mapped_column(
@@ -131,6 +144,18 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
             "activities over the scope period, used to render duration trend "
             "charts in the user"
         ),
+    )
+    total_moving_time_s: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        server_default="0",
+        comment="Cumulative moving time in seconds, excluding stops.",
+    )
+    total_elevation_loss_m: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        server_default="0",
+        comment="Cumulative elevation loss in meters.",
     )
     total_plans_created: Mapped[int] = mapped_column(
         Integer,
@@ -165,8 +190,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Number of consecutive days with at least one recorded activity, "
-            "counting back from the most recent active day. Resets to zero "
-            "when a day is missed."
+            "counting back from the most recent active day."
         ),
     )
     longest_streak_days: Mapped[int] = mapped_column(
@@ -175,7 +199,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Longest consecutive-day activity streak ever achieved by the "
-            "user within the given scope. Never decreases once set."
+            "user within the given scope."
         ),
     )
     total_points: Mapped[int] = mapped_column(
@@ -184,8 +208,7 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         server_default="0",
         comment=(
             "Cumulative gamification points earned by the user within the "
-            "given scope. Stored as bigint to accommodate lifetime totals "
-            "without overflow."
+            "given scope."
         ),
     )
     unique_pois_count: Mapped[int] = mapped_column(
@@ -193,8 +216,8 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
         nullable=False,
         server_default="0",
         comment=(
-            "Number of distinct Points of Interest (POIs) the user has "
-            "visited or collected within the given scope."
+            "Number of distinct POIs the user has visited within the given "
+            "scope, from the visit log."
         ),
     )
     unique_regions_count: Mapped[int] = mapped_column(
@@ -205,4 +228,22 @@ class ProfileSubStatistic(TimestampMixin, UserScopedMixin, Base):
             "Number of distinct geographic regions the user has been active "
             "in within the given scope."
         ),
+    )
+    active_days: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="0",
+        comment="Number of distinct days (UTC) with at least one activity.",
+    )
+    max_elevation_m: Mapped[int | None] = mapped_column(
+        Integer,
+        comment="Highest elevation reached across all tracks in this scope.",
+    )
+    longest_track_m: Mapped[int | None] = mapped_column(
+        Integer,
+        comment="Distance in meters of the longest single track in this scope.",
+    )
+    longest_track_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("explorer_agg_track.id", ondelete="SET NULL"),
+        comment="FK to the longest track. SET NULL on track delete.",
     )

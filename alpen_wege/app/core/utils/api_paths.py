@@ -1,0 +1,11 @@
+# Public URL helpers. The API lives under /api/v1 (see Routing/api_routes_structure_proposal.md).
+API_V1 = "/api/v1"
+
+
+def job_url(job_id) -> str:
+    # Where the owner reads one of their jobs (Location header of the 202 responses).
+    return f"{API_V1}/management/my-jobs/{job_id}"
+
+
+# POST to this path uploads a GPX file; UploadSizeLimitMiddleware matches this exact path.
+TRACK_UPLOAD_PATH = f"{API_V1}/explorer/tracks"

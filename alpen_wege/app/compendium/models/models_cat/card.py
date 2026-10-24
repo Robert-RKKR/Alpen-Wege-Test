@@ -41,11 +41,13 @@ class CompendiumCatCard(TimestampMixin, CreatorMixin, IdentificationL18nMixin, B
             "(e.g. peak, hut, pass). References core_ref_compendium_type.id."
         ),
     )
-    poi_id: Mapped[uuid.UUID | None] = mapped_column(
+    poi_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("compendium_cat_poi.id"),
+        nullable=False,
+        index=True,
         comment=(
-            "Optional foreign key to the point of interest this card is tied "
-            "to. References compendium_cat_poi.id."
+            "FK to compendium_cat_poi. The point of interest this card is "
+            "tied to. Required (NOT NULL)."
         ),
     )
     main_photo_id: Mapped[uuid.UUID | None] = mapped_column(

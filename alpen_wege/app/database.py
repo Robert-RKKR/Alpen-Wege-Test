@@ -54,6 +54,7 @@ async def create_tables():
 
     # Force import all models so they register with Base.metadata
     import app.core.models  # noqa: F401
+    import app.management.models  # noqa: F401
     import app.assets.models  # noqa: F401
     import app.compendium.models  # noqa: F401
     import app.explorer.models  # noqa: F401

@@ -1,4 +1,5 @@
 # Standard library
+from datetime import datetime, timezone
 from uuid import UUID
 
 # Third-party
@@ -13,9 +14,10 @@ from app.core.dependencies import get_db
 from app.core.utils.responses import AppError
 from app.profile.models import ProfileUsrUser
 from app.profile.services.jwt import decode_token, is_token_blacklisted
+from app.core.utils.api_paths import API_V1
 
 # OAuth2 bearer scheme; extracts the token from the Authorization header.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_V1}/profile/auth/login")
 
 
 async def get_current_user(
@@ -77,6 +79,9 @@ async def get_current_user(
     request.state.authenticated_user_group = user.credentials.user_group
     request.state.old_jti = jti
     request.state.old_token_exp = payload["exp"]
+
+    user.last_active_at = datetime.now(timezone.utc)
+    await db.flush()
 
     return user
 

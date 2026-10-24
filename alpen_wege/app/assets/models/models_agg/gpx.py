@@ -2,7 +2,7 @@
 import uuid
 
 # Third-party
-from sqlalchemy import Text, func
+from sqlalchemy import BigInteger, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -51,4 +51,13 @@ class AssetAggGpx(
             "Unique file system or object storage path to the GPX file. Used "
             "to locate and serve the file."
         ),
+    )
+    sha256: Mapped[str | None] = mapped_column(
+        String(64),
+        index=True,
+        comment="SHA-256 hex digest of the uploaded GPX file for duplicate detection.",
+    )
+    size_bytes: Mapped[int | None] = mapped_column(
+        BigInteger,
+        comment="Size of the uploaded GPX file in bytes.",
     )

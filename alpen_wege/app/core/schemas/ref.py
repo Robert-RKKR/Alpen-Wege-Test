@@ -62,3 +62,15 @@ class DifficultySportUpdate(RefWithFactorUpdate):
 
 class DifficultySportRead(RefWithFactorRead):
     sport_type_id: UUID | None
+
+
+class CompendiumTypeCreate(RefWithFactorCreate):
+    is_collectable: bool = True
+
+
+class CompendiumTypeUpdate(RefWithFactorUpdate):
+    is_collectable: bool | None = None
+
+
+class CompendiumTypeRead(RefWithFactorRead):
+    is_collectable: bool

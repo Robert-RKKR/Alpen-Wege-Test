@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local application
 from app.core.dependencies import get_db
+from app.management.utils.event_logger import log_created, log_updated, log_deleted
 from app.core.utils.responses import ApiResponse, AppError, ok, ok_list
 from app.core.utils.csv_import import CsvImportResult, csv_upload_description, import_csv
 from app.profile.permissions import require_groups
@@ -15,9 +16,6 @@ from app.profile.services.access_cache import invalidate_policy_cache
 from app.core.models.resource_type import CoreRefResourceType
 from app.profile.models.access_policy import ProfileAccessPolicy
 from app.profile.schemas.access_policy import (
-    ResourceTypeCreate,
-    ResourceTypeRead,
-    ResourceTypeUpdate,
     AccessPolicyCreate,
     AccessPolicyRead,
     AccessPolicyReadWithKey,
@@ -26,144 +24,10 @@ from app.profile.schemas.access_policy import (
 from app.profile.models import ProfileUsrUser
 
 
-# ============================================================
-# Resource Types — /api/v1/auth/resource-types
-# ============================================================
-
-resource_type_router = APIRouter(
-    prefix="/resource-types",
-    tags=["Auth - Resource Types"],
-)
+router = APIRouter(prefix="/access-policies", tags=["Auth", "Auth - Access Policies"])
 
 
-@resource_type_router.get("", response_model=ApiResponse[list[ResourceTypeRead]])
-async def list_resource_types(
-    limit: int = 1000,
-    offset: int = 0,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    total = (await db.execute(select(func.count()).select_from(CoreRefResourceType))).scalar()
-    stmt = (
-        select(CoreRefResourceType)
-        .order_by(CoreRefResourceType.key)
-        .limit(limit)
-        .offset(offset)
-    )
-    result = await db.execute(stmt)
-    return ok_list(result.scalars().all(), total=total, limit=limit, offset=offset)
-
-
-@resource_type_router.post(
-    "",
-    response_model=ApiResponse[ResourceTypeRead],
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_resource_type(
-    body: ResourceTypeCreate,
-    admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    existing = await db.execute(
-        select(CoreRefResourceType).where(CoreRefResourceType.key == body.key)
-    )
-    if existing.scalar_one_or_none():
-        raise AppError(
-            status.HTTP_409_CONFLICT,
-            "Duplicate entry",
-            error_message="A resource type with this key already exists.",
-            error_errors=[{"field": "key", "code": "conflict", "message": "Key already in use"}],
-        )
-    obj = CoreRefResourceType(**body.model_dump(exclude_unset=True), created_by=admin.id)
-    db.add(obj)
-    await db.commit()
-    await db.refresh(obj)
-    return ok(obj, code=201, message="Created")
-
-
-@resource_type_router.get("/{item_id}", response_model=ApiResponse[ResourceTypeRead])
-async def get_resource_type(
-    item_id: UUID,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    obj = await db.get(CoreRefResourceType, item_id)
-    if not obj:
-        raise AppError(
-            status.HTTP_404_NOT_FOUND,
-            "Not found",
-            error_message="No resource type exists with the given ID.",
-        )
-    return ok(obj)
-
-
-@resource_type_router.patch("/{item_id}", response_model=ApiResponse[ResourceTypeRead])
-async def update_resource_type(
-    item_id: UUID,
-    body: ResourceTypeUpdate,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    obj = await db.get(CoreRefResourceType, item_id)
-    if not obj:
-        raise AppError(
-            status.HTTP_404_NOT_FOUND,
-            "Not found",
-            error_message="No resource type exists with the given ID.",
-        )
-    for field, value in body.model_dump(exclude_unset=True).items():
-        setattr(obj, field, value)
-    await db.commit()
-    await db.refresh(obj)
-    await invalidate_policy_cache()
-    return ok(obj)
-
-
-@resource_type_router.delete("/{item_id}", response_model=ApiResponse[None])
-async def delete_resource_type(
-    item_id: UUID,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    obj = await db.get(CoreRefResourceType, item_id)
-    if not obj:
-        raise AppError(
-            status.HTTP_404_NOT_FOUND,
-            "Not found",
-            error_message="No resource type exists with the given ID.",
-        )
-    await db.delete(obj)
-    await db.commit()
-    await invalidate_policy_cache()
-    return ok(None, message="Deleted")
-
-
-@resource_type_router.post(
-    "/upload-csv",
-    response_model=ApiResponse[CsvImportResult],
-    summary="Import resource types from CSV",
-    description=csv_upload_description(CoreRefResourceType),
-)
-async def upload_resource_type_csv(
-    file: UploadFile = File(..., description="CSV file with header row"),
-    admin: ProfileUsrUser = Depends(require_groups("administrator")),
-    db: AsyncSession = Depends(get_db),
-):
-    result = await import_csv(file, CoreRefResourceType, admin.id, db)
-    return ok(result, code=201, message="Import complete")
-
-
-# ============================================================
-# Access Policies — /api/v1/auth/access-policies
-# ============================================================
-
-access_policy_router = APIRouter(
-    prefix="/access-policies",
-    tags=["Auth - Access Policies"],
-)
-
-
-@access_policy_router.get("", response_model=ApiResponse[list[AccessPolicyReadWithKey]])
+@router.get("", response_model=ApiResponse[list[AccessPolicyReadWithKey]])
 async def list_access_policies(
     limit: int = 1000,
     offset: int = 0,
@@ -209,14 +73,14 @@ async def list_access_policies(
     return ok_list(items, total=total, limit=limit, offset=offset)
 
 
-@access_policy_router.post(
+@router.post(
     "",
     response_model=ApiResponse[AccessPolicyRead],
     status_code=status.HTTP_201_CREATED,
 )
 async def create_access_policy(
     body: AccessPolicyCreate,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
+    admin: ProfileUsrUser = Depends(require_groups("administrator")),
     db: AsyncSession = Depends(get_db),
 ):
     rt = await db.get(CoreRefResourceType, body.resource_type_id)
@@ -245,13 +109,15 @@ async def create_access_policy(
 
     obj = ProfileAccessPolicy(**body.model_dump())
     db.add(obj)
+    await db.flush()
+    log_created(db, obj, admin.id)
     await db.commit()
     await db.refresh(obj)
     await invalidate_policy_cache(body.user_group, rt.key)
     return ok(obj, code=201, message="Created")
 
 
-@access_policy_router.get("/{item_id}", response_model=ApiResponse[AccessPolicyRead])
+@router.get("/{item_id}", response_model=ApiResponse[AccessPolicyRead])
 async def get_access_policy(
     item_id: UUID,
     _admin: ProfileUsrUser = Depends(require_groups("administrator")),
@@ -267,11 +133,11 @@ async def get_access_policy(
     return ok(obj)
 
 
-@access_policy_router.patch("/{item_id}", response_model=ApiResponse[AccessPolicyRead])
+@router.patch("/{item_id}", response_model=ApiResponse[AccessPolicyRead])
 async def update_access_policy(
     item_id: UUID,
     body: AccessPolicyUpdate,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
+    admin: ProfileUsrUser = Depends(require_groups("administrator")),
     db: AsyncSession = Depends(get_db),
 ):
     obj = await db.get(ProfileAccessPolicy, item_id)
@@ -281,17 +147,19 @@ async def update_access_policy(
             "Not found",
             error_message="No access policy exists with the given ID.",
         )
+    old_values = {"scope": obj.scope}
     obj.scope = body.scope
+    log_updated(db, obj, old_values, {"scope": body.scope}, admin.id)
     await db.commit()
     await db.refresh(obj)
     await invalidate_policy_cache()
     return ok(obj)
 
 
-@access_policy_router.delete("/{item_id}", response_model=ApiResponse[None])
+@router.delete("/{item_id}", response_model=ApiResponse[None])
 async def delete_access_policy(
     item_id: UUID,
-    _admin: ProfileUsrUser = Depends(require_groups("administrator")),
+    admin: ProfileUsrUser = Depends(require_groups("administrator")),
     db: AsyncSession = Depends(get_db),
 ):
     obj = await db.get(ProfileAccessPolicy, item_id)
@@ -301,13 +169,14 @@ async def delete_access_policy(
             "Not found",
             error_message="No access policy exists with the given ID.",
         )
+    log_deleted(db, obj, admin.id)
     await db.delete(obj)
     await db.commit()
     await invalidate_policy_cache()
     return ok(None, message="Deleted")
 
 
-@access_policy_router.post(
+@router.post(
     "/upload-csv",
     response_model=ApiResponse[CsvImportResult],
     summary="Import access policies from CSV",

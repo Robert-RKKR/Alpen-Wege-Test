@@ -3,7 +3,19 @@ import uuid
 from datetime import datetime
 
 # Third-party
-from sqlalchemy import DateTime, ForeignKey, Text, func
+from sqlalchemy import (
+    CheckConstraint,
+    DDL,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    event,
+    func,
+    text,
+)
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -20,6 +32,20 @@ class ExplorerAggTrack(
     TimestampMixin, CreatorMixin, PublicMixin, IdentificationL18nMixin, Base
 ):
     __tablename__ = "explorer_agg_track"
+    __table_args__ = (
+        CheckConstraint(
+            "processing_status IN ('pending', 'processing', 'ready', 'failed')",
+            name="ck_track_processing_status",
+        ),
+        Index(
+            "ix_track_active_owner",
+            "created_by",
+            "recorded_at",
+            postgresql_where=text("archived_at IS NULL"),
+        ),
+        Index("ix_track_processing_status", "processing_status"),
+        Index("ix_track_gpx_id", "gpx_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
@@ -89,16 +115,62 @@ class ExplorerAggTrack(
         ),
     )
     start_poi_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("compendium_cat_poi.id"),
+        ForeignKey("compendium_cat_poi.id", ondelete="SET NULL"),
         comment=(
             "FK to compendium_cat_poi. The Point of Interest where this track "
-            "started."
+            "started. SET NULL on POI delete."
         ),
     )
     end_poi_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("compendium_cat_poi.id"),
+        ForeignKey("compendium_cat_poi.id", ondelete="SET NULL"),
         comment=(
             "FK to compendium_cat_poi. The Point of Interest where this track "
-            "ended."
+            "ended. SET NULL on POI delete."
         ),
     )
+    processing_status: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        server_default="pending",
+        comment=(
+            "Processing lifecycle status: pending, processing, ready, or "
+            "failed. Controlled by the worker and reaper."
+        ),
+    )
+    processing_error: Mapped[str | None] = mapped_column(
+        Text,
+        comment="User-safe error message when processing_status is failed.",
+    )
+    processing_warnings: Mapped[list | None] = mapped_column(
+        JSONB,
+        comment=(
+            "Sorted list of warning codes from GPX processing (e.g. "
+            "no_timestamps, outliers_removed)."
+        ),
+    )
+    processing_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        comment="When the worker claimed this track for processing.",
+    )
+    processed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        comment="When processing completed successfully.",
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        comment="Soft-delete timestamp. NULL means active.",
+    )
+    gpx_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("asset_agg_gpx.id"),
+        comment="FK to asset_agg_gpx. The uploaded GPX file for this track.",
+    )
+
+
+event.listen(
+    ExplorerAggTrack.__table__,
+    "after_create",
+    DDL(
+        "CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON explorer_agg_track "
+        "FOR EACH ROW EXECUTE FUNCTION moddatetime('updated_at')"
+    ),
+)

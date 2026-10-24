@@ -2,9 +2,9 @@
 import uuid
 
 # Third-party
-from geoalchemy2 import Geometry
-from sqlalchemy import ForeignKey, Integer, JSON, REAL, func
-from sqlalchemy.orm import Mapped, mapped_column
+from geoalchemy2 import Geography, Geometry
+from sqlalchemy import ForeignKey, Integer, JSON, REAL, SmallInteger, func
+from sqlalchemy.orm import Mapped, mapped_column, deferred
 
 # Local application
 from app.core.base import Base, TimestampMixin
@@ -38,37 +38,34 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
     geojson: Mapped[dict | None] = mapped_column(
         JSON,
         comment=(
-            "JSONB representation of the track geometry in GeoJSON format, "
-            "used for map rendering and spatial queries."
+            "GeoJSON LineString or MultiLineString for map rendering, "
+            "simplified to at most GEOJSON_MAX_POINTS."
         ),
     )
     elevation_graph: Mapped[dict | None] = mapped_column(
         JSON,
         comment=(
-            "JSONB data representing elevation profile over distance, used to "
-            "render the elevation chart in the UI."
+            "Array of [distance_m, elevation_m] pairs for the elevation "
+            "profile chart. NULL without elevation data."
         ),
     )
     track_types: Mapped[dict | None] = mapped_column(
         JSON,
         comment=(
             "JSONB breakdown of surface or trail types encountered along the "
-            "track (e.g. paved, gravel, dirt)."
+            "track (e.g. paved, gravel, dirt). NULL in processor version 1."
         ),
     )
     elevation: Mapped[int | None] = mapped_column(
         Integer,
         comment=(
-            "Representative elevation in meters for this record, typically "
-            "the starting or median altitude."
+            "Filtered elevation in metres of the first point with elevation "
+            "(start altitude). NULL without elevation data."
         ),
     )
     total_points: Mapped[int | None] = mapped_column(
         Integer,
-        comment=(
-            "Total number of GPS data points (trackpoints) in the recorded "
-            "track."
-        ),
+        comment="Number of GPS trackpoints kept after cleaning.",
     )
     distance_m: Mapped[int | None] = mapped_column(
         Integer,
@@ -77,44 +74,34 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
     elevation_gain_m: Mapped[int | None] = mapped_column(
         Integer,
         comment=(
-            "Cumulative positive elevation gain in meters over the entire "
-            "track."
+            "Cumulative positive elevation gain in meters, computed with "
+            "median filter and hysteresis."
         ),
     )
     elevation_loss_m: Mapped[int | None] = mapped_column(
         Integer,
         comment=(
-            "Cumulative negative elevation loss in meters over the entire "
-            "track."
+            "Cumulative negative elevation loss in meters, computed with "
+            "median filter and hysteresis."
         ),
     )
     highest_elevation_m: Mapped[int | None] = mapped_column(
         Integer,
-        comment=(
-            "Maximum altitude above sea level in meters reached during the "
-            "track."
-        ),
+        comment="Maximum altitude above sea level in meters (filtered).",
     )
     lowest_elevation_m: Mapped[int | None] = mapped_column(
         Integer,
-        comment=(
-            "Minimum altitude above sea level in meters reached during the "
-            "track."
-        ),
+        comment="Minimum altitude above sea level in meters (filtered).",
     )
     avg_grade: Mapped[float | None] = mapped_column(
         REAL,
         comment=(
-            "Average gradient percentage across the entire track, computed "
-            "from elevation change and distance."
+            "Mean of absolute windowed grade (%), weighted by step distance."
         ),
     )
     highest_grade: Mapped[float | None] = mapped_column(
         REAL,
-        comment=(
-            "Maximum gradient percentage encountered at any point along the "
-            "track."
-        ),
+        comment="Maximum positive windowed grade (%) along the track.",
     )
     start_location = mapped_column(
         Geometry("POINT", srid=4326),
@@ -131,4 +118,18 @@ class ExplorerSubGeoRecord(TimestampMixin, Base):
             "PostGIS Point geometry (SRID 4326) of the GPS ending position of "
             "the track."
         ),
+    )
+    route = deferred(
+        mapped_column(
+            Geography(geometry_type="MULTILINESTRING", srid=4326),
+            nullable=True,
+            comment=(
+                "Full-resolution route as PostGIS geography MultiLineString, "
+                "simplified by ROUTE_SIMPLIFY_TOLERANCE_M. Used for POI matching."
+            ),
+        )
+    )
+    processor_version: Mapped[int | None] = mapped_column(
+        SmallInteger,
+        comment="Version of the GPX processor that produced this record.",
     )

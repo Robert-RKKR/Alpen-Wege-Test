@@ -58,7 +58,7 @@ All endpoints (except `/health`) require a valid JWT Bearer token.
 ### Register
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/register \
+curl -X POST http://localhost:8000/api/v1/profile/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -82,7 +82,7 @@ Response (`201`):
 ### Login
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
+curl -X POST http://localhost:8000/api/v1/profile/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "securepass123"}'
 ```
@@ -94,33 +94,33 @@ Pass the token as a Bearer header on every request:
 ```bash
 TOKEN="eyJ..."
 
-curl http://localhost:8000/api/v1/users/me \
+curl http://localhost:8000/api/v1/profile/users/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 > **Token rotation:** The middleware automatically issues a fresh token
-> (returned in the `Authorization` response header) when less than half
+> (returned in the `X-Access-Token` response header) when less than half
 > the token's lifetime remains. Use the newest token you receive.
 
 ### Refresh / Logout
 
 | Method | Endpoint                    | Notes                                |
 |--------|-----------------------------|--------------------------------------|
-| POST   | `/api/v1/auth/refresh`      | Returns a new token                  |
-| POST   | `/api/v1/auth/logout`       | Blacklists the current token (204)   |
+| POST   | `/api/v1/profile/auth/refresh`      | Returns a new token                  |
+| POST   | `/api/v1/profile/auth/logout`       | Blacklists the current token (204)   |
 
 ---
 
 ## API endpoints
 
-Base path: `/api/v1`
+Base path: `/api/v1`. Every endpoint is `/api/v1/{app}/{resource}`; the apps are `core`, `compendium`, `explorer`, `profile` and `management`. The paths in the tables below include the app.
 
 ### User profile
 
 | Method | Path          | Description              |
 |--------|---------------|--------------------------|
-| GET    | `/users/me`   | Get current user profile |
-| PUT    | `/users/me`   | Update own profile       |
+| GET    | `/profile/users/me` | Get current user profile |
+| PUT    | `/profile/users/me` | Update own profile       |
 
 Update accepts: `first_name`, `last_name`, `middle_name`, `gender` (`male`/`female`/`not_specified`), `birth_date`, `height_cm`, `max_heart_rate`, `resting_heart_rate`.
 
@@ -130,54 +130,54 @@ User-scoped — each user sees only their own gear.
 
 | Method | Path                    | Description          |
 |--------|-------------------------|----------------------|
-| GET    | `/gear`                 | List my gear         |
-| POST   | `/gear`                 | Create gear          |
-| GET    | `/gear/{id}`            | Get one              |
-| PATCH  | `/gear/{id}`            | Update               |
-| DELETE | `/gear/{id}`            | Delete (204)         |
-| POST   | `/gear/upload-csv`      | Bulk import from CSV |
+| GET    | `/explorer/gear`                 | List my gear         |
+| POST   | `/explorer/gear`                 | Create gear          |
+| GET    | `/explorer/gear/{id}`            | Get one              |
+| PATCH  | `/explorer/gear/{id}`            | Update               |
+| DELETE | `/explorer/gear/{id}`            | Delete (204)         |
+| POST   | `/explorer/gear/upload-csv`      | Bulk import from CSV |
 
 ### Reference data (core_ref)
 
-19 lookup tables, all under `/ref/`. Shared data (no ownership filter).
+19 lookup tables, all under `/core/`. Shared data (no ownership filter).
 
 | Slug                    | Path                                 |
 |-------------------------|--------------------------------------|
-| `companies`             | `/ref/companies`                     |
-| `gear-types`            | `/ref/gear-types`                    |
-| `sport-types`           | `/ref/sport-types`                   |
-| `difficulty-sports`     | `/ref/difficulty-sports`             |
-| `difficulty-levels`     | `/ref/difficulty-levels`             |
-| `compendium-types`      | `/ref/compendium-types`              |
-| `region-types`          | `/ref/region-types`                  |
-| `achievement-categories`| `/ref/achievement-categories`        |
-| `achievement-scopes`    | `/ref/achievement-scopes`            |
-| `achievement-types`     | `/ref/achievement-types`             |
-| `point-reasons`         | `/ref/point-reasons`                 |
-| `post-types`            | `/ref/post-types`                    |
-| `rarities`              | `/ref/rarities`                      |
-| `schedule-statuses`     | `/ref/schedule-statuses`             |
-| `snow-conditions`       | `/ref/snow-conditions`               |
-| `trail-conditions`      | `/ref/trail-conditions`              |
-| `visibilities`          | `/ref/visibilities`                  |
-| `waypoint-types`        | `/ref/waypoint-types`                |
-| `weather-conditions`    | `/ref/weather-conditions`            |
+| `companies`             | `/core/companies`                     |
+| `gear-types`            | `/core/gear-types`                    |
+| `sport-types`           | `/core/sport-types`                   |
+| `difficulty-sports`     | `/core/difficulty-sports`             |
+| `difficulty-levels`     | `/core/difficulty-levels`             |
+| `compendium-types`      | `/core/compendium-types`              |
+| `region-types`          | `/core/region-types`                  |
+| `achievement-categories`| `/core/achievement-categories`        |
+| `achievement-scopes`    | `/core/achievement-scopes`            |
+| `achievement-types`     | `/core/achievement-types`             |
+| `point-reasons`         | `/core/point-reasons`                 |
+| `post-types`            | `/core/post-types`                    |
+| `rarities`              | `/core/rarities`                      |
+| `schedule-statuses`     | `/core/schedule-statuses`             |
+| `snow-conditions`       | `/core/snow-conditions`               |
+| `trail-conditions`      | `/core/trail-conditions`              |
+| `visibilities`          | `/core/visibilities`                  |
+| `waypoint-types`        | `/core/waypoint-types`                |
+| `weather-conditions`    | `/core/weather-conditions`            |
 
 Each table supports the same 6 operations:
 
 | Method | Path                          | Description          |
 |--------|-------------------------------|----------------------|
-| GET    | `/ref/{slug}`                 | List all             |
-| POST   | `/ref/{slug}`                 | Create (201)         |
-| GET    | `/ref/{slug}/{id}`            | Get one              |
-| PATCH  | `/ref/{slug}/{id}`            | Update               |
-| DELETE | `/ref/{slug}/{id}`            | Delete (204)         |
-| POST   | `/ref/{slug}/upload-csv`      | Bulk import from CSV |
+| GET    | `/core/{slug}`                 | List all             |
+| POST   | `/core/{slug}`                 | Create (201)         |
+| GET    | `/core/{slug}/{id}`            | Get one              |
+| PATCH  | `/core/{slug}/{id}`            | Update               |
+| DELETE | `/core/{slug}/{id}`            | Delete (204)         |
+| POST   | `/core/{slug}/upload-csv`      | Bulk import from CSV |
 
 **Create example** (sport type):
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ref/sport-types \
+curl -X POST http://localhost:8000/api/v1/core/sport-types \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -196,19 +196,19 @@ Shared geographic / editorial catalog. GET endpoints return nested objects one l
 
 | Method | Path                          | Description          |
 |--------|-------------------------------|----------------------|
-| GET    | `/countries`                  | List countries       |
-| POST   | `/countries`                  | Create (201)         |
-| GET    | `/countries/{id}`             | Get one              |
-| PATCH  | `/countries/{id}`             | Update               |
-| DELETE | `/countries/{id}`             | Delete (204)         |
-| POST   | `/countries/upload-csv`       | Bulk import from CSV |
+| GET    | `/compendium/countries`                  | List countries       |
+| POST   | `/compendium/countries`                  | Create (201)         |
+| GET    | `/compendium/countries/{id}`             | Get one              |
+| PATCH  | `/compendium/countries/{id}`             | Update               |
+| DELETE | `/compendium/countries/{id}`             | Delete (204)         |
+| POST   | `/compendium/countries/upload-csv`       | Bulk import from CSV |
 
-Same pattern for: `/regions`, `/pois`, `/cards`, `/posts`, `/poi-regions`.
+Same pattern for: `/compendium/regions`, `/compendium/pois`, `/compendium/cards`, `/compendium/posts`, `/compendium/poi-regions`. `POST /compendium/pois/{id}/rescan` and `POST /compendium/cards/{id}/rescan` start a rescan job (see the jobs section below).
 
 **Create country example** (with GeoJSON location):
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/countries \
+curl -X POST http://localhost:8000/api/v1/compendium/countries \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -225,7 +225,7 @@ curl -X POST http://localhost:8000/api/v1/countries \
 **Create region** (references country and region-type by ID):
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/regions \
+curl -X POST http://localhost:8000/api/v1/compendium/regions \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -274,7 +274,7 @@ Every entity has a `POST .../upload-csv` endpoint. Upload a standard CSV file (U
 ### How to use
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ref/sport-types/upload-csv \
+curl -X POST http://localhost:8000/api/v1/core/sport-types/upload-csv \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@sport_types.csv"
 ```
@@ -367,43 +367,96 @@ Open **http://localhost:8000/docs** — every `upload-csv` endpoint shows a full
 
 ---
 
+## URL scheme and routes layout
+
+Every endpoint is `/api/v1/{app}/{resource}`: `app` is the app folder that holds the route file (`core`, `compendium`, `explorer`, `profile`, `management`), `resource` is plural and kebab-case (for example `poi-regions`). Examples: `/api/v1/compendium/pois`, `/api/v1/profile/auth/login`, `/api/v1/management/settings`. Only `/health` and the documentation URLs (`/docs`, `/openapi.json`) are outside. The app prefix is written once, in each app's `routes/__init__.py`.
+
+Inside an app's `routes/` folder every resource is one unit that exports `router`:
+
+- **Size S, one file** (`country.py`): standard CRUD and CSV upload in one file, under about 250 lines.
+- **Size L, one folder** (`poi/`): `_router.py` (the `APIRouter` with prefix and tag), `_shared.py` (helpers used by several endpoints), `__init__.py` (imports the endpoint modules, fixed paths such as `/upload-csv` first) and one file per endpoint (`get_many.py`, `get_one.py`, `create.py`, `update.py`, `delete.py`, `rescan.py`, ...). Use it when the resource has a custom workflow endpoint or the file passes about 250 lines. Endpoint files import the shared router from `._router`; they never create their own (FastAPI refuses child routers with empty paths).
+- Changing size touches no other file: `from .poi import router` is the same for a file and a folder.
+- Helpers used by several resources live in `app/core/utils/` (`scope.py`, `api_paths.py`); route files never import from other route files; URLs are never written as strings in route files (`api_paths.py` builds the `Location` header and names the upload path).
+- Check after any change to routes: `python scripts/route_map.py dump route_dumps/x.json`, then `compare` against an earlier dump, `probe` and `names` (see `scripts/route_map.py`); `tests/test_routes_standard.py` and `tests/test_api_paths.py` enforce the main rules.
+
+---
+
 ## Project structure
 
 ```
 app/
-├── auth/                  # Authentication (JWT, register, login, logout)
+├── profile/               # Users, authentication, access policies
 │   ├── dependencies/      # get_current_user, get_current_active_user
-│   ├── middleware/         # TokenRefreshMiddleware (auto-rotation)
-│   ├── routes/            # register, login, refresh, logout
-│   ├── schemas/           # RegisterRequest, LoginRequest, TokenResponse
+│   ├── middleware/        # TokenRefreshMiddleware (auto-rotation)
+│   ├── models/            # ProfileUsrUser, credentials, access policies, ...
+│   ├── permissions/       # require_groups, resource_access
+│   ├── routes/            # auth/ (register, login, refresh, logout), user/ (me, admin), access_policy.py
+│   ├── schemas/           # RegisterRequest, LoginRequest, TokenResponse, UserRead, UserUpdate
 │   └── services/          # jwt (create/verify/blacklist), passwords (bcrypt)
-├── users/                 # User profile management
-│   ├── models/            # ProfileUsrUser
-│   ├── routes/            # /me, /admin
-│   └── schemas/           # UserRead, UserUpdate
 ├── core/                  # Shared base + reference data
 │   ├── base.py            # DeclarativeBase, all mixins
 │   ├── dependencies.py    # get_db session provider
 │   ├── models/            # 19 CoreRef* models
-│   ├── routes/            # Factory-generated CRUD for all ref tables
+│   ├── routes/            # ref/ (one small file per reference table + shared factory), resource_type.py
 │   ├── schemas/           # ref.py (6 schema classes), geo.py (GeoJSON utils)
 │   └── utils/             # csv_import.py (shared CSV bulk import)
+├── management/            # Event log, jobs, runtime settings, WebSocket, Celery API
+│   ├── models/            # MgmtLogEvent, MgmtRefEntityType, MgmtLogJob, MgmtSettings
+│   ├── jobs/              # job service, TrackedTask (Celery base class), Redis events
+│   ├── runtime_settings/  # settings registry, cached reader, seed
+│   ├── routes/            # /management/* (event-log, settings, jobs, my-jobs, ws, celery, broadcast)
+│   ├── schemas/
+│   └── utils/             # event_logger.py, seed_entity_types.py
 ├── compendium/            # Geographic / editorial catalog
 │   ├── models/
 │   │   ├── models_cat/    # Country, Region, POI, Card, Post
 │   │   └── models_m2m/    # PoiRegion
-│   ├── routes/            # Individual CRUD per entity + CSV upload
+│   ├── routes/            # one file per entity, poi/ and card/ are folders (they also have rescan) + CSV upload
 │   └── schemas/           # Create/Update/Read/SlimRead per entity
 ├── explorer/              # User activity data
 │   ├── models/            # ExplorerAggGear, ...
-│   ├── routes/            # gear CRUD + CSV upload
+│   ├── routes/            # gear.py (CRUD + CSV upload), track/ (GPX upload, geometry, performance, archive)
 │   └── schemas/           # GearCreate/Update/Read
 ├── config.py              # Pydantic settings
 ├── database.py            # Async engine + session factory
 ├── redis.py               # Redis pool (init/close/get)
-├── worker.py              # Celery app
+├── worker/                # Celery app and tasks (tracks, stats, cleanup, management)
 └── main.py                # App factory, router wiring, health check
 ```
+
+---
+
+## Jobs, WebSocket and management
+
+Work that runs in the background (GPX processing, POI and card rescans) is tracked as a **job**.
+`POST /explorer/tracks`, `POST /explorer/tracks/{id}/reprocess`, `POST /compendium/pois/{id}/rescan` and `POST /compendium/cards/{id}/rescan`
+answer `202` with a `job_id` (and a `Location: /api/v1/management/my-jobs/{job_id}` header). The job id is also the Celery task id.
+
+| Endpoint | Who | Purpose |
+|---|---|---|
+| `GET /api/v1/management/my-jobs`, `GET /api/v1/management/my-jobs/{id}` | any active user | own jobs (filters: `status`, `kind`, `subject_type`, `subject_id`, `active`) |
+| `POST /api/v1/management/ws/ticket` | any active user | one-time ticket (30 s) for a WebSocket |
+| `WS /api/v1/management/ws?ticket=...` | ticket holder | all my job events, broadcast notices |
+| `WS /api/v1/management/ws/jobs/{job_id}?ticket=...` | ticket holder | one job, closes when it ends |
+| `GET /api/v1/management/jobs`, `/api/v1/management/jobs/stats`, `/api/v1/management/jobs/{id}` | administrator | all jobs |
+| `GET /api/v1/management/event-log` (and `/entity-types`, `/{id}`, `/{id_1}/compare/{id_2}`) | administrator | object change history (moved from `/event-log`) |
+| `GET/PATCH /api/v1/management/settings[/{key}]`, `POST .../{key}/reset` | administrator | runtime settings (retention, WebSocket limits, ...) |
+| `POST /api/v1/management/broadcast` | administrator | notice to every connected WebSocket |
+| `GET /api/v1/management/celery/status`, `/workers`, `/tasks/registered`, `/tasks/active`, `/tasks/{id}`, `/beat` | administrator | Celery health and tasks (read-only) |
+
+**Following a job over WebSocket.** Get a ticket with `POST /api/v1/management/ws/ticket` (normal bearer token),
+then open `wss://<host>/api/v1/management/ws?ticket=<ticket>` within 30 seconds. The first message is `sync`
+(your queued and running jobs plus those finished in the last minutes); after that wait for updates.
+On every (re)connect: wait for `sync`, replace local state with it, then apply updates. Terminal states
+(`succeeded`, `failed`, `cancelled`) are final. Message types: `sync`, `job.update`, `job.progress`,
+`system.notice`, `control`. Close codes: `4401` bad ticket or logout, `4403` account deactivated,
+`4404` dedicated socket: not your job, `4408` maximum lifetime reached (reconnect with a new ticket),
+`4429` too many sockets. The WebSocket is only a hint: `GET /api/v1/management/my-jobs/{id}` always gives the truth.
+
+Database changes for the management app: `scripts/sql/management_x1_move.sql`, `management_x2_settings.sql`,
+`management_x3_jobs.sql` (run in this order with the api and worker stopped, before the code is deployed).
+Try it without a GPX file: `python scripts/demo_job.py --user-id <uuid> --seconds 8` and
+`python scripts/ws_check.py --token "$TOKEN"` (both inside the api container, `PYTHONPATH=/app`).
 
 ---
 

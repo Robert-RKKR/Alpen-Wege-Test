@@ -1,4 +1,5 @@
 # Third-party
+import redis as sync_redis
 import redis.asyncio as aioredis
 
 # Local application
@@ -9,6 +10,9 @@ settings = get_settings()
 
 # Module-level Redis client, created on startup and reused across requests.
 redis_pool: aioredis.Redis | None = None
+
+# Module-level synchronous client for Celery workers and scripts (created on first use).
+_sync_redis: sync_redis.Redis | None = None
 
 
 async def init_redis() -> aioredis.Redis:
@@ -40,3 +44,13 @@ def get_redis_pool() -> aioredis.Redis:
     if redis_pool is None:
         raise RuntimeError("Redis not initialized")
     return redis_pool
+
+
+def get_sync_redis() -> sync_redis.Redis:
+    # Accessor for a synchronous Redis client (the async pool cannot be used in a worker).
+    # Params: none.
+    # Returns: a client for REDIS_URL with decoded (str) responses.
+    global _sync_redis
+    if _sync_redis is None:
+        _sync_redis = sync_redis.from_url(settings.REDIS_URL, decode_responses=True)
+    return _sync_redis

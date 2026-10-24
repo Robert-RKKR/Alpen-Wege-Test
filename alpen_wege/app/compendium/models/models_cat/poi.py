@@ -3,7 +3,7 @@ import uuid
 
 # Third-party
 from geoalchemy2 import Geometry
-from sqlalchemy import ForeignKey, Integer, Text, func
+from sqlalchemy import ForeignKey, Index, Integer, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
@@ -17,6 +17,13 @@ from app.core.base import (
 
 class CompendiumCatPoi(TimestampMixin, CreatorMixin, IdentificationL18nMixin, Base):
     __tablename__ = "compendium_cat_poi"
+    __table_args__ = (
+        Index(
+            "ix_poi_location_geog",
+            text("(location::geography)"),
+            postgresql_using="gist",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,

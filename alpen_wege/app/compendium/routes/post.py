@@ -7,26 +7,18 @@ from sqlalchemy.orm import selectinload
 
 from app.core.dependencies import get_db
 from app.core.utils.csv_import import CsvImportResult, csv_upload_description, import_csv
+from app.management.utils.event_logger import log_created, log_updated, log_deleted
 from app.core.utils.responses import ApiResponse, ok, ok_list
 from app.profile.permissions import resource_access, AccessContext, check_object_access
 from app.compendium.models.models_cat.post import CompendiumCatPost
 from app.compendium.schemas.post import PostCreate, PostRead, PostUpdate
+from app.core.utils.scope import apply_scope
 
 router = APIRouter(prefix="/posts", tags=["Compendium - Post"])
 
 _EAGER = [
     selectinload(CompendiumCatPost.post_type),
 ]
-
-
-def _apply_scope(stmt, model, access: AccessContext):
-    if access.scope == "own":
-        stmt = stmt.where(model.created_by == access.user.id)
-    elif access.scope == "public":
-        stmt = stmt.where(
-            (model.created_by == access.user.id) | (model.is_public == True)
-        )
-    return stmt
 
 
 @router.get("", response_model=ApiResponse[list[PostRead]])
@@ -37,10 +29,10 @@ async def list_posts(
     db: AsyncSession = Depends(get_db),
 ):
     count_stmt = select(func.count()).select_from(CompendiumCatPost)
-    count_stmt = _apply_scope(count_stmt, CompendiumCatPost, access)
+    count_stmt = apply_scope(count_stmt, CompendiumCatPost, access)
     total = (await db.execute(count_stmt)).scalar()
     stmt = select(CompendiumCatPost).options(*_EAGER).order_by(CompendiumCatPost.name).limit(limit).offset(offset)
-    stmt = _apply_scope(stmt, CompendiumCatPost, access)
+    stmt = apply_scope(stmt, CompendiumCatPost, access)
     result = await db.execute(stmt)
     items = result.scalars().all()
     return ok_list(items, total=total, limit=limit, offset=offset)
@@ -54,6 +46,8 @@ async def create_post(
 ):
     obj = CompendiumCatPost(**body.model_dump(exclude_unset=True), created_by=access.user.id)
     db.add(obj)
+    await db.flush()
+    log_created(db, obj, access.user.id)
     await db.commit()
     stmt = (
         select(CompendiumCatPost)
@@ -90,8 +84,11 @@ async def update_post(
 ):
     obj = await db.get(CompendiumCatPost, post_id)
     check_object_access(access, obj, not_found_msg="Post not found")
-    for field, value in body.model_dump(exclude_unset=True).items():
+    changes = body.model_dump(exclude_unset=True)
+    old_values = {f: getattr(obj, f) for f in changes}
+    for field, value in changes.items():
         setattr(obj, field, value)
+    log_updated(db, obj, old_values, changes, access.user.id)
     await db.commit()
     stmt = (
         select(CompendiumCatPost)
@@ -110,6 +107,7 @@ async def delete_post(
 ):
     obj = await db.get(CompendiumCatPost, post_id)
     check_object_access(access, obj, not_found_msg="Post not found")
+    log_deleted(db, obj, access.user.id)
     await db.delete(obj)
     await db.commit()
     return ok(None, message="Deleted")

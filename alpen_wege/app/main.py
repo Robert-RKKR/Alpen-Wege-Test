@@ -15,12 +15,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.database import async_engine, create_tables
 from app.redis import init_redis, close_redis, get_redis_pool
 from app.profile.middleware import TokenRefreshMiddleware
-from app.profile.routes import auth_router
-from app.profile.routes import users_router
+from app.profile.routes import router as profile_router
 from app.explorer.routes import router as explorer_router
 from app.core.routes import router as core_router
 from app.compendium.routes import router as compendium_router
+from app.management.routes import router as management_router
+from app.management.utils.event_logger import load_entity_type_cache
+from app.management.utils.seed_entity_types import seed_entity_types
+from app.core.utils.api_paths import API_V1
 from app.core.utils.responses import AppError, fail, request_id_ctx
+from app.core.utils.upload_limit import UploadSizeLimitMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +42,13 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI):
     await init_redis()
     await create_tables()
+    from app.database import AsyncSessionLocal
+    async with AsyncSessionLocal() as session:
+        await seed_entity_types(session)
+        await load_entity_type_cache(session)
+        # after the entity types: PATCH /management/settings logs through the entity cache
+        from app.management.runtime_settings.seed import seed_settings
+        await seed_settings(session)
     yield
     await close_redis()
     await async_engine.dispose()
@@ -48,6 +59,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(RequestIdMiddleware)
     app.add_middleware(TokenRefreshMiddleware)
+    app.add_middleware(UploadSizeLimitMiddleware)
 
     # ---- Exception handlers ----
 
@@ -101,12 +113,12 @@ def create_app() -> FastAPI:
 
     # ---- Routers ----
 
-    api_v1_prefix = "/api/v1"
-    app.include_router(auth_router, prefix=api_v1_prefix)
-    app.include_router(users_router, prefix=api_v1_prefix)
+    api_v1_prefix = API_V1
+    app.include_router(profile_router, prefix=api_v1_prefix)
     app.include_router(explorer_router, prefix=api_v1_prefix)
     app.include_router(core_router, prefix=api_v1_prefix)
     app.include_router(compendium_router, prefix=api_v1_prefix)
+    app.include_router(management_router, prefix=api_v1_prefix)
 
     @app.get("/health")
     async def health():

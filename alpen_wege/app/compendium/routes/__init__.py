@@ -7,7 +7,7 @@ from .card import router as card_router
 from .post import router as post_router
 from .poi_region import router as poi_region_router
 
-router = APIRouter()
+router = APIRouter(prefix="/compendium")
 router.include_router(country_router)
 router.include_router(region_router)
 router.include_router(poi_router)

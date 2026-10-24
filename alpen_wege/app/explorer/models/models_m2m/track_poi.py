@@ -2,7 +2,7 @@
 import uuid
 
 # Third-party
-from sqlalchemy import ForeignKey, Integer, func
+from sqlalchemy import ForeignKey, Integer, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -11,6 +11,11 @@ from app.core.base import Base, CreatorMixin, TimestampMixin
 
 class ExplorerM2mTrackPoi(TimestampMixin, CreatorMixin, Base):
     __tablename__ = "explorer_m2m_track_poi"
+    __table_args__ = (
+        UniqueConstraint(
+            "track_id", "poi_id", name="uq_explorer_m2m_track_poi_track_poi"
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
@@ -46,5 +51,5 @@ class ExplorerM2mTrackPoi(TimestampMixin, CreatorMixin, Base):
     )
     distance_m: Mapped[int | None] = mapped_column(
         Integer,
-        comment=("Distance in meters from the track start to this POI."),
+        comment="Along-track distance in meters from the track start to this POI.",
     )

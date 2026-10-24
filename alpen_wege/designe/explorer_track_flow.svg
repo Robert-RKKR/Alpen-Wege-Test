@@ -1,11 +1,11 @@
-<svg viewBox="0 0 980 810" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+<svg viewBox="0 0 980 960" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="980" height="810" fill="#ffffff"/>
+  <rect x="0" y="0" width="980" height="960" fill="#ffffff"/>
 
   <!-- Title -->
   <text x="40" y="46" font-size="24" font-weight="700" fill="#0f172a">Recorded activities — three-tier data architecture</text>
@@ -108,4 +108,33 @@
 
   <circle cx="530" cy="762" r="5" fill="#0d9488"/>
   <text x="544" y="766" font-size="12" fill="#334155"><tspan font-weight="700" fill="#0f766e">Tier 3</tspan> — untouched; badges, points, cards and visits all stay.</text>
+
+  <!-- ============ EVENT LOGGER ============ -->
+  <rect x="40" y="810" width="880" height="130" rx="12" fill="#fdf2f8" stroke="#db2777" stroke-width="1.5"/>
+  <circle cx="66" cy="836" r="6" fill="#db2777"/>
+  <text x="82" y="841" font-size="16" font-weight="700" fill="#9d174d">EVENT LOGGER · Audit trail</text>
+  <text x="898" y="841" font-size="12.5" font-weight="600" fill="#db2777" text-anchor="end">append-only · every model change · JSON snapshots</text>
+
+  <g>
+    <rect x="60" y="856" width="280" height="68" rx="8" fill="#ffffff" stroke="#db2777" stroke-width="1.2"/>
+    <text x="200" y="883" font-size="11.5" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">mgmt_log_event</text>
+    <text x="200" y="903" font-size="10.5" fill="#64748b" text-anchor="middle">who · what · when · action · snapshot</text>
+
+    <rect x="358" y="856" width="196" height="68" rx="8" fill="#ffffff" stroke="#db2777" stroke-width="1.2"/>
+    <text x="456" y="877" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="monospace">mgmt_ref_entity_type</text>
+    <text x="456" y="897" font-size="10.5" fill="#64748b" text-anchor="middle">registry of all tables</text>
+    <text x="456" y="912" font-size="9.5" fill="#64748b" text-anchor="middle">FK from mgmt_log_event</text>
+
+    <rect x="572" y="856" width="162" height="68" rx="8" fill="#ffffff" stroke="#db2777" stroke-width="1.2"/>
+    <text x="653" y="883" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">API: /management/event-log</text>
+    <text x="653" y="903" font-size="10.5" fill="#64748b" text-anchor="middle">list + before/after diff</text>
+
+    <rect x="752" y="856" width="146" height="68" rx="8" fill="#ffffff" stroke="#db2777" stroke-width="1.2"/>
+    <text x="825" y="883" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">after_flush</text>
+    <text x="825" y="903" font-size="10.5" fill="#64748b" text-anchor="middle">auto-capture</text>
+  </g>
+
+  <!-- Arrow from all tiers to event logger -->
+  <path d="M 40,642 L 20,642 L 20,875 L 40,875" fill="none" stroke="#db2777" stroke-width="1.4" stroke-dasharray="6 3" marker-end="url(#arrow)"/>
+  <text x="10" y="760" font-size="11" font-weight="600" fill="#9d174d" writing-mode="tb">all changes logged</text>
 </svg>

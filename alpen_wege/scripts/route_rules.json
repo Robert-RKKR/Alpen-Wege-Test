@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {"old": "/api/v1/management", "new": "/api/v1/management", "step": 0},
+
+    {"old": "/api/v1/countries",   "new": "/api/v1/compendium/countries",   "step": 1},
+    {"old": "/api/v1/regions",     "new": "/api/v1/compendium/regions",     "step": 1},
+    {"old": "/api/v1/pois",        "new": "/api/v1/compendium/pois",        "step": 1},
+    {"old": "/api/v1/cards",       "new": "/api/v1/compendium/cards",       "step": 1},
+    {"old": "/api/v1/posts",       "new": "/api/v1/compendium/posts",       "step": 1},
+    {"old": "/api/v1/poi-regions", "new": "/api/v1/compendium/poi-regions", "step": 1},
+    {"old": "/api/v1/gear",        "new": "/api/v1/explorer/gear",          "step": 1},
+    {"old": "/api/v1/tracks",      "new": "/api/v1/explorer/tracks",        "step": 1},
+
+    {"old": "/api/v1/ref",                 "new": "/api/v1/core",                 "step": 2},
+    {"old": "/api/v1/auth/resource-types", "new": "/api/v1/core/resource-types",  "step": 2},
+
+    {"old": "/api/v1/auth",                 "new": "/api/v1/profile/auth",            "step": 3},
+    {"old": "/api/v1/auth/access-policies", "new": "/api/v1/profile/access-policies", "step": 3},
+    {"old": "/api/v1/users",                "new": "/api/v1/profile/users",           "step": 3},
+
+    {"old": "/api/v1/jobs", "new": "/api/v1/management/my-jobs", "step": 4},
+    {"old": "/api/v1/ws",   "new": "/api/v1/management/ws",      "step": 4}
+  ]
+}

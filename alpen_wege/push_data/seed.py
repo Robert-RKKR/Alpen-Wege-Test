@@ -227,6 +227,31 @@ def main():
     for t in LOAD_ORDER:
         load_table(cur, t)
 
+    print("\n3) Marking transport and parking types as non-collectable ...")
+    non_collectable = (
+        "Bus Stop", "Train Station", "Tram", "Cable Car Station",
+        "Gondola Station", "Chair Lift", "Funicular Station", "Rack Railway",
+        "Mountain Railway", "Ferry Crossing", "Multi transport station",
+        "Multi transport station (Bus/Cable Car)",
+        "Multi transport station (Tram/Bus)", "Parking", "Lake Harbor",
+        "Helipad",
+    )
+    cur.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_name = 'core_ref_compendium_type' AND column_name = 'is_collectable'"
+    )
+    if cur.fetchone():
+        placeholders = ", ".join(["%s"] * len(non_collectable))
+        cur.execute(
+            f"UPDATE core_ref_compendium_type SET is_collectable = false "
+            f"WHERE name IN ({placeholders})",
+            non_collectable,
+        )
+        conn.commit()
+        print(f"  Set {cur.rowcount} types to non-collectable")
+    else:
+        print("  is_collectable column not present yet — skipped")
+
     cur.close()
     conn.close()
     print("\nDone!")

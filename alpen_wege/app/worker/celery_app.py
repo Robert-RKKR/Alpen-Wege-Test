@@ -14,6 +14,13 @@ celery_app = Celery(
     "alpen_wege",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
+    include=[
+        "app.worker.tasks.cleanup",
+        "app.worker.tasks.stats",
+        "app.worker.tasks.track_processing",
+        "app.worker.tasks.track_detection",
+        "app.worker.tasks.management",
+    ],
 )
 
 # Runtime config: JSON (de)serialization, UTC scheduling, and the periodic beat
@@ -25,6 +32,8 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_track_started=True,
+    worker_prefetch_multiplier=1,
+    worker_max_tasks_per_child=50,
     beat_schedule={
         "cleanup-orphaned-comments-daily": {
             "task": "app.worker.tasks.cleanup.cleanup_orphaned_comments",
@@ -33,6 +42,18 @@ celery_app.conf.update(
         "log-active-users-hourly": {
             "task": "app.worker.tasks.stats.log_active_users",
             "schedule": crontab(minute=0),
+        },
+        "reap-stuck-tracks": {
+            "task": "tracks.reap_stuck",
+            "schedule": crontab(minute="*/2"),
+        },
+        "mgmt-cleanup-retention-daily": {
+            "task": "mgmt.cleanup_retention",
+            "schedule": crontab(hour=3, minute=30),
+        },
+        "mgmt-reap-stale-jobs": {
+            "task": "mgmt.reap_stale_jobs",
+            "schedule": crontab(minute="*/15"),
         },
     },
 )

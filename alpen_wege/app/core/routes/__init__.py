@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from .ref import routers as ref_routers
+from . import resource_type
+from .ref import router as ref_router
 
-router = APIRouter(prefix="/ref")
-for r in ref_routers:
-    router.include_router(r)
+router = APIRouter(prefix="/core")
+router.include_router(ref_router)
+router.include_router(resource_type.router)
