@@ -2,11 +2,13 @@ from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_deleted
 from app.core.utils.responses import ApiResponse, ok
 from app.profile.permissions import resource_access, AccessContext, check_object_access
+from app.compendium.cards.service import remove_files
 from app.compendium.models.models_cat.card import CompendiumCatCard
 
 from ._router import router
@@ -23,4 +25,5 @@ async def delete_card(
     log_deleted(db, obj, access.user.id)
     await db.delete(obj)
     await db.commit()
+    await run_in_threadpool(remove_files, card_id)
     return ok(None, message="Deleted")

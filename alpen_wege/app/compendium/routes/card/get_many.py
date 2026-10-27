@@ -18,7 +18,7 @@ from ._router import router
 from ._shared import EAGER
 
 M = CompendiumCatCard
-SORT = {"name": M.name, "created_at": M.created_at, "updated_at": M.updated_at}
+SORT = {"name": M.name, "card_number": M.card_number, "created_at": M.created_at, "updated_at": M.updated_at}
 
 
 class CardFilters:
@@ -28,12 +28,18 @@ class CardFilters:
         rarity_id: list[UUID] | None = ids_query("Rarity"),
         compendium_type_id: list[UUID] | None = ids_query("POI type of the card"),
         poi_id: UUID | None = Query(None, description="Cards of this POI."),
+        difficulty_level_id: list[UUID] | None = ids_query("Difficulty level"),
+        difficulty_sport_id: list[UUID] | None = ids_query("Sport difficulty grade"),
+        render_status: str | None = Query(None, description="State of the card files: pending, rendering, done or failed."),
         created_by: UUID | None = Query(None, description="Cards created by this user."),
     ):
         self.q = q
         self.rarity_id = rarity_id
         self.compendium_type_id = compendium_type_id
         self.poi_id = poi_id
+        self.difficulty_level_id = difficulty_level_id
+        self.difficulty_sport_id = difficulty_sport_id
+        self.render_status = render_status
         self.created_by = created_by
 
     def apply(self, stmt):
@@ -43,6 +49,9 @@ class CardFilters:
             one_of(M.rarity_id, self.rarity_id),
             one_of(M.compendium_type_id, self.compendium_type_id),
             equals(M.poi_id, self.poi_id),
+            one_of(M.difficulty_level_id, self.difficulty_level_id),
+            one_of(M.difficulty_sport_id, self.difficulty_sport_id),
+            equals(M.render_status, self.render_status),
             equals(M.created_by, self.created_by),
         )
 

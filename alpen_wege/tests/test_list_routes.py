@@ -54,8 +54,9 @@ LIST_ROUTES.update({
     "/api/v1/compendium/regions": (P1000, "name", ["name", "created_at", "updated_at"], (
         "q", "country_id", "region_type_id", "parent_id", "created_by", "bbox")),
     "/api/v1/compendium/countries": (P1000, "name", ["name", "iso_code", "created_at"], ("q", "iso_code", "created_by")),
-    "/api/v1/compendium/cards": (P1000, "name", ["name", "created_at", "updated_at"], (
-        "q", "rarity_id", "compendium_type_id", "poi_id", "created_by")),
+    "/api/v1/compendium/cards": (P1000, "name", ["name", "card_number", "created_at", "updated_at"], (
+        "q", "rarity_id", "compendium_type_id", "poi_id", "difficulty_level_id", "difficulty_sport_id", "render_status",
+        "created_by")),
     "/api/v1/compendium/posts": (P1000, "name", ["name", "created_at", "updated_at"], ("q", "post_type_id", "created_by")),
     "/api/v1/compendium/poi-regions": (P1000, "slot_position", ["slot_position", "created_at"], ("poi_id", "region_id", "created_by")),
     "/api/v1/explorer/gear": (P1000, "-created_at", ["name", "created_at", "weight_g"], (
@@ -290,6 +291,8 @@ def _sample(name: str, annotation):
         return "own"
     if name in ("status", "processing_status"):
         return "ready" if name == "processing_status" else "queued"
+    if name == "render_status":
+        return "done"
     if name == "bbox":
         return "7,46,8,47"
     if name == "near":

@@ -54,6 +54,15 @@ def enqueue_reprocess_track(track_id: UUID, job_id: UUID | None = None) -> None:
     )
 
 
+def enqueue_render_card(card_id: UUID, job_id: UUID | None = None) -> None:
+    celery_app.send_task(
+        "cards.render",
+        args=[str(card_id)],
+        task_id=str(job_id) if job_id else None,
+        ignore_result=True,
+    )
+
+
 def enqueue_rescan_poi(poi_id: UUID, job_id: UUID | None = None) -> None:
     celery_app.send_task(
         "tracks.rescan_poi",

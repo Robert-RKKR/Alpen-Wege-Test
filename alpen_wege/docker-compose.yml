@@ -42,6 +42,8 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-change-in-prod}
       GPX_STORAGE_DIR: /data/gpx
+      CARD_STORAGE_DIR: /data/cards
+      PHOTO_STORAGE_DIR: /data/photos
     ports:
       - "8000:8000"
     depends_on:
@@ -53,6 +55,8 @@ services:
     volumes:
       - .:/app
       - gpx_data:/data/gpx
+      - card_data:/data/cards
+      - photo_data:/data/photos
 
   celery-worker:
     build:
@@ -66,6 +70,8 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       GPX_STORAGE_DIR: /data/gpx
+      CARD_STORAGE_DIR: /data/cards
+      PHOTO_STORAGE_DIR: /data/photos
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,8 +80,12 @@ services:
     command: celery -A app.worker.celery_app worker --loglevel=info --beat
     volumes:
       - gpx_data:/data/gpx
+      - card_data:/data/cards
+      - photo_data:/data/photos
 
 volumes:
   pgdata:
   redisdata:
   gpx_data:
+  card_data:
+  photo_data:

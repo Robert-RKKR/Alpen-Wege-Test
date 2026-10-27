@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     POI_DETECTION_REQUIRES_TIMESTAMPS: bool = True
     RESCAN_LOCK_SECONDS: int = 1860
 
+    # Collectible card graphics
+    CARD_STORAGE_DIR: str = "/data/cards"        # generated files: {card_id}/{lang}.{svg,png,jpg,pdf}
+    PHOTO_STORAGE_DIR: str = "/data/photos"      # asset_agg_photo.path is relative to this directory
+    CARD_FOOTER: str = "Alpen Wege"              # small text at the bottom right of every card
+
     # Planned hierarchy: segments, routes, journeys
     SEGMENT_GPX_MAX_UPLOAD_MB: int = 5          # a planned trail is small; processed inside the request
     SEGMENT_DRAW_MAX_POINTS: int = 5000         # points of one drawn segment

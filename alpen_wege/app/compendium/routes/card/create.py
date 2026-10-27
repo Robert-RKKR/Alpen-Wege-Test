@@ -1,16 +1,17 @@
 from fastapi import Depends, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_created
-from app.core.utils.responses import ApiResponse, ok
+from app.core.utils.responses import ApiResponse, AppError, ok
 from app.profile.permissions import resource_access, AccessContext
 from app.compendium.models.models_cat.card import CompendiumCatCard
 from app.compendium.schemas.card import CardCreate, CardRead
 
 from ._router import router
-from ._shared import EAGER
+from ._shared import EAGER, queue_render_quietly
 
 
 @router.post("", response_model=ApiResponse[CardRead], status_code=status.HTTP_201_CREATED)
@@ -21,9 +22,14 @@ async def create_card(
 ):
     obj = CompendiumCatCard(**body.model_dump(exclude_unset=True), created_by=access.user.id)
     db.add(obj)
-    await db.flush()
+    try:
+        await db.flush()
+    except IntegrityError:
+        await db.rollback()
+        raise AppError(409, "Card number already used.", error_errors=[{"field": "body.card_number", "message": "already used"}])
     log_created(db, obj, access.user.id)
     await db.commit()
+    await queue_render_quietly(db, obj.id, access.user.id)
     stmt = (
         select(CompendiumCatCard)
         .where(CompendiumCatCard.id == obj.id)

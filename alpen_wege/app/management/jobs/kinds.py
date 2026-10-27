@@ -3,6 +3,7 @@ class JobKind:
     TRACK_REPROCESS = "track.reprocess"
     POI_RESCAN = "poi.rescan"
     CARD_RESCAN = "card.rescan"
+    CARD_RENDER = "card.render"
     DEMO = "demo"
 
 
@@ -12,6 +13,7 @@ TASK_NAME = {
     JobKind.TRACK_REPROCESS: "tracks.reprocess",
     JobKind.POI_RESCAN: "tracks.rescan_poi",
     JobKind.CARD_RESCAN: "tracks.rescan_card",
+    JobKind.CARD_RENDER: "cards.render",
     JobKind.DEMO: "mgmt.demo_job",
 }
 

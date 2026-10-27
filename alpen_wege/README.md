@@ -48,6 +48,9 @@ Swagger UI is available at **http://localhost:8000/docs**.
 | `CELERY_RESULT_BACKEND`| `redis://localhost:6379/1`     |                                |
 | `JWT_SECRET_KEY`       | `change-me-in-production`      | **must** be changed for prod   |
 | `JWT_EXPIRE_MINUTES`   | `5`                            | access token lifetime          |
+| `CARD_STORAGE_DIR`     | `/data/cards`                  | generated card files           |
+| `PHOTO_STORAGE_DIR`    | `/data/photos`                 | `asset_agg_photo.path` is relative to it |
+| `CARD_FOOTER`          | `Alpen Wege`                   | small text at the bottom of every card |
 
 ---
 
@@ -235,7 +238,7 @@ Shared geographic / editorial catalog. List endpoints return their nested object
 | DELETE | `/compendium/countries/{id}`             | Delete (204)         |
 | POST   | `/compendium/countries/upload-csv`       | Bulk import from CSV |
 
-Same pattern for: `/compendium/regions`, `/compendium/pois`, `/compendium/cards`, `/compendium/posts`, `/compendium/poi-regions`. `POST /compendium/pois/{id}/rescan` and `POST /compendium/cards/{id}/rescan` start a rescan job (see the jobs section below).
+Same pattern for: `/compendium/regions`, `/compendium/pois`, `/compendium/cards`, `/compendium/posts`, `/compendium/poi-regions`. `POST /compendium/pois/{id}/rescan` and `POST /compendium/cards/{id}/rescan` start a rescan job (see the jobs section below). Card graphics: see "Collectible cards" below.
 
 **Create country example** (with GeoJSON location):
 
@@ -296,6 +299,51 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
   "..."
 }
 ```
+
+### Collectible cards (graphics)
+
+A card is the printable picture of a POI, 63×88 mm (trading-card size) with 3 mm bleed. The front shows the
+order number, the flag of every country the POI lies in (main region first, then `compendium/poi-regions` by
+`slot_position`), the main photo, the name, region and country, the type, the altitude, the difficulty (only
+when set) and the description; the rarity sets the colour of the frame (Legendary and Mythic get a holographic one).
+
+| Card shows | Taken from (card value first, then the POI) |
+|---|---|
+| `No 013` | `card.card_number`: unique, assigned automatically; can be given on create, update or CSV to keep the number of an old printed card |
+| Name, description | `card.name*` / `card.description*` → `card.summary*` → `poi.name*` / `poi.description*` → `poi.summary*` |
+| Type | `card.compendium_type_id` → `poi.compendium_type_id` |
+| Photo | `card.main_photo_id` → `poi.main_photo_id`; without one a placeholder in the rarity colour |
+| Flags, country, region | `poi.main_region` → country, plus the regions in `compendium/poi-regions` |
+| Altitude | `poi.altitude_m` |
+| Difficulty | `card.difficulty_sport_id` (shown short: `SAC T3`) or else `card.difficulty_level_id`; nothing when both are empty |
+| Frame colour | `card.rarity_id` → `core_ref_rarity.color` |
+
+German and Polish fall back to English per field.
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/compendium/cards/{id}/render?format=svg&lang=en` | The card. `format`: `json` (the render model: every value on the card, translated, for your own front end), `svg`, `png` (300 dpi), `jpg` (300 dpi), `pdf` (print). `lang`: `en`, `de`, `pl`. `download=true` saves instead of showing |
+| POST | `/compendium/cards/{id}/render` | Render the stored files again (job, `202` with `job_id`; `409` when one is already queued or running) |
+
+Creating or changing a card queues a `card.render` job automatically (follow it like any job, see below). It writes
+`svg`, `png` and `pdf` in the three languages to `CARD_STORAGE_DIR/{card_id}/{lang}.{format}` and sets
+`render_status` (`pending`, `rendering`, `done`, `failed`), `render_version` and `rendered_at` on the card. `GET .../render`
+serves those files while they are up to date; when the card, its POI or a reference value changed since (or the
+template is newer), the card is drawn on the spot, so the answer is always current. Deleting a card deletes its files.
+The list takes `sort=card_number` and the filters `difficulty_level_id`, `difficulty_sport_id` and `render_status`.
+
+```bash
+# print-ready PDF of card 013 in German
+curl -H "Authorization: Bearer $TOKEN" -o card-013.pdf \
+  "http://localhost:8000/api/v1/compendium/cards/<card-uuid>/render?format=pdf&lang=de"
+```
+
+The design is one Jinja2 SVG template, `app/compendium/cards/templates/card.svg.j2`; text is wrapped and sized in
+`app/compendium/cards/render.py` with the metrics of the bundled Inter font. After changing the template or the
+layout, raise `TEMPLATE_VERSION` in `render.py`: every card then counts as stale and is drawn fresh until it is rendered again.
+Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT), font: [Inter](https://rsms.me/inter/) (SIL OFL), both in `app/compendium/cards/`.
+
+Database change: `scripts/sql/card_render_ddl.sql`.
 
 ### Expanding linked objects (`?expand=`)
 
@@ -505,6 +553,7 @@ app/
 │   ├── schemas/
 │   └── utils/             # event_logger.py, seed_entity_types.py
 ├── compendium/            # Geographic / editorial catalog
+│   ├── cards/             # card graphics: render.py, service.py, templates/card.svg.j2, fonts/, flags/
 │   ├── models/
 │   │   ├── models_cat/    # Country, Region, POI, Card, Post
 │   │   └── models_m2m/    # PoiRegion
@@ -525,8 +574,8 @@ app/
 
 ## Jobs, WebSocket and management
 
-Work that runs in the background (GPX processing, POI and card rescans) is tracked as a **job**.
-`POST /explorer/tracks`, `POST /explorer/tracks/{id}/reprocess`, `POST /compendium/pois/{id}/rescan` and `POST /compendium/cards/{id}/rescan`
+Work that runs in the background (GPX processing, POI and card rescans, card rendering) is tracked as a **job**.
+`POST /explorer/tracks`, `POST /explorer/tracks/{id}/reprocess`, `POST /compendium/pois/{id}/rescan`, `POST /compendium/cards/{id}/rescan` and `POST /compendium/cards/{id}/render`
 answer `202` with a `job_id` (and a `Location: /api/v1/management/my-jobs/{job_id}` header). The job id is also the Celery task id.
 
 | Endpoint | Who | Purpose |

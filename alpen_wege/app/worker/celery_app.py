@@ -20,6 +20,7 @@ celery_app = Celery(
         "app.worker.tasks.track_processing",
         "app.worker.tasks.track_detection",
         "app.worker.tasks.management",
+        "app.worker.tasks.card_render",
     ],
 )
 
