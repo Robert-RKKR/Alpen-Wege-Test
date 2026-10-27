@@ -3,7 +3,7 @@ import uuid
 
 # Third-party
 from sqlalchemy import ForeignKey, Integer, REAL, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
 from app.core.base import (
@@ -101,27 +101,33 @@ class ExplorerAggRoute(
             "requirements (equipment, permits, best months) for this route."
         ),
     )
-    sport_type_id: Mapped[uuid.UUID] = mapped_column(
+    sport_type_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("core_ref_sport_type.id"),
-        nullable=False,
         comment=(
             "FK to core_ref_sport_type. The primary sport activity for this "
-            "route (e.g. hiking, trail running)."
+            "route (e.g. hiking, trail running). NULL while the route has no "
+            "segments (draft); set from the segments on the first save and "
+            "never overwritten afterwards."
         ),
     )
-    difficulty_level_id: Mapped[uuid.UUID] = mapped_column(
+    difficulty_level_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("core_ref_difficulty_level.id"),
-        nullable=False,
         comment=(
             "FK to core_ref_difficulty_level. General difficulty "
-            "classification for this route. Required."
+            "classification for this route. NULL while unknown; derived from "
+            "the segment with the highest rank when empty."
         ),
     )
-    difficulty_sport_id: Mapped[uuid.UUID] = mapped_column(
+    difficulty_sport_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("core_ref_difficulty_sport.id"),
-        nullable=False,
         comment=(
             "FK to core_ref_difficulty_sport. Sport-specific difficulty "
-            "grading for this route. Required."
+            "grading for this route. NULL while unknown; derived from the "
+            "highest-ranked grade of the segments of the primary sport when "
+            "empty."
         ),
     )
+
+    sport_type = relationship("CoreRefSportType", foreign_keys=[sport_type_id], lazy="raise", viewonly=True)
+    difficulty_level = relationship("CoreRefDifficultyLevel", foreign_keys=[difficulty_level_id], lazy="raise", viewonly=True)
+    difficulty_sport = relationship("CoreRefDifficultySport", foreign_keys=[difficulty_sport_id], lazy="raise", viewonly=True)

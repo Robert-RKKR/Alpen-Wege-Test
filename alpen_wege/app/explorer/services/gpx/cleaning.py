@@ -19,7 +19,7 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         math.sin(dphi / 2) ** 2
         + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2) ** 2
     )
-    return 2 * R_EARTH * math.asin(math.sqrt(a))
+    return 2 * R_EARTH * math.asin(math.sqrt(min(1.0, a)))
 
 
 def haversine_vec(

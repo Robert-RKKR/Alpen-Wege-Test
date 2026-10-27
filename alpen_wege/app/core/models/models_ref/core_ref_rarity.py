@@ -6,10 +6,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
-from app.core.base import Base, ReferenceWithFactorMixin
+from app.core.base import Base, ReferenceWithRankMixin
 
 
-class CoreRefRarity(Base, ReferenceWithFactorMixin):
+class CoreRefRarity(Base, ReferenceWithRankMixin):
     __tablename__ = "core_ref_rarity"
 
     id: Mapped[uuid.UUID] = mapped_column(

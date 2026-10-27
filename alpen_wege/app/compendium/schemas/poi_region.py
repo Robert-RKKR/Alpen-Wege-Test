@@ -3,8 +3,10 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from app.compendium.schemas.poi import PoiSlimRead
-from app.compendium.schemas.region import RegionSlimRead
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.compendium.schemas.poi import PoiDetail, PoiSlimRead
+from app.compendium.schemas.region import RegionDetail, RegionSlimRead
 
 
 class PoiRegionCreate(BaseModel):
@@ -31,3 +33,9 @@ class PoiRegionRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class PoiRegionDetail(PoiRegionRead):
+    poi: PoiDetail | None = Link()
+    region: RegionDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

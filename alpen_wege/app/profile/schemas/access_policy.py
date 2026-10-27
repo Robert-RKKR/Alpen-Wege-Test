@@ -5,6 +5,9 @@ from uuid import UUID
 # Third-party
 from pydantic import BaseModel, ConfigDict
 
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+
 
 # --- Resource Type ---
 
@@ -42,6 +45,10 @@ class ResourceTypeRead(BaseModel):
     updated_at: datetime
 
 
+class ResourceTypeDetail(ResourceTypeRead):
+    created_by_user: ExpandedUser | None = Link("created_by")
+
+
 # --- Access Policy ---
 
 
@@ -66,6 +73,10 @@ class AccessPolicyRead(BaseModel):
     scope: str
     created_at: datetime
     updated_at: datetime
+
+
+class AccessPolicyDetail(AccessPolicyRead):
+    resource_type: ResourceTypeDetail | None = Link()
 
 
 class AccessPolicyReadWithKey(AccessPolicyRead):

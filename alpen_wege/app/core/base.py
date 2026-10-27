@@ -3,12 +3,13 @@ import uuid
 from datetime import datetime
 
 # Third-party
-from sqlalchemy import Boolean, DateTime, ForeignKey, REAL, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, REAL, SmallInteger, Text, func
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     declared_attr,
     mapped_column,
+    relationship,
 )
 
 
@@ -71,6 +72,17 @@ class CreatorMixin:
                 "UUID of the user who originally created this record. "
                 "References profile_usr_user.id and is required (NOT NULL)."
             ),
+        )
+
+    @declared_attr
+    def created_by_user(cls):
+        # Read-only link to the creating user, loaded only when a GET asks for ?expand=created_by.
+        # lazy="raise" blocks accidental loads; viewonly keeps it out of every save.
+        return relationship(
+            "ProfileUsrUser",
+            foreign_keys=f"{cls.__name__}.created_by",
+            lazy="raise",
+            viewonly=True,
         )
 
 
@@ -197,5 +209,23 @@ class ReferenceWithFactorMixin(ReferenceBaseMixin):
         comment=(
             "Numeric multiplier applied when calculating gamification points "
             "for entities associated with this reference type."
+        ),
+    )
+
+
+class ReferenceWithRankMixin(ReferenceWithFactorMixin):
+    """Extends ReferenceWithFactorMixin with rank: the place of the value on
+    the scale of its table (difficulty level, rarity, visibility, ...)."""
+
+    rank: Mapped[int] = mapped_column(
+        SmallInteger,
+        nullable=False,
+        comment=(
+            "Position of this value on the scale of its table. A higher "
+            "number means harder, rarer or worse. Equal numbers are allowed "
+            "(equivalent values). For difficulty_sport the scale is per "
+            "sport_type_id: only grades of the same sport type can be "
+            "compared. Used to find the hardest value, for example the "
+            "difficulty of a route."
         ),
     )

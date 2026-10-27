@@ -4,6 +4,8 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.core.schemas.geo import GeoPoint, GeoPointField
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
 
 
 class CountryCreate(BaseModel):
@@ -100,3 +102,7 @@ class CountryRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class CountryDetail(CountryRead):
+    created_by_user: ExpandedUser | None = Link("created_by")

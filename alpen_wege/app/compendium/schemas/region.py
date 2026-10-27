@@ -4,8 +4,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.core.schemas.geo import GeoPoint, GeoPointField, GeoPolygon, GeoPolygonField
-from app.core.schemas.ref import RefWithFactorRead
-from app.compendium.schemas.country import CountrySlimRead
+from app.core.schemas.ref import RefWithFactorDetail, RefWithFactorRead
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.compendium.schemas.country import CountryDetail, CountrySlimRead
 
 
 class RegionCreate(BaseModel):
@@ -78,3 +80,10 @@ class RegionRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class RegionDetail(RegionRead):
+    country: CountryDetail | None = Link()
+    region_type: RefWithFactorDetail | None = Link()
+    parent: "RegionDetail | None" = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

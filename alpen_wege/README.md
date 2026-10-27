@@ -137,6 +137,36 @@ User-scoped — each user sees only their own gear.
 | DELETE | `/explorer/gear/{id}`            | Delete (204)         |
 | POST   | `/explorer/gear/upload-csv`      | Bulk import from CSV |
 
+### Segments and routes (explorer)
+
+A **segment** is a piece of trail with its own geometry (distance, elevation, GeoJSON line, elevation profile, start and end point). It never changes after it is made: to change the geometry, make a new segment. A **route** is an ordered chain of segments (one day). Each slot of the route has one default segment and optional alternatives; a segment can be walked reversed. A route's totals (distance, ascent, descent, highest, lowest point) come from its default segments. Journeys (several routes) are not built yet.
+
+Who sees what: your own segments and routes and the public ones (the role's access policy decides; an administrator sees all). Anything you may not see answers `404`. New segments are private; publishing a route (`is_public: true`) publishes its own segments with it; a segment or route that another user's route or journey (or a public route) uses cannot be deleted or made private (`409`).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET    | `/explorer/segments` | List. Filters: `q`, `sport_type_id`, `difficulty_level_id`, `difficulty_sport_id`, `created_by`, `is_public`, `unused`, `start_poi_id`, `end_poi_id`, `distance_min/max`, `elevation_gain_min/max`, `near=lon,lat` with `radius_m` (segments that start or end near a point); `sort`: `name`, `created_at`, `updated_at`, `distance_m`, `elevation_gain_m` |
+| POST   | `/explorer/segments` | Create from a GPX file (multipart: `gpx_file`, `name`, `sport_type_id`, ...). Times, heart rate and cadence are dropped and the file is not kept. At most `SEGMENT_GPX_MAX_UPLOAD_MB` (5) |
+| POST   | `/explorer/segments/from-coordinates` | Create from drawn points `[[lon, lat, ele?], ...]` (2 to 5000 points) |
+| POST   | `/explorer/segments/from-track` | Create from a part of one of your own tracks (`track_id`, `start_distance_m`, `end_distance_m`) |
+| GET    | `/explorer/segments/{id}` | One segment (`?expand=sport_type,difficulty_level,difficulty_sport,start_poi,end_poi,created_by`) |
+| GET    | `/explorer/segments/{id}/geometry` | GeoJSON line, elevation profile, start and end location |
+| PATCH  | `/explorer/segments/{id}` | Metadata only (name, texts, sport, difficulty, POIs, `is_public`) |
+| DELETE | `/explorer/segments/{id}` | `409` while a route uses it |
+| GET    | `/explorer/routes` | List. Filters: `q`, `sport_type_id`, `difficulty_level_id`, `difficulty_sport_id`, `created_by`, `is_public`, `distance_min/max`, `elevation_gain_min/max`; `sort`: `name`, `created_at`, `updated_at`, `agg_distance_m`, `agg_elevation_gain_m`, `rating_avg` |
+| POST   | `/explorer/routes` | Create the route itself, a draft without segments (name, texts, optional `plan_conditions`) |
+| GET    | `/explorer/routes/{id}` | The route with its segment rows, `sport_types`, `derived` and `classification_differs` (`?expand=sport_type,difficulty_level,difficulty_sport,created_by`) |
+| PUT    | `/explorer/routes/{id}/segments` | **Replace the segment list** (see below) |
+| GET    | `/explorer/routes/{id}/segments` | The rows in slot order, the default of a slot first, as the route walks them |
+| POST   | `/explorer/routes/{id}/segments/validate` | The same checks as the save, without saving (a saved segment by id, an unsaved drawing by its first and last point) |
+| GET    | `/explorer/routes/{id}/geometry` | Map line and elevation profile of the default path, alternatives as separate lines |
+| PATCH  | `/explorer/routes/{id}` | Name, texts, `is_public`, sport and difficulty by hand, `plan_conditions` (only the fields sent) |
+| DELETE | `/explorer/routes/{id}` | The segments stay; `409` while a journey uses the route |
+
+**Saving the segments of a route** (`PUT /explorer/routes/{id}/segments`): the body is the complete list, `{"segments": [{"segment_id": "...", "slot_position": 0, "is_default": true, "is_reversed": false}, ...], "validation": "strict"}`. An item is an existing segment (`segment_id`) or a new one that is created in the same transaction (`inline`: drawn `coordinates`, or `track_id` with `start_distance_m` and `end_distance_m`), so drawing a trail and saving the route is one call; the answer lists the new ids in `created_segments` by position. The server checks: slots 0, 1, 2 ... without gaps, exactly one default per slot, `alt_group` (if sent) equal to the slot, at most 50 rows, and that neighbouring segments connect, which means the end of the default of slot N and the start of the default of slot N+1 (as walked, reversed segments swapped) are at most `CONTINUITY_THRESHOLD_M` (50 m) apart or at the same POI; every alternative must start and end where the default of its slot does. `validation: "strict"` answers `422` with the problems and saves nothing (not even the new segments); `"warn"` saves and returns them in `warnings`. Then the totals are recomputed, and an empty sport or difficulty on the route is filled from the segments: the sport with the most distance, the highest difficulty level (by `rank`), the highest grade of the main sport. A value that is already set (by hand) is never changed; `classification_differs` tells when it differs from what the segments give.
+
+Limits (settings): `SEGMENT_DRAW_MAX_POINTS` 5000 points per drawn segment, `ROUTE_SAVE_MAX_POINTS` 20000 drawn points per save, `ROUTE_MAX_SEGMENTS` 50 rows per route, elevations from -1000 to 10000 m (drawn points outside are refused, broken elevations in a GPX file are dropped with the warning `elevation_outliers_dropped`). A named `start_poi_id` or `end_poi_id` must be within 500 m of that end of the segment. Checks of everything above: `scripts/hierarchy_check.py` (live, see its header).
+
 ### Reference data (core_ref)
 
 19 lookup tables, all under `/core/`. Shared data (no ownership filter).
@@ -174,6 +204,8 @@ Each table supports the same 6 operations:
 | DELETE | `/core/{slug}/{id}`            | Delete (204)         |
 | POST   | `/core/{slug}/upload-csv`      | Bulk import from CSV |
 
+**Rank (four tables).** `difficulty-levels`, `difficulty-sports`, `rarities` and `visibilities` are scales and have one more required whole number, `rank` (0 to 1000): the place of the value on the scale, a higher number means harder, rarer or worse; equal numbers are allowed. It is used to find the hardest value, for example the difficulty of a route. For `difficulty-sports` the scale is per `sport_type_id` (only grades of the same sport type are comparable; UIAA and French grades share the climbing scale). Lists take `rank_min` and `rank_max` and `sort=rank`. The other reference tables have no rank. Create needs it (`422` without), Update leaves it unchanged when it is not sent, and a required field (`color`, `icon`, `point_factor`, `rank`) cannot be set to `null` (`422`).
+
 **Create example** (sport type):
 
 ```bash
@@ -192,7 +224,7 @@ curl -X POST http://localhost:8000/api/v1/core/sport-types \
 
 ### Compendium (catalog)
 
-Shared geographic / editorial catalog. GET endpoints return nested objects one level deep (FK IDs are accepted on create/update; full sub-objects come back on read).
+Shared geographic / editorial catalog. List endpoints return their nested objects one level deep. A single-object GET returns linked objects as IDs only; ask for the full objects with `?expand=` (see "Expanding linked objects" below). FK IDs are accepted on create/update.
 
 | Method | Path                          | Description          |
 |--------|-------------------------------|----------------------|
@@ -236,7 +268,7 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
   }'
 ```
 
-The GET response returns the full nested objects:
+`GET /api/v1/compendium/regions/{id}?expand=country,region_type` returns the nested objects:
 
 ```json
 {
@@ -264,6 +296,56 @@ The GET response returns the full nested objects:
   "..."
 }
 ```
+
+### Expanding linked objects (`?expand=`)
+
+A single-object GET (for example `/compendium/pois/{id}`, `/explorer/tracks/{id}`, `/core/rarities/{id}`,
+`/management/event-log/{id}`) returns every linked object as its ID only. Add `expand` with a comma-separated list of
+links to get the full object instead. The allowed names are in the description of the `expand` parameter of each
+endpoint in Swagger.
+
+```bash
+curl "http://localhost:8000/api/v1/compendium/pois/<id>?expand=main_region.country,compendium_type" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:8000/api/v1/explorer/tracks/<id>?expand=sport_type,start_poi,created_by" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:8000/api/v1/management/event-log/<id>?expand=changed_by,entity_type" -H "Authorization: Bearer $TOKEN"
+```
+
+| Rule | Detail |
+|------|--------|
+| Names | A link is asked for by name (`main_region`, `poi`, ...). `created_by`, `changed_by` and `updated_by` fill `created_by_user`, `changed_by_user` and `updated_by_user`; every other name fills the field of the same name |
+| Depth | Dotted paths go at most 3 levels deep (`main_region.country.created_by`); the parents of a path are included. One request may ask for at most 10 links in total |
+| Not asked | A link that is not asked for stays `null` next to its ID (`"main_region_id": "...", "main_region": null`); `null` also appears when the ID itself is empty |
+| Errors | An unknown name, a path deeper than 3 levels or more than 10 links answers `400`; `response_details.error_message` names the allowed links |
+| Who sees what | Whoever may read an object may see what is expanded inside it. Of a user behind `created_by`, `changed_by`, `updated_by` or `user` everybody sees `id` and `username`; the other profile fields (email, birth date, heart rates, ...) are `null` unless the caller is an administrator or that user himself |
+| Lists | List endpoints do not take `expand` and keep returning their nested objects |
+| Repeating | Write `?expand=a,b`; if the parameter is repeated only the last value counts |
+
+---
+
+### Lists: filters and sorting
+
+Every list endpoint (`GET /compendium/pois`, `/explorer/tracks`, `/core/rarities`, `/management/event-log`, ...) takes
+filters that fit its data and an optional `sort`. Paging works as it always did (`limit`, `offset`; the users list
+calls the offset `skip`). The filters of each endpoint are in Swagger.
+
+```bash
+curl "http://localhost:8000/api/v1/compendium/pois?q=bahnhof&altitude_min=1000&sort=-altitude_m" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:8000/api/v1/compendium/pois?near=8.54,47.37&radius_m=5000" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:8000/api/v1/compendium/pois?compendium_type_id=<id1>&compendium_type_id=<id2>&bbox=7,46,8,47" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:8000/api/v1/explorer/tracks?distance_min=10000&sport_type_id=<id>&sort=-distance_m" -H "Authorization: Bearer $TOKEN"
+```
+
+| Rule | Detail |
+|------|--------|
+| Paging | Unchanged: `limit` defaults to 1000 (100 on tracks, the event log, jobs and my jobs), `offset` skips rows (`skip` on the users list); tracks, jobs and my jobs allow at most 500 per call, the other lists have no maximum. `limit` or `offset` below 1 / 0 or above 1,000,000,000 answer `422` |
+| Counting | `response_pagination.pagination_total` counts the rows that match the filters, not the whole table |
+| Sorting | `sort=name` ascending, `sort=-name` descending, one field; the allowed names are in the description of `sort` in Swagger, an unknown name answers `422`. Rows without a value come last; equal values are ordered by `id`, so pages do not repeat or skip rows. Without `sort` each list keeps its old order |
+| Text search | `q` searches the name in English, German and Polish (and for some lists the summary, model or e-mail), not case sensitive, at least 2 characters (an empty `q` means no search); `%` and `_` are ordinary characters |
+| Values | A filter that names a row (`compendium_type_id`, `sport_type_id`, ...) takes one id or the same parameter several times (`compendium_type_id=a&compendium_type_id=b` means a or b), at most 50. Different filters are combined with AND. A text filter that is sent empty (`kind=`) counts as not given; an id, a number or a date has to be valid or left out. Ranges are `..._min` and `..._max` (both included, whole numbers between -1,000,000,000 and 1,000,000,000); dates are `..._from` (included) and `..._to` (not included), the year between 1900 and 2200; give a time zone (`2026-10-01T00:00:00Z`), without one the time zone of the database session applies |
+| Geography | `bbox=min_lon,min_lat,max_lon,max_lat` (west, south, east, north; plain decimals; a box over the 180th meridian has to be asked twice; on regions the area of the region has to touch the box, on POIs the point has to be inside) and, on POIs, `near=lon,lat` with `radius_m` (default 5000, at most 100000) |
+| Who sees what | The filters narrow the rows the caller may already see; they never widen them. A viewer who asks for `created_by=<someone>` still only gets what the access policy allows |
+| Unknown parameters | A parameter that a list does not know is ignored, as before (so check the spelling of a filter) |
+| Errors | An unknown `sort` name, a bad `bbox`, a one-character `q`, more than 50 ids, a number, date, `limit` or `offset` out of range or a NUL character answer `422`; `response_details.error_errors` names the field (`query.sort`, ...) and what is allowed |
 
 ---
 
@@ -316,6 +398,7 @@ If some rows fail, they are skipped and reported:
 | Geometry (WKT)  | `POINT(13.37 47.27)` or `POLYGON((10 47, 11 47, 11 48, 10 48, 10 47))`                  |
 | Geometry (pair)  | Use `location_lon` + `location_lat` columns instead of WKT for Point geometries         |
 | Empty cell      | Treated as `NULL`                                                                        |
+| Required columns| A column that is `NOT NULL` without a default (the table in Swagger shows them as **yes**, for example `rank` on the four scale tables) must be in the header, otherwise nothing is inserted and `errors` names the missing columns; a row with an empty required cell is reported (`row 3: missing value for rank`) and the other rows are still imported |
 
 ### Example CSV files
 
@@ -389,8 +472,9 @@ routes/
 - **File names are actions:** `get_many`, `get_one`, `create`, `update`, `delete`, `upload_csv`, and special ones (`rescan`, `geometry`, `restore`, `stats`, `compare`, ...). Several actions that belong together in one workflow still get one file each.
 - **`_router.py`** holds the one `APIRouter` object of the resource (for example the prefix `cards` and the tag `Compendium - Card`). Every endpoint file imports it and registers its function on it; `__init__.py` imports all endpoint files. Endpoint files never create their own router, because FastAPI refuses sub-routers with an empty path (the list and create endpoints).
 - **`post/` is the Post model** (editorial posts, `/compendium/posts`), not the HTTP method. The reference tables are written out like every other model, not generated.
-- Helpers used by several resources live in `app/core/utils/` (`scope.py`, `api_paths.py`); route files never import from other resources; URLs are never written as strings in route files (`api_paths.py` builds the `Location` header and names the upload path).
-- Check after any change to routes: `python scripts/route_map.py dump route_dumps/x.json`, then `compare` against an earlier dump, `probe` and `names` (see `scripts/route_map.py`); `tests/test_routes_standard.py` and `tests/test_api_paths.py` enforce the rules above.
+- **Single-object GETs take `?expand=`.** Their `get_one.py` uses a `*Detail` schema (next to the `*Read` schema, with `Link()` fields) and `plan: ExpandPlan = Depends(expand_plan(XDetail))` from `app/core/utils/expand.py`; `select(...).options(*plan.load_options(Model))` loads the asked links and `ok(plan.render(obj))` builds the answer. A new GET-by-id route must be added to `tests/test_expand_routes.py` (and its schema to `tests/test_expand_wiring.py`).
+- Helpers used by several resources live in `app/core/utils/` (`scope.py`, `api_paths.py`, `expand.py`); route files never import from other resources; URLs are never written as strings in route files (`api_paths.py` builds the `Location` header and names the upload path).
+- Check after any change to routes: `python scripts/route_map.py dump route_dumps/x.json`, then `compare` against an earlier dump, `probe` and `names` (see `scripts/route_map.py`); `tests/test_routes_standard.py` and `tests/test_api_paths.py` enforce the rules above; `python scripts/route_map.py compare BEFORE AFTER --expand` accepts exactly the changes of the expand option; `scripts/expand_check.py` is the live check of `?expand=` (needs the seeded users and compendium data).
 
 ---
 

@@ -56,3 +56,4 @@ class MgmtLogEvent(Base):
     )
 
     entity_type = relationship("MgmtRefEntityType", lazy="joined")
+    changed_by_user = relationship("ProfileUsrUser", foreign_keys=[changed_by], lazy="raise", viewonly=True)

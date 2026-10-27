@@ -1,0 +1,40 @@
+== payload and time per limit value (median of 7 requests)
+list            limit            rows       KB  KB gzip  median ms
+pois               10     10 of 20758       12        2         29
+pois               50     50 of 20758       60        4         31
+pois              100    100 of 20758      119        8         37
+pois              200    200 of 20758      240       16         47
+pois              500    500 of 20758      600       42         77
+pois             1000   1000 of 20758     1197       83        150
+pois             5000   5000 of 20758     6003      407        999
+pois            20758  20758 of 20758    24922     1694       3721
+regions            50      50 of 1570       68        5         27
+regions           100     100 of 1570      136        9         40
+regions           500     500 of 1570      680       39        113
+regions          1000    1000 of 1570     1355       77        364
+regions          2000    1570 of 1570     2128      120        475
+compendium-types    100      100 of 214       33        6         15
+compendium-types   1000      214 of 214       70       13         20
+countries         100      100 of 250       80       11         21
+countries         250      250 of 250      202       28         34
+
+== deep pages of pois (limit 100)
+offset      0: 100 of 20758, 28 ms
+offset   5000: 100 of 20758, 35 ms
+offset  10000: 100 of 20758, 39 ms
+offset  20000: 100 of 20758, 48 ms
+
+== odd values: status code of each list route (a 500 is a bug, 422 is the right answer)
+route                             limit=-1         limit=0   limit=1000000       limit=abc       offset=-5 offset=99999999
+/compendium/pois                       500       200/0r/L0200/20758r/L1000000             422             500    200/0r/L1000
+/compendium/regions                    500       200/0r/L0200/1570r/L1000000             422             500    200/0r/L1000
+/compendium/countries                  500       200/0r/L0200/250r/L1000000             422             500    200/0r/L1000
+/core/rarities                         500       200/0r/L0 200/6r/L1000000             422             500    200/0r/L1000
+/explorer/tracks                       500       200/0r/L0     200/0r/L500             422             500     200/0r/L100
+/explorer/gear                         500       200/0r/L0 200/0r/L1000000             422             500    200/0r/L1000
+/management/event-log                  500       200/0r/L0200/201r/L1000000             422             500     200/0r/L100
+/management/jobs                 200/1r/L1       200/1r/L1     200/6r/L500             422             500     200/0r/L100
+/management/my-jobs              200/1r/L1       200/1r/L1     200/6r/L500             422             500     200/0r/L100
+/profile/access-policies               500       200/0r/L0200/184r/L1000000             422             500    200/0r/L1000
+/profile/users/                        422             422 200/7r/L1000000             422             422    200/0r/L1000
+/core/resource-types                   500       200/0r/L0200/16r/L1000000             422             500    200/0r/L1000

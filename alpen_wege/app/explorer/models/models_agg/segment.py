@@ -3,7 +3,7 @@ import uuid
 
 # Third-party
 from sqlalchemy import ForeignKey, Integer, REAL, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
 from app.core.base import (
@@ -96,3 +96,9 @@ class ExplorerAggSegment(
             "grading (e.g. T1-T6 for hiking, WS for ski touring)."
         ),
     )
+
+    sport_type = relationship("CoreRefSportType", foreign_keys=[sport_type_id], lazy="raise", viewonly=True)
+    difficulty_level = relationship("CoreRefDifficultyLevel", foreign_keys=[difficulty_level_id], lazy="raise", viewonly=True)
+    difficulty_sport = relationship("CoreRefDifficultySport", foreign_keys=[difficulty_sport_id], lazy="raise", viewonly=True)
+    start_poi = relationship("CompendiumCatPoi", foreign_keys=[start_poi_id], lazy="raise", viewonly=True)
+    end_poi = relationship("CompendiumCatPoi", foreign_keys=[end_poi_id], lazy="raise", viewonly=True)

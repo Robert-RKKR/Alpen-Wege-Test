@@ -4,8 +4,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.core.schemas.geo import GeoPoint, GeoPointField
-from app.core.schemas.ref import RefWithFactorRead
-from app.compendium.schemas.region import RegionSlimRead
+from app.core.schemas.ref import CompendiumTypeDetail, RefWithFactorRead
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.compendium.schemas.region import RegionDetail, RegionSlimRead
 
 
 class PoiCreate(BaseModel):
@@ -80,3 +82,9 @@ class PoiRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class PoiDetail(PoiRead):
+    compendium_type: CompendiumTypeDetail | None = Link()
+    main_region: RegionDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

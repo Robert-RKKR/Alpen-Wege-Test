@@ -5,14 +5,15 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
 # Local application
 from app.core.dependencies import get_db
 from app.management.models.event_log import MgmtLogEvent
 from app.management.schemas.event_log import (
     EventLogCompare,
+    EventLogDetail,
 )
+from app.core.utils.expand import ExpandPlan, expand_plan
 from app.core.utils.responses import ApiResponse, AppError, ok
 from app.profile.permissions import require_groups
 from app.profile.models import ProfileUsrUser
@@ -25,6 +26,7 @@ async def compare_event_logs(
     id_1: UUID,
     id_2: UUID,
     _user: ProfileUsrUser = Depends(require_groups("administrator")),
+    plan: ExpandPlan = Depends(expand_plan(EventLogDetail)),
     db: AsyncSession = Depends(get_db),
 ):
     if id_1 == id_2:
@@ -32,7 +34,7 @@ async def compare_event_logs(
 
     res = await db.execute(
         select(MgmtLogEvent)
-        .options(joinedload(MgmtLogEvent.entity_type))
+        .options(*plan.load_options(MgmtLogEvent))
         .where(MgmtLogEvent.id.in_([id_1, id_2]))
     )
     found = {e.id: e for e in res.scalars().unique().all()}
@@ -76,23 +78,20 @@ async def compare_event_logs(
 
     changes = {f: c for f, c in net.items() if c["from"] != c["to"]}
 
-    def ref(e):
+    older_d, newer_d = plan.render(older, viewer=_user), plan.render(newer, viewer=_user)
+
+    def ref(d):
         return {
-            "id": e.id, "seq": e.seq, "action": e.action,
-            "changed_by": e.changed_by, "changed_at": e.changed_at,
-            "request_id": e.request_id,
+            "id": d["id"], "seq": d["seq"], "action": d["action"],
+            "changed_by": d["changed_by"], "changed_at": d["changed_at"],
+            "request_id": d["request_id"], "changed_by_user": d["changed_by_user"],
         }
 
-    et = older.entity_type
     return ok({
-        "entity_type": {
-            "id": et.id, "key": et.key, "display_name": et.display_name,
-            "module": et.module, "tracking_mode": et.tracking_mode,
-            "ignore_fields": et.ignore_fields,
-        },
+        "entity_type": older_d["entity_type"],
         "entity_id": older.entity_id,
-        "older": ref(older),
-        "newer": ref(newer),
+        "older": ref(older_d),
+        "newer": ref(newer_d),
         "events_between": len(rows) - 1,
         "changes": changes,
         "warnings": warnings,

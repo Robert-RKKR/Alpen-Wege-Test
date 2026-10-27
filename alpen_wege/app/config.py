@@ -60,6 +60,14 @@ class Settings(BaseSettings):
     POI_DETECTION_REQUIRES_TIMESTAMPS: bool = True
     RESCAN_LOCK_SECONDS: int = 1860
 
+    # Planned hierarchy: segments, routes, journeys
+    SEGMENT_GPX_MAX_UPLOAD_MB: int = 5          # a planned trail is small; processed inside the request
+    SEGMENT_DRAW_MAX_POINTS: int = 5000         # points of one drawn segment
+    ROUTE_SAVE_MAX_POINTS: int = 20000          # drawn points of all inline segments of one route save
+    ROUTE_MAX_SEGMENTS: int = 50                # segment rows (defaults and alternatives) of one route
+    CONTINUITY_THRESHOLD_M: float = 50.0        # two segment ends this close (or the same POI) are connected
+    JOURNEY_GAP_WARN_M: float = 500.0           # gap between two days of a journey that is worth a warning
+
     # Processing lifecycle
     STUCK_PENDING_MINUTES: int = 5
     STUCK_PROCESSING_MINUTES: int = 30

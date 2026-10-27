@@ -1,7 +1,7 @@
-id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
-06552841-a599-4c14-a7cf-92acca81fb05,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Common,Gewöhnlich,Pospolity,#95A5A6,rarity_common,1
-a2917c1d-c617-42e2-b918-c689e839781c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Uncommon,Ungewöhnlich,Niezbyt pospolity,#2ECC71,rarity_uncommon,1.5
-9bf9f918-baf6-4eeb-bc84-63c401548f97,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rare,Selten,Rzadki,#3498DB,rarity_rare,2
-69fa8d5f-0842-47d6-a577-ce1823c23634,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Epic,Episch,Epicki,#9B59B6,rarity_epic,3
-6ab0e147-5da7-43c6-9049-7dd7ea3967db,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Legendary,Legendär,Legendarny,#F1C40F,rarity_legendary,5
-25ed19ca-019a-4ec8-a9d1-60b65998904d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mythic,Mythisch,Mityczny,#C0392B,rarity_mythic,8
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor,rank
+06552841-a599-4c14-a7cf-92acca81fb05,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Common,Gewöhnlich,Pospolity,#95A5A6,rarity_common,1,1
+a2917c1d-c617-42e2-b918-c689e839781c,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Uncommon,Ungewöhnlich,Niezbyt pospolity,#2ECC71,rarity_uncommon,1.5,2
+9bf9f918-baf6-4eeb-bc84-63c401548f97,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Rare,Selten,Rzadki,#3498DB,rarity_rare,2,3
+69fa8d5f-0842-47d6-a577-ce1823c23634,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Epic,Episch,Epicki,#9B59B6,rarity_epic,3,4
+6ab0e147-5da7-43c6-9049-7dd7ea3967db,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Legendary,Legendär,Legendarny,#F1C40F,rarity_legendary,5,5
+25ed19ca-019a-4ec8-a9d1-60b65998904d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Mythic,Mythisch,Mityczny,#C0392B,rarity_mythic,8,6

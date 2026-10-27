@@ -3,8 +3,10 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.core.schemas.ref import RefWithFactorRead
-from app.compendium.schemas.poi import PoiSlimRead
+from app.core.schemas.ref import CompendiumTypeDetail, RefRankedDetail, RefRankedRead, RefWithFactorRead
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.compendium.schemas.poi import PoiDetail, PoiSlimRead
 
 
 class CardCreate(BaseModel):
@@ -52,7 +54,7 @@ class CardRead(BaseModel):
     id: UUID
     name: str | None
     rarity_id: UUID | None
-    rarity: RefWithFactorRead | None = None
+    rarity: RefRankedRead | None = None
     compendium_type_id: UUID | None
     compendium_type: RefWithFactorRead | None = None
     poi_id: UUID
@@ -69,3 +71,10 @@ class CardRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class CardDetail(CardRead):
+    rarity: RefRankedDetail | None = Link()
+    compendium_type: CompendiumTypeDetail | None = Link()
+    poi: PoiDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

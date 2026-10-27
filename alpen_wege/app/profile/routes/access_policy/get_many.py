@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local application
 from app.core.dependencies import get_db
+from app.core.utils.listing import Page, Sort, equals, page_params, sort_params, where_all
 from app.core.utils.responses import ApiResponse, ok_list
 from app.profile.permissions import require_groups
 from app.core.models.resource_type import CoreRefResourceType
@@ -16,33 +17,47 @@ from app.profile.models import ProfileUsrUser
 
 from ._router import router
 
+M = ProfileAccessPolicy
+R = CoreRefResourceType
+SORT = {"group": M.user_group, "resource_key": R.key, "action": M.action}
+
+
+class AccessPolicyFilters:
+    def __init__(
+        self,
+        group: str | None = Query(
+            None, pattern="^(administrator|editor|viewer|guest)?$", description="administrator, editor, viewer or guest."
+        ),
+        resource_key: str | None = Query(None, description="Resource key, for example poi or track."),
+        action: str | None = Query(None, pattern="^(create|read|update|delete)?$", description="create, read, update or delete."),
+        scope: str | None = Query(None, pattern="^(own|public|all)?$", description="own, public or all."),
+    ):
+        self.group = group
+        self.resource_key = resource_key
+        self.action = action
+        self.scope = scope
+
+    def apply(self, stmt):
+        return where_all(
+            stmt,
+            equals(M.user_group, self.group),
+            equals(R.key, self.resource_key),
+            equals(M.action, self.action),
+            equals(M.scope, self.scope),
+        )
+
 
 @router.get("", response_model=ApiResponse[list[AccessPolicyReadWithKey]])
 async def list_access_policies(
-    limit: int = 1000,
-    offset: int = 0,
-    group: str | None = Query(None),
-    resource_key: str | None = Query(None),
     _admin: ProfileUsrUser = Depends(require_groups("administrator")),
+    page: Page = Depends(page_params()),
+    sort: Sort = Depends(sort_params(SORT, "group", (R.key, M.action, M.id))),   # the old order: group, key, action
+    filters: AccessPolicyFilters = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
-    base = select(ProfileAccessPolicy).join(CoreRefResourceType)
-    count_base = select(func.count()).select_from(ProfileAccessPolicy).join(CoreRefResourceType)
-
-    if group:
-        base = base.where(ProfileAccessPolicy.user_group == group)
-        count_base = count_base.where(ProfileAccessPolicy.user_group == group)
-    if resource_key:
-        base = base.where(CoreRefResourceType.key == resource_key)
-        count_base = count_base.where(CoreRefResourceType.key == resource_key)
-
-    total = (await db.execute(count_base)).scalar()
-    stmt = (
-        base
-        .order_by(ProfileAccessPolicy.user_group, CoreRefResourceType.key, ProfileAccessPolicy.action)
-        .limit(limit)
-        .offset(offset)
-    )
+    base = filters.apply(select(M).join(R))
+    total = (await db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+    stmt = sort.apply(base).limit(page.limit).offset(page.offset)
     result = await db.execute(stmt)
     rows = result.scalars().all()
 
@@ -60,4 +75,4 @@ async def list_access_policies(
         }
         items.append(AccessPolicyReadWithKey(**data))
 
-    return ok_list(items, total=total, limit=limit, offset=offset)
+    return ok_list(items, total=total, limit=page.limit, offset=page.offset)

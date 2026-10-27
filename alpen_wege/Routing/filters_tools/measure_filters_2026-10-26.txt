@@ -1,0 +1,21 @@
+call                                       status  median ms       KB   total
+pois default (100)                            200         27      119   20758
+pois limit=500                                200         78      600   20758
+pois q=bahnhof                                200         49      120     701
+pois q=ba (2 letters, many hits)              200         36      120    2610
+pois q=zzzz (no hit, full scan)               200         43        0       0
+pois compendium_type_id (big type)            200         37      119    1250
+pois bbox 7,46,8,47                           200         37      120    3774
+pois near Zurich 5 km                         200        120      121     421
+pois near Zurich 100 km                       200        100      120   12143
+pois altitude 1000..1500                      200         33      120    2172
+pois sort=altitude_m                          200         39      120   20758
+pois sort=-created_at                         200         42      120   20758
+pois sort=altitude_m offset=20000             200         70      121   20758
+pois offset=20000 default sort                200         57      120   20758
+regions default (100)                         200         33      136    1570
+regions bbox 7,46,8,47                        200         33      137     264
+regions q=bern                                200         17       11       8
+event-log default (100)                       200         17       73     595
+users default                                 200         10        3       7
+compendium-types default (500)                200         19       70     214

@@ -2,6 +2,10 @@ from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.core.schemas.ref import RefBaseDetail
+
 
 class GearCreate(BaseModel):
     name: str
@@ -36,3 +40,9 @@ class GearRead(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class GearDetail(GearRead):
+    company: RefBaseDetail | None = Link()
+    gear_type: RefBaseDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

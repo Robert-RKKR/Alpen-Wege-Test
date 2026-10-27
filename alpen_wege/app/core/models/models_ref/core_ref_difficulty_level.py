@@ -6,10 +6,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
-from app.core.base import Base, ReferenceWithFactorMixin
+from app.core.base import Base, ReferenceWithRankMixin
 
 
-class CoreRefDifficultyLevel(Base, ReferenceWithFactorMixin):
+class CoreRefDifficultyLevel(Base, ReferenceWithRankMixin):
     __tablename__ = "core_ref_difficulty_level"
 
     id: Mapped[uuid.UUID] = mapped_column(

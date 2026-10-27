@@ -8,15 +8,15 @@ from app.management.utils.event_logger import log_updated
 from app.core.utils.responses import ApiResponse, ok
 from app.profile.permissions import resource_access, AccessContext, check_object_access
 from app.core.models.models_ref import CoreRefRarity
-from app.core.schemas.ref import RefWithFactorRead, RefWithFactorUpdate
+from app.core.schemas.ref import RefRankedRead, RefRankedUpdate
 
 from ._router import router
 
 
-@router.patch("/{item_id}", response_model=ApiResponse[RefWithFactorRead])
+@router.patch("/{item_id}", response_model=ApiResponse[RefRankedRead])
 async def update_item(
     item_id: UUID,
-    body: RefWithFactorUpdate,
+    body: RefRankedUpdate,
     access: AccessContext = Depends(resource_access("ref", "update")),
     db: AsyncSession = Depends(get_db),
 ):

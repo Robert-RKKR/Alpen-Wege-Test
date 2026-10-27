@@ -1,32 +1,37 @@
 # GET `?expand=` - decisions
 
-Scope: only single-object GET endpoints (`GET /something/{id}`). Lists, POST, PATCH and DELETE are not changed. No database change.
+Scope: only single-object GET endpoints (`GET .../{id}`). Lists, POST, PATCH and DELETE are not changed. No database change.
 
-Implementation plan (for VS Code Claude): `get_expand_implementation_plan.md` (same folder). This file is the short list of decisions; the plan has the details.
+Plan: `get_expand_implementation_plan_v2.md` (2026-10-24; v1 is superseded). Tools and tests: `expand_tools/`. This file is the short list of decisions; the plan has the details and what was tested.
 
-## Confirmed by the user (2026-10-21)
+## Confirmed by you (2026-10-21, carried into plan v2)
 
-1. **Mechanism:** `?expand=a,b` query parameter, a whitelist of allowed names per endpoint. Example: `GET /event-log/{id}?expand=changed_by`. No generic `depth=N`.
-2. **Default = ID only.** Without `expand`, a link is returned only as its ID (`changed_by`, `created_by`, `main_region_id`, ...).
-3. **Expanded = full representation** of the linked object. For a user that is the `UserRead` shape (email, birth date, heart rates, group; never the password hash).
-4. **No field is always expanded any more on single GETs.** Fields that are expanded today (`entity_type`, `compendium_type`, `main_region`, `poi`, `rarity`, `country`, `parent`, `region_type`, `post_type`, `region`) also become opt-in. Speed check (asked for by the user): this does not slow anything down. The default request gets cheaper (fewer queries); each requested link costs one small extra query.
-5. **Visibility rule: if you may read an object, you may see everything expanded inside it.** No extra permission check per expanded object. This includes the full user profile behind `created_by` / `changed_by`.
-6. **Nested expand:** dotted paths up to 3 levels (for example `poi.main_region.country`), several comma-separated paths allowed and merged (shared parents are loaded once). Chosen option 2 (links declared once, any route can use them), accepted with "ok super" after the recommendation.
-7. **Limits:** a request may expand at most 10 distinct links in total; a path deeper than 3 levels or an unknown name returns 400 with the allowed names.
+1. **Mechanism:** `?expand=a,b` query parameter, a whitelist of allowed names per endpoint. Example: `GET /api/v1/management/event-log/{id}?expand=changed_by`. No generic `depth=N`.
+2. **Default = ID only.** Without `expand` a link is only an ID (`changed_by`, `created_by`, `main_region_id`, ...). Asked for, it is the **full object**.
+3. **Nothing is always expanded any more** on single GETs (also not what is expanded today). Speed checked: a plain GET is cheaper than before (POI 5 -> 3 SELECTs), the same content as before costs the same; each asked-for link costs about one small query (a user link two).
+4. **Nested expand:** dotted paths up to 3 levels (`main_region.country.created_by`), several comma-separated paths merged (a shared parent counts once), at most 10 distinct links per request; an unknown name, a deeper path or more links answer 400 with the allowed names.
+5. **Scope:** single-object GETs only.
 
-## Defaults chosen in the plan (the user has not objected; can be changed)
+## Answered 2026-10-26: "all recommended" (delivered to the repo, not yet on your host)
 
-- The expanded object goes into a sibling field next to the ID: `created_by_user`, `changed_by_user`; existing names (`compendium_type`, `main_region`, ...) stay.
-- Unrequested links are present with the value `null` (alternative: omit the key).
-- Event log: `changed_by` and `entity_type` on `/event-log/{id}` and on the compare endpoint (applies to both entries). The object a log entry is about (`entity_id`) and IDs inside `snapshot` are not resolved.
-- `created_by` works on every object (one relationship in `CreatorMixin`). `GearDetail` also returns `created_by`. Difficulty-sports also get `sport_type`.
-- Lists keep today's behaviour (nested objects always included), so a list item and a single GET differ on purpose.
-- Rollout in 7 steps (E0 to E6), pilot on the event log and on POI first.
+7 = **B** (an expanded user shows `id` and `username` to everybody; administrators and the user himself see the whole profile), 8 = all 33 endpoints, 9 = `null`, 10 = the plan has the host commands for both cases. Next step is yours: the commands of plan section 6 on the host (expect 506 files, hash `5a0dee4fcbd0cf7e`, pytest 107, `expand_check.py` 75 checks).
 
-## Consequence to remember
+## The questions as they were asked (plan v2, section 2)
 
-With the seeded access policies every registered user (even `guest`) can read all compendium and reference data, and public gear. So with rule 5, any registered user can see the full profile (email, birth date, heart rates) of whoever created an object, including ordinary users who create public gear, and later public tracks and trips. It is a one-line switch in the code (`ExpandedUser` in `app/core/utils/expand.py`) to return only id and username instead. Recommended to revisit before tracks and trips get expand support.
+| # | Question | Recommendation |
+|---|---|---|
+| 7 | Who sees which fields of an expanded user? A = whole profile for everybody (as you decided); B = everybody sees id and username, administrators and the user himself see the whole profile; C = only id and username except administrators | **B**. The profile endpoints are administrator-only today and registration is open; with A, `?expand=created_by` on 27 of the 33 endpoints would hand out every creator's email, birth date, heart rates and group to anyone (tracks, gear and the compendium creators, editors included, are ordinary users). B is built and tested |
+| 8 | Which endpoints get `expand`? | all 33 of the plan (section 3.1), including the new tracks, administrator job, settings, access policy |
+| 9 | A link that was not asked for: key with `null`, or no key | `null` |
+| 10 | Gate: does your host already run the Phase 3 layout? | tell me; the plan has the commands for both cases |
 
-## Open
+Assumption 6 of the plan (clean break): nothing besides your own scripts and Postman calls the single GETs; this is the answer you gave for the URL change.
 
-None for the user. The implementing agent reports after each step.
+## Defaults chosen in the plan (change by telling me)
+
+- The answer field keeps the existing name (`compendium_type`, `main_region`); for users it is `created_by_user`, `changed_by_user`, `updated_by_user`, and `user` on the administrator's job, asked for as `created_by`, `changed_by`, `updated_by`, `user`.
+- A plain gear answer stays as it is (no `created_by` added); the event-log compare endpoint takes `changed_by` and `entity_type` for both entries.
+- An expanded object is shown by the rule "who may read the object you asked for", not by the policy of the linked object (no difference under today's policies).
+- A request may have at most 10 links, 3 levels and 1000 characters.
+- Not included: `/profile/users/{id}` and `/me`, your own job, Celery tasks, photos, `poi_access`, `gpx`, `geo_record`, the object a log entry is about.
+- Lists keep their nested objects (a list item and a single GET differ on purpose).

@@ -3,7 +3,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from app.core.schemas.ref import RefWithFactorRead
+from app.core.schemas.ref import RefWithFactorDetail, RefWithFactorRead
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
 
 
 class PostCreate(BaseModel):
@@ -53,3 +55,8 @@ class PostRead(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class PostDetail(PostRead):
+    post_type: RefWithFactorDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")

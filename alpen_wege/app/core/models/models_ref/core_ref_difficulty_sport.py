@@ -3,13 +3,13 @@ import uuid
 
 # Third-party
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
-from app.core.base import Base, ReferenceWithFactorMixin
+from app.core.base import Base, ReferenceWithRankMixin
 
 
-class CoreRefDifficultySport(Base, ReferenceWithFactorMixin):
+class CoreRefDifficultySport(Base, ReferenceWithRankMixin):
     __tablename__ = "core_ref_difficulty_sport"
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -31,3 +31,5 @@ class CoreRefDifficultySport(Base, ReferenceWithFactorMixin):
             "when the grade applies across multiple sports."
         ),
     )
+
+    sport_type = relationship("CoreRefSportType", foreign_keys=[sport_type_id], lazy="raise", viewonly=True)

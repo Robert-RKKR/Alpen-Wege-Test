@@ -6,6 +6,9 @@ from uuid import UUID
 # Third-party
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+
 
 class JobSubject(BaseModel):
     type: str
@@ -49,6 +52,10 @@ class JobAdminRead(JobRead):
     task_name: str
     worker_hostname: str | None = None
     request_id: str | None = None
+
+
+class JobAdminDetail(JobAdminRead):
+    user: ExpandedUser | None = Link()
 
 
 class JobAccepted(BaseModel):

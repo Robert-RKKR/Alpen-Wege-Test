@@ -4,7 +4,7 @@ import uuid
 # Third-party
 from sqlalchemy import Boolean, CheckConstraint, DDL, ForeignKey, Numeric, String, Text, event, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
 from app.core.base import Base, TimestampMixin
@@ -76,6 +76,8 @@ class MgmtSettings(Base, TimestampMixin):
         nullable=True,
         comment="User who last changed the value through the API, NULL if never changed.",
     )
+
+    updated_by_user = relationship("ProfileUsrUser", foreign_keys=[updated_by], lazy="raise", viewonly=True)
 
 
 # Keeps updated_at current on every UPDATE. Only runs when create_all creates the table;

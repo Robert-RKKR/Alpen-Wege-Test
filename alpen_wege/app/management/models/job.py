@@ -17,7 +17,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
 from app.core.base import Base, TimestampMixin
@@ -111,6 +111,8 @@ class MgmtLogJob(Base, TimestampMixin):
         DateTime(timezone=True), nullable=True,
         comment="When the job reached a terminal state.",
     )
+
+    user = relationship("ProfileUsrUser", foreign_keys=[user_id], lazy="raise", viewonly=True)
 
 
 # Keeps updated_at current on every UPDATE (the stale-job check depends on it). Only runs when

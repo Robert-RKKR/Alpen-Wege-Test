@@ -6,14 +6,14 @@ from app.management.utils.event_logger import log_created
 from app.core.utils.responses import ApiResponse, ok
 from app.profile.permissions import resource_access, AccessContext
 from app.core.models.models_ref import CoreRefRarity
-from app.core.schemas.ref import RefWithFactorCreate, RefWithFactorRead
+from app.core.schemas.ref import RefRankedCreate, RefRankedRead
 
 from ._router import router
 
 
-@router.post("", response_model=ApiResponse[RefWithFactorRead], status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ApiResponse[RefRankedRead], status_code=status.HTTP_201_CREATED)
 async def create_item(
-    body: RefWithFactorCreate,
+    body: RefRankedCreate,
     access: AccessContext = Depends(resource_access("ref", "create")),
     db: AsyncSession = Depends(get_db),
 ):

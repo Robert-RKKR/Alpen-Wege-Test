@@ -3,6 +3,11 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.core.schemas.ref import DifficultySportDetail, RefRankedDetail, RefWithFactorDetail
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+from app.compendium.schemas.poi import PoiDetail
+
 
 class TrackCreated(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -74,6 +79,15 @@ class TrackRead(BaseModel):
     updated_at: datetime
     created_by: UUID
     metrics: TrackMetrics | None = None
+
+
+class TrackDetail(TrackRead):
+    sport_type: RefWithFactorDetail | None = Link()
+    difficulty_level: RefRankedDetail | None = Link()
+    difficulty_sport: DifficultySportDetail | None = Link()
+    start_poi: PoiDetail | None = Link()
+    end_poi: PoiDetail | None = Link()
+    created_by_user: ExpandedUser | None = Link("created_by")
 
 
 class TrackUpdate(BaseModel):

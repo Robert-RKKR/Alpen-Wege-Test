@@ -123,6 +123,14 @@ def _coerce(raw: str | None, col_type):
 # CSV import
 # ------------------------------------------------------------------
 
+def _required_columns(mapper) -> list[str]:
+    # NOT NULL columns that nothing fills in by itself (no database default, no Python default, not created_by)
+    return [
+        c.key for c in mapper.columns
+        if not c.nullable and not c.primary_key and c.server_default is None and c.default is None and c.key != "created_by"
+    ]
+
+
 async def import_csv(
     file,
     model,
@@ -146,6 +154,16 @@ async def import_csv(
         if isinstance(c.type, Geometry)
         and getattr(c.type, "geometry_type", "").upper() == "POINT"
     }
+
+    required = _required_columns(mapper)
+    headers = {(h or "").strip() for h in (reader.fieldnames or [])}
+    missing_headers = [
+        k for k in required
+        if k not in headers and not (k in point_geo and {f"{k}_lon", f"{k}_lat"} <= headers)
+    ]
+    if missing_headers:
+        # without these columns every row would fail in the database (500); say it once, clearly, and insert nothing
+        return {"inserted": 0, "errors": [f"missing required column(s) in the header: {', '.join(missing_headers)}"]}
 
     objects = []
     errors: list[str] = []
@@ -174,6 +192,10 @@ async def import_csv(
 
             if "created_by" in col_map and "created_by" not in data:
                 data["created_by"] = user_id
+
+            empty = [k for k in required if data.get(k) is None]
+            if empty:
+                raise ValueError(f"missing value for {', '.join(empty)}")
 
             objects.append(model(**data))
         except Exception as exc:

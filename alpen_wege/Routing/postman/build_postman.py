@@ -160,9 +160,48 @@ def csv_request(slug_path, label, status=(200, 201)):
     )
 
 
+FIRST_ID_LISTS: list = []   # (list path, variable) of every model; used by "Collect first IDs" and by the fallbacks below
+
+
+def api_url(path):
+    return f"{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/{path}"
+
+
+def first_id_pre(list_path, var, *, second=None, extra=None):
+    """Pre-request lines: when the variable is empty, fill it from the first row of the list (so the request can run alone,
+    without Create or List before it). second is a second variable that gets the second row (event log compare);
+    extra is a list of (variable, field) that are copied from the first row too (setting_value)."""
+    lines = [
+        f"// Run alone? When {{{{{var}}}}} is empty, take the id of the first row of {list_path}.",
+        f'if (!pm.environment.get("{var}")) {{',
+        "    pm.sendRequest({",
+        f'        url: pm.variables.replaceIn("{api_url(list_path)}?limit={2 if second else 1}"),',
+        '        method: "GET",',
+        f'        header: {{ Authorization: "Bearer " + pm.environment.get("{ARGS.token_var}") }}',
+        "    }, function (err, res) {",
+        f'        if (err || res.code !== 200) {{ console.log("first id of {list_path}: the list answered " + (err || res.code)); return; }}',
+        "        var rows = res.json().response_data;",
+        "        if (rows && rows.length) {",
+        f'            pm.environment.set("{var}", rows[0].{"key" if var == "setting_key" else "id"});',
+    ]
+    if second:
+        lines.append(f'            if (rows.length > 1) {{ pm.environment.set("{second}", rows[1].id); }}')
+    for v, field in (extra or []):
+        lines.append(f'            pm.environment.set("{v}", JSON.stringify(rows[0].{field}));')
+    lines += [
+        f'            console.log("{var} was empty, using the first row of {list_path}: " + rows[0].{"key" if var == "setting_key" else "id"});',
+        f'        }} else {{ console.log("first id of {list_path}: the list is empty"); }}',
+        "    });",
+        "}",
+    ]
+    return lines
+
+
 def crud_folder(app, slug, label, var, create_body, update_body, *, needs="", extras=None, csv=True,
                 list_extra_test=None, create_pre=None, create_desc=""):
     base = f"{app}/{slug}"
+    FIRST_ID_LISTS.append((base, var))
+    first = first_id_pre(base, var)
     needs_txt = f" Needs these variables first (run their Create): {needs}." if needs else ""
     items = [
         request(f"List {label}", "GET", base, enabled_query={},
@@ -174,16 +213,17 @@ def crud_folder(app, slug, label, var, create_body, update_body, *, needs="", ex
                 desc=f"All {label} you may read. Query parameters (limit, offset, ...) are listed but switched off."),
         request(f"Create {label}", "POST", base, body=create_body, status=201, pre=create_pre,
                 test=set_from_response(var), desc=create_desc or f"Creates one record and saves its id in `{{{{{var}}}}}`.{needs_txt}"),
-        request(f"Get one {label}", "GET", f"{base}/{{{{{var}}}}}", desc=f"Uses `{{{{{var}}}}}` (set by Create or List)."),
-        request(f"Update {label}", "PATCH", f"{base}/{{{{{var}}}}}", body=update_body,
-                desc="Only the fields in the body change."),
+        request(f"Get one {label}", "GET", f"{base}/{{{{{var}}}}}", pre=first,
+                desc=f"Uses `{{{{{var}}}}}` (set by Create, List or Collect first IDs; when empty the first row of the list is used)."),
+        request(f"Update {label}", "PATCH", f"{base}/{{{{{var}}}}}", body=update_body, pre=first,
+                desc="Only the fields in the body change. When `{{" + var + "}}` is empty the first row of the list is changed."),
     ]
     items += (extras or [])
     if csv:
         items.append(csv_request(base, label))
-    items.append(request(f"Delete {label}", "DELETE", f"{base}/{{{{{var}}}}}", pre=SKIP_DELETES,
+    items.append(request(f"Delete {label}", "DELETE", f"{base}/{{{{{var}}}}}", pre=SKIP_DELETES + first,
                          test=[f'pm.environment.unset("{var}");'],
-                         desc=f"Deletes `{{{{{var}}}}}` and clears the variable. Records that other records point at cannot be deleted until those are deleted."))
+                         desc=f"Deletes `{{{{{var}}}}}` and clears the variable. **When the variable is empty (no Create, List or Collect first IDs before) it deletes the FIRST row of the list.** Records that other records point at cannot be deleted until those are deleted."))
     return folder(slug, items)
 
 
@@ -193,14 +233,21 @@ SKIP_DELETES = [
 ]
 
 
+RANKED_TABLES = {"difficulty-levels", "difficulty-sports", "rarities", "visibilities"}   # the tables with a scale: rank is required
+
+
 def ref_folder(slug, label, var, *, factor=True, extra_fields=None, name_required=False):
     body = {"name": "{{random_name}}", "name_de": "{{random_name}}", "color": "#2196F3", "icon": "star"}
     if factor:
         body["point_factor"] = 1.0
+    if slug in RANKED_TABLES:
+        body["rank"] = 3
     body.update(extra_fields or {})
     upd = {"color": "#FF9800"}
     if factor:
         upd["point_factor"] = 2.0
+    if slug in RANKED_TABLES:
+        upd["rank"] = 4
     return crud_folder("core", slug, label, var, body, upd)
 
 
@@ -247,7 +294,7 @@ def compendium_folder():
         "compendium", "regions", "region", "region_id",
         {"name": "{{random_name}}", "location": POINT, "country_id": "{{country_id}}", "region_type_id": "{{region_type_id}}"},
         {"summary": "Updated summary"}, needs="`country_id` (compendium/countries), `region_type_id` (core/region-types)")
-    poi_rescan = request("Rescan POI", "POST", "compendium/pois/{{poi_id}}/rescan", status=202,
+    poi_rescan = request("Rescan POI", "POST", "compendium/pois/{{poi_id}}/rescan", status=202, pre=first_id_pre("compendium/pois", "poi_id"),
                          test=[
                              "var jsonData = pm.response.json();",
                              'pm.environment.set("job_id", jsonData.response_data.job_id);',
@@ -260,7 +307,7 @@ def compendium_folder():
          "main_region_id": "{{region_id}}", "altitude_m": 2000},
         {"altitude_m": 2100}, needs="`compendium_type_id` (core/compendium-types), `region_id` (compendium/regions)",
         extras=[poi_rescan])
-    card_rescan = request("Rescan card", "POST", "compendium/cards/{{card_id}}/rescan", status=202,
+    card_rescan = request("Rescan card", "POST", "compendium/cards/{{card_id}}/rescan", status=202, pre=first_id_pre("compendium/cards", "card_id"),
                           test=[
                               "var jsonData = pm.response.json();",
                               'pm.environment.set("job_id", jsonData.response_data.job_id);',
@@ -288,6 +335,8 @@ def explorer_folder():
         {"name": "{{random_name}}", "company_id": "{{company_id}}", "gear_type_id": "{{gear_type_id}}",
          "model": "Test model", "weight_g": 500},
         {"weight_g": 450}, needs="`company_id` (core/companies), `gear_type_id` (core/gear-types)")
+    FIRST_ID_LISTS.append(("explorer/tracks", "track_id"))
+    track_first = first_id_pre("explorer/tracks", "track_id")
     gpx_note = "Pick a .gpx file in the body (key `gpx_file`). `python scripts/make_sample_gpx.py --variant full --out full.gpx` makes one."
     tracks = folder("tracks", [
         request("List tracks", "GET", "explorer/tracks",
@@ -307,21 +356,151 @@ def explorer_folder():
                     'pm.environment.set("job_id", jsonData.response_data.job_id);',
                     'pm.test("Location header points to the job", function () { pm.expect(pm.response.headers.get("Location")).to.include("/management/my-jobs/"); });',
                 ], desc=f"Accepts the file and starts processing as a job (202). Saves `track_id` and `job_id`. {gpx_note}"),
-        request("Get one track", "GET", "explorer/tracks/{{track_id}}"),
-        request("Track geometry", "GET", "explorer/tracks/{{track_id}}/geometry", status=[200, 404],
+        request("Get one track", "GET", "explorer/tracks/{{track_id}}", pre=track_first),
+        request("Track geometry", "GET", "explorer/tracks/{{track_id}}/geometry", status=[200, 404], pre=track_first,
                 desc="404 until the processing job has finished."),
-        request("Track performance", "GET", "explorer/tracks/{{track_id}}/performance", status=[200, 404],
+        request("Track performance", "GET", "explorer/tracks/{{track_id}}/performance", status=[200, 404], pre=track_first,
                 desc="404 when the file has no timestamps or the job is not finished."),
-        request("Update track", "PATCH", "explorer/tracks/{{track_id}}", body={"name": "Renamed {{random_name}}", "is_public": False}),
-        request("Reprocess track", "POST", "explorer/tracks/{{track_id}}/reprocess", status=[202, 409],
+        request("Update track", "PATCH", "explorer/tracks/{{track_id}}", body={"name": "Renamed {{random_name}}", "is_public": False}, pre=track_first),
+        request("Reprocess track", "POST", "explorer/tracks/{{track_id}}/reprocess", status=[202, 409], pre=track_first,
                 desc="Only tracks with processing_status `failed` can be reprocessed (409 otherwise).",
                 test=["var jsonData = pm.response.json();",
                       'if (pm.response.code === 202) { pm.environment.set("job_id", jsonData.response_data.job_id); }']),
-        request("Archive track (DELETE)", "DELETE", "explorer/tracks/{{track_id}}",
+        request("Archive track (DELETE)", "DELETE", "explorer/tracks/{{track_id}}", pre=track_first,
                 desc="Archives the track (it is not deleted). Restore brings it back."),
-        request("Restore track", "POST", "explorer/tracks/{{track_id}}/restore"),
+        request("Restore track", "POST", "explorer/tracks/{{track_id}}/restore", pre=track_first),
     ])
-    return folder("explorer", [gear, tracks], "User activity data: gear and tracks.")
+    segments = segments_folder()
+    routes = routes_folder()
+    return folder("explorer", [gear, tracks, segments, routes],
+                  "User activity data (gear, tracks) and the planned hierarchy: segments are pieces of trail with their own geometry, routes are chains of segments.")
+
+
+def remember(var, expr):
+    # test lines: add an id to the list kept in the environment variable `var` (a JSON array), for the Cleanup folder
+    return [f'var list_ = JSON.parse(pm.environment.get("{var}") || "[]"); list_.push({expr}); pm.environment.set("{var}", JSON.stringify(list_));']
+
+
+def delete_all_pre(var, path):
+    # pre-request lines of a Cleanup request: delete every record whose id is in the list `var`, one after the other
+    return [
+        f"// Deletes everything this collection made in {path} (the ids are kept in {var}); answers are not checked.",
+        f'var ids = JSON.parse(pm.environment.get("{var}") || "[]");',
+        f'var token = pm.environment.get("{ARGS.token_var}");',
+        f'var base = pm.variables.replaceIn("{api_url(path)}/");',
+        "function next() {",
+        "    var id = ids.shift();",
+        f'    if (!id) {{ pm.environment.set("{var}", "[]"); return; }}',
+        '    pm.sendRequest({ url: base + id, method: "DELETE", header: { Authorization: "Bearer " + token } }, function () { next(); });',
+        "}",
+        "next();",
+    ]
+
+
+def drawn_trail(first, count):
+    # points of a drawn trail, about 100 m apart and climbing 12 m each: [[lon, lat, ele], ...]; the trail of `first`+count points
+    # continues the one that ends at point `first` (same coordinates), so segments built from consecutive parts are connected
+    return [[round(11.87 + i * 0.0002, 5), round(47.05 + i * 0.0009, 5), 1800 + i * 12] for i in range(first, first + count)]
+
+
+def segments_folder():
+    FIRST_ID_LISTS.append(("explorer/segments", "segment_id"))
+    first = first_id_pre("explorer/segments", "segment_id")
+    gpx_note = "Pick a .gpx file in the body (key `gpx_file`). Times and heart rate in the file are dropped; the file itself is not kept."
+    sport = "`sport_type_id` (core/sport-types; Create sport type, or Collect first IDs)"
+    return folder("segments", [
+        request("List segments", "GET", "explorer/segments",
+                test=["var jsonData = pm.response.json();",
+                      'pm.test("Response has a list in response_data", function () { pm.expect(jsonData.response_data).to.be.an("array"); });',
+                      'if (!pm.environment.get("segment_id") && jsonData.response_data.length) { pm.environment.set("segment_id", jsonData.response_data[0].id); }'],
+                desc="The segments you may read: your own and the public ones. Filters (switched off): `near` + `radius_m` finds segments that start or end near a point, "
+                     "`unused`, `created_by`, `sport_type_id`, `distance_min` / `distance_max`, `sort`."),
+        request("Create segment from a GPX file", "POST", "explorer/segments", status=201,
+                form=[{"key": "name", "value": "Postman segment {{random_name}}", "type": "text"},
+                      {"key": "gpx_file", "type": "file", "src": []},
+                      {"key": "sport_type_id", "value": "{{sport_type_id}}", "type": "text"},
+                      {"key": "is_public", "value": "false", "type": "text"}],
+                test=set_from_response("segment_id") + remember("created_segment_ids", "jsonData.response_data.id") + [
+                    'pm.test("the new segment has a distance and is private", function () { var s = jsonData.response_data; pm.expect(s.metrics.distance_m).to.be.above(0); pm.expect(s.is_public).to.eql(false); });'],
+                desc=f"Makes a segment from your GPX file and saves its id in `{{{{segment_id}}}}`. {gpx_note} Needs {sport}."),
+        request("Create segment from drawn points", "POST", "explorer/segments/from-coordinates", status=201,
+                body={"name": "Postman drawn segment {{random_name}}", "sport_type_id": "{{sport_type_id}}", "is_public": False,
+                      "coordinates": drawn_trail(0, 10)},
+                test=set_from_response("segment_id") + remember("created_segment_ids", "jsonData.response_data.id") + [
+                    'pm.test("about 900 m, with elevation", function () { var m = jsonData.response_data.metrics; pm.expect(m.distance_m).to.be.within(800, 1100); pm.expect(m.elevation_gain_m).to.be.above(50); });'],
+                desc=f"Points are [lon, lat, ele]; 2 to 5000 points. Saves `{{{{segment_id}}}}`. Needs {sport}."),
+        request("Create segment from a track", "POST", "explorer/segments/from-track", status=[201, 404, 409, 422],
+                body={"name": "Postman clip {{random_name}}", "sport_type_id": "{{sport_type_id}}", "track_id": "{{track_id}}",
+                      "start_distance_m": 0, "end_distance_m": 1000},
+                test=["var jsonData = pm.response.json();",
+                      'if (pm.response.code === 201) { pm.environment.set("segment_id", jsonData.response_data.id); }',
+                      'if (pm.response.code === 201) { var list_ = JSON.parse(pm.environment.get("created_segment_ids") || "[]"); list_.push(jsonData.response_data.id); pm.environment.set("created_segment_ids", JSON.stringify(list_)); }'],
+                desc="A part of one of YOUR OWN tracks, cut by distance from its start (here the first 1000 m). Needs `{{track_id}}` of a track with "
+                     "processing_status ready (404 for somebody else's track, 409 while it is not processed, 422 behind the end of the track)."),
+        request("Get one segment", "GET", "explorer/segments/{{segment_id}}", pre=first,
+                desc="Add `?expand=sport_type,difficulty_level,difficulty_sport,start_poi,end_poi,created_by` for the linked objects."),
+        request("Segment geometry", "GET", "explorer/segments/{{segment_id}}/geometry", pre=first,
+                desc="The GeoJSON line, the elevation profile and the start and end point."),
+        request("Update segment", "PATCH", "explorer/segments/{{segment_id}}", pre=first,
+                body={"summary": "Changed from Postman"},
+                desc="Metadata only; the geometry of a segment never changes. `is_public: false` is refused (409) while another user's route or a public route uses it."),
+        request("Delete segment", "DELETE", "explorer/segments/{{segment_id}}", pre=SKIP_DELETES + first, status=[200, 409],
+                test=['if (pm.response.code === 200) { pm.environment.unset("segment_id"); }'],
+                desc="409 when a route uses the segment (the answer says how many routes; it names only the ones you may see). Delete the route first."),
+    ], "Pieces of trail with their own geometry. A segment is never changed once it exists (draw a new one instead).")
+
+
+def routes_folder():
+    FIRST_ID_LISTS.append(("explorer/routes", "route_id"))
+    first = first_id_pre("explorer/routes", "route_id")
+    walk = lambda **kw: {"slot_position": 0, "is_default": True, "is_reversed": False, **kw}
+    return folder("routes", [
+        request("List routes", "GET", "explorer/routes",
+                test=["var jsonData = pm.response.json();",
+                      'pm.test("Response has a list in response_data", function () { pm.expect(jsonData.response_data).to.be.an("array"); });',
+                      'if (!pm.environment.get("route_id") && jsonData.response_data.length) { pm.environment.set("route_id", jsonData.response_data[0].id); }'],
+                desc="The routes you may read: your own and the public ones. Filters (switched off): `sport_type_id`, `difficulty_level_id`, `distance_min` / `distance_max`, `q`, `sort`."),
+        request("1. Create route (a draft without segments)", "POST", "explorer/routes", status=201,
+                body={"name": "Postman route {{random_name}}", "summary": "Made from Postman"},
+                test=set_from_response("route_id") + remember("created_route_ids", "jsonData.response_data.id") + [
+                    'pm.test("a draft has no sport, no difficulty and no totals", function () { var r = jsonData.response_data; pm.expect(r.sport_type_id).to.eql(null); pm.expect(r.agg_distance_m).to.eql(null); pm.expect(r.segments).to.eql([]); });'],
+                desc="Step 1 of the test with a GPX file: make the route. Saves `{{route_id}}`. Sport and difficulty stay empty until segments are added."),
+        request("2. Put the segment into the route", "PUT", "explorer/routes/{{route_id}}/segments",
+                body={"segments": [walk(segment_id="{{segment_id}}")], "validation": "strict"},
+                test=["var jsonData = pm.response.json();",
+                      'pm.test("totals and sport come from the segment", function () { var r = jsonData.response_data; pm.expect(r.segments.length).to.eql(1); pm.expect(r.agg_distance_m).to.be.above(0); pm.expect(r.sport_type_id).to.not.eql(null); });'],
+                desc="Step 2 (after `Create segment from a GPX file`): `{{segment_id}}` becomes slot 0 of the route. The list you send REPLACES the saved one. "
+                     "The server checks the slots and that neighbouring segments connect (within 50 m or at the same POI), recomputes distance and elevation, and fills sport and difficulty if they are empty."),
+        request("2b. Draw two segments inside the save", "PUT", "explorer/routes/{{route_id}}/segments",
+                body={"segments": [
+                    walk(inline={"name": "Drawn A {{random_name}}", "sport_type_id": "{{sport_type_id}}", "coordinates": drawn_trail(0, 10)}),
+                    walk(slot_position=1, inline={"name": "Drawn B {{random_name}}", "sport_type_id": "{{sport_type_id}}", "coordinates": drawn_trail(9, 10)}),
+                ], "validation": "strict"},
+                test=["var jsonData = pm.response.json();",
+                      'jsonData.response_data.created_segments.forEach(function (c) { var list_ = JSON.parse(pm.environment.get("created_segment_ids") || "[]"); list_.push(c.segment_id); pm.environment.set("created_segment_ids", JSON.stringify(list_)); });',
+                      'pm.test("two segments were created and the route has about 1800 m", function () { var r = jsonData.response_data; pm.expect(r.created_segments.length).to.eql(2); pm.expect(r.agg_distance_m).to.be.within(1600, 2100); });'],
+                desc="Drawn trails can be saved together with the route in one call (`inline`); `created_segments` gives the ids of the new segments by position. "
+                     "Instead of `coordinates` an inline item can name `track_id`, `start_distance_m`, `end_distance_m` (a part of your own track). "
+                     "If anything is wrong nothing is saved, not even the new segments."),
+        request("Validate segments (nothing is saved)", "POST", "explorer/routes/{{route_id}}/segments/validate",
+                body={"segments": [{"segment_id": "{{segment_id}}", "slot_position": 0},
+                                   {"start": [11.8724, 47.0581], "end": [11.8800, 47.0700], "slot_position": 1}]},
+                test=["var jsonData = pm.response.json();",
+                      'pm.test("the report has is_valid, errors and warnings", function () { var r = jsonData.response_data; pm.expect(r).to.have.property("is_valid"); pm.expect(r.errors).to.be.an("array"); pm.expect(r.warnings).to.be.an("array"); });'],
+                desc="The same checks as the save, for an editor while the user is still drawing. A saved segment by id; a drawing that is not saved yet by its first and last point."),
+        request("Get one route", "GET", "explorer/routes/{{route_id}}", pre=first,
+                desc="With the segment rows, the sports of the default segments, the derived sport and difficulty and `classification_differs`. Add `?expand=sport_type,difficulty_level,difficulty_sport,created_by`."),
+        request("Route segments", "GET", "explorer/routes/{{route_id}}/segments", pre=first,
+                desc="The segment rows in slot order, the default of a slot first, as the route walks them."),
+        request("Route geometry", "GET", "explorer/routes/{{route_id}}/geometry", pre=first,
+                desc="The map line and the elevation profile of the whole default path, and the alternatives as separate lines."),
+        request("Update route", "PATCH", "explorer/routes/{{route_id}}", pre=first,
+                body={"summary": "Changed from Postman", "plan_conditions": {"best_months": [6, 7, 8], "permit_required": False}},
+                desc="Name, texts, `is_public` (publishing a route also publishes its own segments), sport and difficulty by hand, and plan conditions (only the fields you send)."),
+        request("Delete route", "DELETE", "explorer/routes/{{route_id}}", pre=SKIP_DELETES + first, status=[200, 409],
+                test=['if (pm.response.code === 200) { pm.environment.unset("route_id"); }'],
+                desc="The segments stay. 409 when a journey uses the route."),
+    ], "Chains of segments. Test with your GPX file: run `Create segment from a GPX file` (folder segments), then 1. Create route, then 2. Put the segment into the route, then Get one route.")
 
 
 def profile_folder():
@@ -473,13 +652,18 @@ def management_folder():
         "if (jsonData.response_data.length) { pm.environment.set(\"log_id\", jsonData.response_data[0].id); }",
         "if (jsonData.response_data.length > 1) { pm.environment.set(\"log_id_2\", jsonData.response_data[1].id); }",
     ]
+    FIRST_ID_LISTS.append(("management/event-log", "log_id"))
+    log_first = first_id_pre("management/event-log", "log_id", second="log_id_2")
     event_log = folder("event-log", [
         request("List event log", "GET", "management/event-log", test=log_list_test,
                 enabled_query={"limit": "20"}, desc="Administrator only. Change history of objects. Saves the first two ids in `log_id` and `log_id_2`."),
         request("List entity types", "GET", "management/event-log/entity-types"),
-        request("Get one event", "GET", "management/event-log/{{log_id}}"),
-        request("Compare two events", "GET", "management/event-log/{{log_id}}/compare/{{log_id_2}}"),
+        request("Get one event", "GET", "management/event-log/{{log_id}}", pre=log_first),
+        request("Compare two events", "GET", "management/event-log/{{log_id}}/compare/{{log_id_2}}", pre=log_first, status=[200, 400],
+                desc="Compares two entries of the same object. 400 when `log_id` and `log_id_2` (the first two rows of the list) belong to different objects."),
     ])
+    FIRST_ID_LISTS.append(("management/settings", "setting_key"))
+    setting_first = first_id_pre("management/settings", "setting_key", extra=[("setting_value", "value")])
     settings = folder("settings", [
         request("List settings", "GET", "management/settings",
                 test=[
@@ -490,11 +674,13 @@ def management_folder():
                     '    pm.environment.set("setting_value", JSON.stringify(jsonData.response_data[0].value));',
                     "}",
                 ], desc="Administrator only. Runtime settings. Saves the first key and its value in `setting_key` and `setting_value`."),
-        request("Get one setting", "GET", "management/settings/{{setting_key}}"),
-        request("Update setting", "PATCH", "management/settings/{{setting_key}}", body='{"value": {{setting_value}}}',
+        request("Get one setting", "GET", "management/settings/{{setting_key}}", pre=setting_first),
+        request("Update setting", "PATCH", "management/settings/{{setting_key}}", body='{"value": {{setting_value}}}', pre=setting_first,
                 desc="Sends back the value that List settings saved (no change). Edit the body to change a setting."),
-        request("Reset setting", "POST", "management/settings/{{setting_key}}/reset", desc="Puts the default value back."),
+        request("Reset setting", "POST", "management/settings/{{setting_key}}/reset", pre=setting_first, desc="Puts the default value back."),
     ])
+    FIRST_ID_LISTS.append(("management/my-jobs", "job_id"))
+    job_first = first_id_pre("management/my-jobs", "job_id")
     my_jobs = folder("my-jobs", [
         request("List my jobs", "GET", "management/my-jobs", enabled_query={"limit": "20"},
                 test=[
@@ -502,14 +688,14 @@ def management_folder():
                     'pm.test("Response has a list in response_data", function () { pm.expect(jsonData.response_data).to.be.an("array"); });',
                     'if (!pm.environment.get("job_id") && jsonData.response_data.length) { pm.environment.set("job_id", jsonData.response_data[0].id); }',
                 ], desc="Background jobs started by you (GPX processing, rescans)."),
-        request("Get one of my jobs", "GET", "management/my-jobs/{{job_id}}", desc="Uses `job_id` (set by an upload or rescan, or by List my jobs)."),
+        request("Get one of my jobs", "GET", "management/my-jobs/{{job_id}}", pre=job_first, desc="Uses `job_id` (set by an upload or rescan, or by List my jobs)."),
     ])
     admin_jobs = folder("jobs", [
         request("List all jobs", "GET", "management/jobs",
-                enabled_query={"created_from": "2020-01-01T00:00:00", "created_to": "2099-01-01T00:00:00", "limit": "20"},
-                desc="Administrator only. `created_from` and `created_to` are switched on because the API answers 500 when either is missing (known bug, not fixed yet). Switch them off after the fix."),
+                enabled_query={"limit": "20"},
+                desc="Administrator only. Filters (status, kind, user_id, created_from, created_to, ...) and sort are listed and switched off."),
         request("Job statistics", "GET", "management/jobs/stats", desc="Administrator only."),
-        request("Get any job", "GET", "management/jobs/{{job_id}}", desc="Administrator only."),
+        request("Get any job", "GET", "management/jobs/{{job_id}}", pre=job_first, desc="Administrator only."),
     ])
     broadcast = folder("broadcast", [
         request("Send notice", "POST", "management/broadcast", body={"level": "info", "text": "Notice from Postman"},
@@ -520,7 +706,7 @@ def management_folder():
         request("Celery workers", "GET", "management/celery/workers"),
         request("Registered tasks", "GET", "management/celery/tasks/registered"),
         request("Active tasks", "GET", "management/celery/tasks/active"),
-        request("Task detail", "GET", "management/celery/tasks/{{job_id}}", status=[200, 404],
+        request("Task detail", "GET", "management/celery/tasks/{{job_id}}", status=[200, 404], pre=job_first,
                 desc="A job id is also its Celery task id. Needs `job_id` (set by an upload or rescan, or by List my jobs); answers 404 when the task is unknown."),
         request("Beat schedule", "GET", "management/celery/beat"),
     ])
@@ -546,6 +732,8 @@ def cleanup_folder():
         ("DELETE", "compendium/regions/{{region_id}}", "region_id"),
         ("DELETE", "compendium/countries/{{country_id}}", "country_id"),
         ("DELETE", "explorer/gear/{{gear_id}}", "gear_id"),
+        ("DELETE", "explorer/routes/{{route_id}}", "route_id"),
+        ("DELETE", "explorer/segments/{{segment_id}}", "segment_id"),
         ("DELETE", "core/resource-types/{{resource_type_id}}", "resource_type_id"),
     ]
     refs = ["companies/{{company_id}}", "gear-types/{{gear_type_id}}", "achievement-categories/{{achievement_category_id}}",
@@ -557,7 +745,12 @@ def cleanup_folder():
             "visibilities/{{visibility_id}}", "waypoint-types/{{waypoint_type_id}}", "weather-conditions/{{weather_condition_id}}"]
     for r in refs:
         order.append(("DELETE", f"core/{r}", re.search(r"\{\{(\w+)\}\}", r).group(1)))
-    items = []
+    items = [
+        request("Delete the routes this collection made", "GET", "explorer/routes", pre=delete_all_pre("created_route_ids", "explorer/routes"),
+                desc="Deletes every route whose id was kept by a Create call of this collection (variable `created_route_ids`)."),
+        request("Delete the segments this collection made", "GET", "explorer/segments", pre=delete_all_pre("created_segment_ids", "explorer/segments"),
+                desc="Deletes every segment that a Create call or a route save of this collection made (variable `created_segment_ids`), after the routes are gone."),
+    ]
     for method, path, var in order:
         label = path.split("/")[0] + " / " + path.split("/")[1]
         it = request(f"Delete {label}", method, path, status=[200, 204, 404, 409, 422],
@@ -566,6 +759,48 @@ def cleanup_folder():
     return folder("Cleanup (optional)", items,
                   "Deletes the records the Create calls made, in an order that respects the links between them (links first, then what they point at). "
                   "Run this folder with the Collection Runner after a full run. Answers 404, 409 and 422 are accepted, so it can be run twice.")
+
+
+def collect_folder():
+    # One request that reads the first row of every list (limit=1) and saves its id in the variable that the Get one, Update
+    # and Delete requests of that model use. Built after all other folders, because they fill FIRST_ID_LISTS.
+    pairs = ",\n".join(f'    ["{path}", "{var}"]' for path, var in FIRST_ID_LISTS)
+    lines = [
+        "// Reads the first row of every list and saves its id in the variable of that model (company_id, poi_id, track_id, ...).",
+        "// By default an id that is already set (made by a Create call) is kept; set the variable collect_overwrite to true to replace them.",
+        'var overwrite = pm.environment.get("collect_overwrite") === "true";',
+        f'var token = pm.environment.get("{ARGS.token_var}");',
+        f'var base = pm.variables.replaceIn("{api_url("")}");',
+        "var lists = [",
+        pairs,
+        "];",
+        "var saved = [], kept = [], empty = [], failed = [];",
+        "lists.forEach(function (item) {",
+        "    var path = item[0], variable = item[1];",
+        '    if (!overwrite && pm.environment.get(variable)) { kept.push(variable); return; }',
+        '    pm.sendRequest({ url: base + path + "?limit=" + (variable === "log_id" ? 2 : 1), method: "GET", header: { Authorization: "Bearer " + token } }, function (err, res) {',
+        "        if (err || res.code !== 200) { failed.push(path + " + '" (" + (err ? "no answer" : res.code) + ")"' + "); return; }",
+        "        var rows = res.json().response_data;",
+        "        if (!rows || !rows.length) { empty.push(path); return; }",
+        '        pm.environment.set(variable, variable === "setting_key" ? rows[0].key : rows[0].id);',
+        '        if (variable === "setting_key") { pm.environment.set("setting_value", JSON.stringify(rows[0].value)); }',
+        '        if (variable === "log_id" && rows.length > 1) { pm.environment.set("log_id_2", rows[1].id); }',
+        "        saved.push(variable);",
+        "    });",
+        "});",
+        "setTimeout(function () {",
+        '    console.log("saved: " + saved.join(", ") + "\\nkept (already set): " + kept.join(", ") + "\\nlist is empty: " + empty.join(", ") + "\\nfailed: " + failed.join(", "));',
+        "}, 3000);",
+        'pm.test("Every list answered (an empty list is fine, a failed one is not)", function () { pm.expect(failed, failed.join("; ")).to.have.lengthOf(0); });',
+    ]
+    return folder("Collect first IDs (optional)", [
+        request("Collect first IDs (all lists)", "GET", "../health", auth=False, test=lines,
+                desc=("Run it once and every Get one, Update and Delete request can run alone: it reads the first row of each list "
+                      "(core, compendium, explorer, management, access policies) and saves its id in the variable that the requests of that model use "
+                      "(`company_id`, `poi_id`, `track_id`, `log_id`, `setting_key`, ...). It needs a login (`access_token`). "
+                      "An id that a Create call already saved is kept; set `collect_overwrite` to `true` in the environment to replace all of them. "
+                      "Careful: with the ids of real rows in the variables, a Delete request deletes a real row (Delete requests with an empty variable do the same on their own)."))],
+        "Fills the id variables from the first row of every list, so single requests can run without Create first. The List requests and the Get one, Update and Delete requests of every model do the same for their own model.")
 
 
 def health_folder():
@@ -603,7 +838,7 @@ def build_collection():
 
 **URL:** `{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/<app>/<resource>`. Folders: one per app (core, compendium, explorer, profile, management), one per model inside.
 
-**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV and Upload track calls need a file chosen in their body.
+**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV and Upload track calls need a file chosen in their body.
 
 **Not covered:** WebSocket requests (see management / ws for the ticket and the URLs)."""
     items = [
@@ -615,6 +850,7 @@ def build_collection():
         management_folder(),
         cleanup_folder(),
     ]
+    items.insert(2, collect_folder())    # after health and profile (the login is in profile / auth)
     return {
         "info": {
             "_postman_id": str(uuid.uuid5(uuid.NAMESPACE_URL, "alpen-wege-api-collection")),
@@ -642,6 +878,7 @@ def build_environment():
         var("guest_email", "guest@alpenwege.dev"), var("guest_password", "!Password@5005", True),
         var("new_user_password", "!Password@5005", True),
         var("skip_deletes", "false"),
+        var("collect_overwrite", "false"),
         var(ARGS.token_var, "", True),
     ]
     return {

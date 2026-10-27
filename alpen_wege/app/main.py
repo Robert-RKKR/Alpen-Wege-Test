@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 
 # Local application
 from app.database import async_engine, create_tables
@@ -54,12 +55,39 @@ async def lifespan(app: FastAPI):
     await async_engine.dispose()
 
 
+# Shown at the top of Swagger (/docs) and ReDoc (/redoc).
+API_DESCRIPTION = """
+REST API of Alpen Wege. Every URL is `/api/v1/{app}/{resource}` (apps: `profile`, `core`, `compendium`, `explorer`, `management`).
+
+**Login.** `POST /api/v1/profile/auth/login`, then press *Authorize* and paste the `access_token`. A token lasts a few minutes;
+when it is half used up the answer carries a fresh one in the header `X-Access-Token`: use that one from then on.
+
+**Answers.** Every answer has `response_status`, `response_code`, `response_message`, `response_data`, `response_details`
+(`error_message`, `error_errors` on a failure) and `response_request_id`. A list answer also has `response_pagination`
+(`pagination_total` counts the rows that match the filters).
+
+**Lists (`GET` of a collection).**
+`limit` and `offset` page through the rows (the users list calls the offset `skip`). Defaults: `limit` 1000, 100 on tracks, the
+event log, jobs and my jobs; tracks, jobs and my jobs allow at most 500 per call. `sort=name` sorts ascending, `sort=-name`
+descending (the allowed names are in the description of `sort`). Every list has filters that fit its data (text search `q`,
+ids, `..._min` / `..._max`, `..._from` / `..._to`, `bbox`, `near`); filters are combined with AND, an id filter can be repeated
+(`compendium_type_id=a&compendium_type_id=b`), and they only narrow what the caller may already see.
+A value the database cannot take (a negative `limit`, a date in the year 9999, a NUL character) answers 422.
+
+**Depth of one object (`GET .../{id}`).** Linked objects come as IDs. `expand=main_region.country,created_by` fills the ones
+you name (3 levels deep, 10 links at most; a wrong name answers 400 and lists the allowed ones).
+
+**Jobs.** Uploading a track and the rescan / reprocess endpoints answer 202 with a `job_id` (and a `Location` header);
+follow it with `management/my-jobs/{job_id}` or the WebSocket `management/ws`.
+"""
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="Alpen Wege", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Alpen Wege", version="0.1.0", description=API_DESCRIPTION, lifespan=lifespan)
 
     app.add_middleware(RequestIdMiddleware)
     app.add_middleware(TokenRefreshMiddleware)
     app.add_middleware(UploadSizeLimitMiddleware)
+    app.add_middleware(GZipMiddleware, minimum_size=1000)   # a list of 100 rows shrinks to about a tenth
 
     # ---- Exception handlers ----
 

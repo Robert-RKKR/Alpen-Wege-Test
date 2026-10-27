@@ -131,7 +131,7 @@ def ensure_seed_user(cur):
         cur.execute(
             "INSERT INTO profile_user_credentials"
             " (user_id, password_hash, user_group)"
-            " VALUES (%s, %s, 'admin')",
+            " VALUES (%s, %s, 'administrator')",
             (SEED_USER_ID, pw_hash),
         )
         print(f"  Created seed user: {SEED_EMAIL} / {SEED_PASSWORD}")

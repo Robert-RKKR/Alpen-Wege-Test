@@ -3,7 +3,7 @@ import uuid
 
 # Third-party
 from sqlalchemy import ForeignKey, Integer, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # Local application
 from app.core.base import (
@@ -72,3 +72,6 @@ class ExplorerAggGear(
             "listings and detail views."
         ),
     )
+
+    company = relationship("CoreRefCompany", foreign_keys=[company_id], lazy="raise", viewonly=True)
+    gear_type = relationship("CoreRefGearType", foreign_keys=[gear_type_id], lazy="raise", viewonly=True)

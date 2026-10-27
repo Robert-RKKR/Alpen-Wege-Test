@@ -6,6 +6,9 @@ from uuid import UUID
 # Third-party
 from pydantic import BaseModel, Field
 
+from app.core.utils.expand import Link
+from app.profile.schemas.user_read import ExpandedUser
+
 
 class EntityTypeRead(BaseModel):
     id: UUID
@@ -33,6 +36,11 @@ class EventLogRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class EventLogDetail(EventLogRead):
+    entity_type: EntityTypeRead | None = Link()
+    changed_by_user: ExpandedUser | None = Link("changed_by")
+
+
 class CompareEntryRef(BaseModel):
     id: UUID
     seq: int
@@ -40,6 +48,7 @@ class CompareEntryRef(BaseModel):
     changed_by: UUID
     changed_at: datetime
     request_id: str | None
+    changed_by_user: ExpandedUser | None = None
 
 
 class FieldChange(BaseModel):
@@ -50,7 +59,7 @@ class FieldChange(BaseModel):
 
 
 class EventLogCompare(BaseModel):
-    entity_type: EntityTypeRead
+    entity_type: EntityTypeRead | None = None
     entity_id: UUID
     older: CompareEntryRef
     newer: CompareEntryRef

@@ -2,7 +2,7 @@
 import uuid
 
 # Third-party
-from sqlalchemy import ForeignKey, Integer, Text, func
+from sqlalchemy import ForeignKey, Index, Integer, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -11,6 +11,12 @@ from app.core.base import Base, CreatorMixin, TimestampMixin
 
 class ExplorerM2mRouteJourney(TimestampMixin, CreatorMixin, Base):
     __tablename__ = "explorer_m2m_route_journey"
+    __table_args__ = (
+        UniqueConstraint(
+            "journey_id", "slot_position", name="uq_route_journey_day",
+        ),
+        Index("ix_route_journey_route_id", "route_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
@@ -30,11 +36,12 @@ class ExplorerM2mRouteJourney(TimestampMixin, CreatorMixin, Base):
         ),
     )
     route_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("explorer_agg_route.id", ondelete="CASCADE"),
+        ForeignKey("explorer_agg_route.id", ondelete="RESTRICT"),
         nullable=False,
         comment=(
-            "FK to explorer_agg_route with CASCADE "
-            "delete. The planned route assigned to "
+            "FK to explorer_agg_route with RESTRICT "
+            "delete: a route that is used by a journey "
+            "cannot be deleted. The planned route assigned to "
             "this day or stage of the journey."
         ),
     )

@@ -1,5 +1,7 @@
 # GET `?expand=` — implementation plan (for VS Code Claude)
 
+> **Superseded on 2026-10-24 by `get_expand_implementation_plan_v2.md`.** This v1 was written before the routes were restructured (folder per resource, URLs `/api/v1/{app}/{resource}`) and before tracks, jobs and settings existed; its file paths, URLs and the list of endpoints are outdated. Use v2.
+
 > Update 2026-10-23: the management app moves the event log. If this plan is not merged yet, read `app/core/{models,schemas,routes}/event_log.py` as `app/management/{models,schemas,routes}/event_log.py`, `CoreLogEvent` as `MgmtLogEvent`, and `/event-log...` as `/management/event-log...` (table in `management_implementation_plan.md`, section 5.3). The move is already done in the repo.
 
 Version 1 · written 2026-10-21 · status: ready to implement, not started

@@ -2,7 +2,7 @@
 import uuid
 
 # Third-party
-from sqlalchemy import Boolean, ForeignKey, Integer, func
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, UniqueConstraint, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -11,6 +11,19 @@ from app.core.base import Base, CreatorMixin, TimestampMixin
 
 class ExplorerM2mSegmentRoute(TimestampMixin, CreatorMixin, Base):
     __tablename__ = "explorer_m2m_segment_route"
+    __table_args__ = (
+        UniqueConstraint(
+            "route_id", "slot_position", "segment_id",
+            name="uq_segment_route_slot_segment",
+        ),
+        # at most one default per alternative group of a route (code checks
+        # that there is exactly one)
+        Index(
+            "uq_segment_route_one_default", "route_id", "alt_group",
+            unique=True, postgresql_where=text("is_default"),
+        ),
+        Index("ix_segment_route_segment_id", "segment_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
@@ -21,11 +34,12 @@ class ExplorerM2mSegmentRoute(TimestampMixin, CreatorMixin, Base):
         ),
     )
     segment_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("explorer_agg_segment.id", ondelete="CASCADE"),
+        ForeignKey("explorer_agg_segment.id", ondelete="RESTRICT"),
         nullable=False,
         comment=(
-            "FK to explorer_agg_segment with CASCADE delete. The trail "
-            "segment included in this route."
+            "FK to explorer_agg_segment with RESTRICT delete: a segment that "
+            "is used by a route cannot be deleted. The trail segment "
+            "included in this route."
         ),
     )
     route_id: Mapped[uuid.UUID] = mapped_column(

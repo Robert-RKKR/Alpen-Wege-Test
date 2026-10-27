@@ -1,4 +1,5 @@
 # Standard library
+import asyncio
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects import postgresql
 
 # Local application
-from app.core.utils.api_paths import TRACK_UPLOAD_PATH, job_url
+from app.core.utils.api_paths import SEGMENT_UPLOAD_PATH, TRACK_UPLOAD_PATH, job_url
 from app.core.utils.scope import apply_scope
 from app.core.utils.upload_limit import UploadSizeLimitMiddleware
 from app.explorer.models.models_agg.track import ExplorerAggTrack
@@ -28,6 +29,41 @@ def test_track_upload_path_is_the_create_track_route():
 def test_upload_guard_is_installed_and_watches_the_create_track_route():
     assert any(m.cls is UploadSizeLimitMiddleware for m in app.user_middleware), "middleware is not registered"
     assert UploadSizeLimitMiddleware(app=None).path == app.url_path_for("create_track")
+
+
+def test_segment_upload_path_is_the_create_segment_route_and_is_guarded_too():
+    assert app.url_path_for("create_segment") == SEGMENT_UPLOAD_PATH
+    guard = UploadSizeLimitMiddleware(app=None)
+    assert SEGMENT_UPLOAD_PATH in guard.limits and TRACK_UPLOAD_PATH in guard.limits
+    assert guard.limits[SEGMENT_UPLOAD_PATH][1] < guard.limits[TRACK_UPLOAD_PATH][1]      # a planned trail may be smaller than a recording
+
+
+def _ask_the_guard(path: str, content_length: int | None, method: str = "POST"):
+    # sends a request through the middleware; returns (status the guard sent or None, whether the app behind it was called)
+    called, sent = [], []
+
+    async def inner(scope, receive, send):
+        called.append(True)
+
+    async def send(message):
+        sent.append(message)
+
+    guard = UploadSizeLimitMiddleware(inner)
+    headers = [] if content_length is None else [(b"content-length", str(content_length).encode())]
+    asyncio.run(guard({"type": "http", "method": method, "path": path, "headers": headers}, None, send))
+    return (sent[0]["status"] if sent else None), bool(called), guard
+
+
+def test_the_guard_refuses_a_big_upload_before_the_endpoint_runs():
+    _, _, guard = _ask_the_guard(SEGMENT_UPLOAD_PATH, None)
+    segment_max, track_max = guard.limits[SEGMENT_UPLOAD_PATH][0], guard.limits[TRACK_UPLOAD_PATH][0]
+    assert _ask_the_guard(SEGMENT_UPLOAD_PATH, segment_max + 1)[:2] == (413, False)             # too big for a segment: refused, endpoint not called
+    assert _ask_the_guard(SEGMENT_UPLOAD_PATH, segment_max)[:2] == (None, True)                  # at the limit: passes on
+    assert _ask_the_guard(TRACK_UPLOAD_PATH, segment_max + 1)[:2] == (None, True)                # a track may be that big
+    assert _ask_the_guard(TRACK_UPLOAD_PATH, track_max + 1)[:2] == (413, False)
+    assert _ask_the_guard(SEGMENT_UPLOAD_PATH, None)[:2] == (None, True)                         # no Content-Length: the endpoint counts the bytes itself
+    assert _ask_the_guard(SEGMENT_UPLOAD_PATH, segment_max + 1, "GET")[:2] == (None, True)       # only POST is guarded
+    assert _ask_the_guard(SEGMENT_UPLOAD_PATH + "/from-coordinates", segment_max + 1)[:2] == (None, True)   # JSON routes are not uploads
 
 
 def test_job_url_is_the_owner_job_route():

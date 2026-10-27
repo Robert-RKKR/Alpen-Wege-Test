@@ -15,9 +15,10 @@ from app.profile.permissions import require_groups
 admin_only = require_groups("administrator")
 
 
-async def get_row(db: AsyncSession, key: str) -> MgmtSettings:
+async def get_row(db: AsyncSession, key: str, options=()) -> MgmtSettings:
     definition = REGISTRY.get(key)
-    row = (await db.execute(select(MgmtSettings).where(MgmtSettings.key == key))).scalar_one_or_none()
+    stmt = select(MgmtSettings).where(MgmtSettings.key == key).options(*options)
+    row = (await db.execute(stmt)).scalar_one_or_none()
     if definition is None or row is None:
         raise AppError(404, "Not found", error_message="No setting exists with this key.")
     return row

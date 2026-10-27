@@ -163,3 +163,9 @@ class ProfileUsrUser(Base):
         uselist=False,
         lazy="selectin",
     )
+
+    @property
+    def user_group(self) -> str | None:
+        # Lets an expanded user show its group like GET /profile/users/me does. The group is stored on the
+        # credentials row, which is loaded together with the user (lazy="selectin").
+        return self.credentials.user_group if self.credentials else None
