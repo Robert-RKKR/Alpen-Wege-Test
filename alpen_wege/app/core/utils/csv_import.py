@@ -136,10 +136,13 @@ async def import_csv(
     model,
     user_id: uuid.UUID,
     db: AsyncSession,
+    *,
+    row_check=None,
 ) -> dict:
     """Parse a CSV upload and bulk-insert rows into *model*'s table.
 
-    Returns ``{"inserted": N, "errors": [...]}``.
+    Returns ``{"inserted": N, "errors": [...]}``. row_check(data) is awaited for every parsed row and raises
+    ValueError to reject it (for example a link to something the caller may not use).
     """
     content = await file.read()
     text = content.decode("utf-8-sig")
@@ -196,6 +199,8 @@ async def import_csv(
             empty = [k for k in required if data.get(k) is None]
             if empty:
                 raise ValueError(f"missing value for {', '.join(empty)}")
+            if row_check is not None:
+                await row_check(data)
 
             objects.append(model(**data))
         except Exception as exc:

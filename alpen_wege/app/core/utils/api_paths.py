@@ -11,3 +11,5 @@ def job_url(job_id) -> str:
 TRACK_UPLOAD_PATH = f"{API_V1}/explorer/tracks"
 # POST to this path uploads the GPX file of a segment (smaller limit); the same middleware watches it.
 SEGMENT_UPLOAD_PATH = f"{API_V1}/explorer/segments"
+# POST to this path uploads a photo; the same middleware watches it.
+PHOTO_UPLOAD_PATH = f"{API_V1}/assets/photos"

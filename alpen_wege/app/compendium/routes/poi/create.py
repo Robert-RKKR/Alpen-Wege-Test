@@ -2,6 +2,7 @@ from fastapi import Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.assets.services.photo_access import check_photo_link
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_created
 from app.core.utils.responses import ApiResponse, ok
@@ -20,6 +21,7 @@ async def create_poi(
     access: AccessContext = Depends(resource_access("poi", "create")),
     db: AsyncSession = Depends(get_db),
 ):
+    await check_photo_link(db, access.user, body.main_photo_id)
     data = body.model_dump(exclude_unset=True)
     if "location" in data:
         data["location"] = geojson_to_wkt(data["location"], "POINT")

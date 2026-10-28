@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.assets.services.photo_access import check_photo_link
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_updated
 from app.core.utils.responses import ApiResponse, AppError, ok
@@ -26,6 +27,8 @@ async def update_card(
     obj = await db.get(CompendiumCatCard, card_id)
     check_object_access(access, obj, not_found_msg="Card not found")
     changes = body.model_dump(exclude_unset=True)
+    if "main_photo_id" in changes:
+        await check_photo_link(db, access.user, changes["main_photo_id"])
     old_values = {f: getattr(obj, f) for f in changes}
     for field, value in changes.items():
         setattr(obj, field, value)

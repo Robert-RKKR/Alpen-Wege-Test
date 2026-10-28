@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     # Collectible card graphics
     CARD_STORAGE_DIR: str = "/data/cards"        # generated files: {card_id}/{lang}.{svg,png,jpg,pdf}
     PHOTO_STORAGE_DIR: str = "/data/photos"      # asset_agg_photo.path is relative to this directory
+    PHOTO_MAX_UPLOAD_MB: int = 25
     CARD_FOOTER: str = "Alpen Wege"              # small text at the bottom right of every card
 
     # Planned hierarchy: segments, routes, journeys

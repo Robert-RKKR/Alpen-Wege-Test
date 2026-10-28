@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 # Every single-object GET that takes ?expand=. A new GET-by-id route has to be added here (and get a Detail schema)
 # or to EXEMPT, so no route is left out by accident.
 EXPAND_ROUTES = {
+    "GET /api/v1/assets/gpx/{gpx_id}",
+    "GET /api/v1/assets/photos/{photo_id}",
     "GET /api/v1/compendium/cards/{card_id}",
     "GET /api/v1/compendium/countries/{country_id}",
     "GET /api/v1/compendium/poi-regions/{poi_region_id}",

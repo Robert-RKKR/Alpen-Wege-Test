@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.assets.services.photo_access import check_photo_link
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_created
 from app.core.utils.responses import ApiResponse, AppError, ok
@@ -20,6 +21,7 @@ async def create_card(
     access: AccessContext = Depends(resource_access("card", "create")),
     db: AsyncSession = Depends(get_db),
 ):
+    await check_photo_link(db, access.user, body.main_photo_id)
     obj = CompendiumCatCard(**body.model_dump(exclude_unset=True), created_by=access.user.id)
     db.add(obj)
     try:

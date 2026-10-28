@@ -14,7 +14,7 @@ Names of the Postman variables (match them to the ones you already use):
 URL pattern of every request:  {scheme}://{{host-var}}:{{port-var}}/{{api-var}}/<app>/<resource>
 The value of the api variable is `api/v1`.
 
-Structure: one folder per app (core, compendium, explorer, profile, management), one folder per model
+Structure: one folder per app (core, compendium, assets, explorer, profile, management), one folder per model
 inside. Every model folder has List, Create, Get one, Update, Delete (and Upload CSV or the special
 calls where the API has them). Create calls save the new id in a variable (`country_id`, `poi_id`, ...)
 that the following calls of that model and the models that depend on it use.
@@ -313,10 +313,45 @@ def compendium_folder():
                               'pm.environment.set("job_id", jsonData.response_data.job_id);',
                           ],
                           desc="Starts a background job for this card. Saves `job_id`.")
+    card_first = first_id_pre("compendium/cards", "card_id")
+    render_note = ("63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, "
+                   "so the answer is always current. Use Send and Download (or `download=true`) to save the file.")
+    card_render = [
+        request("Card render model (JSON)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "json", "lang": "en"},
+                test=["var jsonData = pm.response.json();",
+                      'pm.test("Model has a number and a name", function () { pm.expect(jsonData.response_data).to.have.property("number"); pm.expect(jsonData.response_data).to.have.property("name"); });'],
+                desc="Every value printed on the card, already translated: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end."),
+        request("Card image (SVG)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "svg", "lang": "en"},
+                test=['pm.test("Answer is an SVG", function () { pm.expect(pm.response.headers.get("Content-Type")).to.include("image/svg+xml"); });'],
+                desc=render_note),
+        request("Card image (PNG, 300 dpi)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "png", "lang": "en"}, desc=render_note),
+        request("Card image (JPG, German)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "jpg", "lang": "de"}, desc=render_note),
+        request("Card for print (PDF)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "pdf", "lang": "en", "download": "true"},
+                desc=render_note + " Print at 100 % (not fit to page) and cut along the rounded edge."),
+        request("Render card files again", "POST", "compendium/cards/{{card_id}}/render", status=[202, 409], pre=card_first,
+                test=["var jsonData = pm.response.json();",
+                      'if (pm.response.code === 202) { pm.environment.set("job_id", jsonData.response_data.job_id); }'],
+                desc="Starts a job that writes SVG, PNG and PDF in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."),
+    ]
     card = crud_folder(
         "compendium", "cards", "card", "card_id",
-        {"name": "{{random_name}}", "poi_id": "{{poi_id}}"}, {"name": "{{random_name}} renamed"},
-        needs="`poi_id` (compendium/pois)", extras=[card_rescan])
+        {"poi_id": "{{poi_id}}", "rarity_id": "{{rarity_id}}", "difficulty_sport_id": "{{difficulty_sport_id}}"},
+        {"name": "{{random_name}} renamed"},
+        needs="`poi_id` (compendium/pois); optional `rarity_id` (core/rarities), `difficulty_sport_id` (core/difficulty-sports)",
+        extras=[card_rescan,
+                request("Set card photo", "PATCH", "compendium/cards/{{card_id}}", pre=card_first + first_id_pre("assets/photos", "photo_id"),
+                        body={"main_photo_id": "{{photo_id}}"},
+                        desc=("Makes `{{photo_id}}` (assets / photos / Upload photo) the main photo of the card and queues a new render. "
+                              "Same as Update card with only main_photo_id. 422 when the photo does not exist or you may not read it. "
+                              "Send null to remove it; the card then shows the photo of its POI."))] + card_render,
+        create_desc=("Creates a card and saves its id in `{{card_id}}`. Only `poi_id` is required; `card_number` is assigned when left out. "
+                     "Name, description, type, photo, altitude, country and region come from the POI unless set on the card. "
+                     "A render job is queued at once. Needs `poi_id`; `rarity_id` and `difficulty_sport_id` are optional (remove them when empty)."))
     post = crud_folder(
         "compendium", "posts", "post", "post_id",
         {"name": "{{random_name}}", "post_type_id": "{{post_type_id}}"}, {"summary": "Updated summary"},
@@ -327,6 +362,57 @@ def compendium_folder():
         needs="`poi_id` (compendium/pois), `region_id` (compendium/regions)")
     return folder("compendium", [country, region, poi, card, post, poi_region],
                   "Geographic and editorial catalog. Order of Create calls: core region-types, compendium-types, post-types, then country, region, POI, card, post, POI-region link.")
+
+
+def assets_folder():
+    FIRST_ID_LISTS.append(("assets/photos", "photo_id"))
+    photo_first = first_id_pre("assets/photos", "photo_id")
+    photos = folder("photos", [
+        request("List photos", "GET", "assets/photos", enabled_query={},
+                test=["var jsonData = pm.response.json();",
+                      "pm.test(\"Response has a list in response_data\", function () { pm.expect(jsonData.response_data).to.be.an('array'); });",
+                      'if (!pm.environment.get("photo_id") && jsonData.response_data.length) { pm.environment.set("photo_id", jsonData.response_data[0].id); }'],
+                desc="All photos you may read. Filters: q, created_by, is_public, altitude, taken_from/to, created_from/to, bbox, near + radius_m."),
+        request("Upload photo", "POST", "assets/photos", status=201,
+                form=[{"key": "file", "type": "file", "src": []},
+                      {"key": "name", "value": "{{random_name}}", "type": "text"},
+                      {"key": "summary", "value": "Uploaded from Postman", "type": "text", "disabled": True},
+                      {"key": "lon", "value": "8.82", "type": "text", "disabled": True},
+                      {"key": "lat", "value": "46.99", "type": "text", "disabled": True},
+                      {"key": "altitude_m", "value": "2572", "type": "text", "disabled": True},
+                      {"key": "is_public", "value": "true", "type": "text"}],
+                test=set_from_response("photo_id"),
+                desc=("Pick a JPEG, PNG or WebP in the body (key `file`, at most 25 MB). The image is turned upright, shrunk to 2560 px "
+                      "and stored without metadata; position, altitude and time come from EXIF unless the form gives them. Saves `photo_id`. "
+                      "Put it on a card, POI or post with their Update call: `{\"main_photo_id\": \"{{photo_id}}\"}` "
+                      "(compendium / cards / Set card photo).")),
+        request("Get one photo", "GET", "assets/photos/{{photo_id}}", pre=photo_first,
+                desc="Uses `{{photo_id}}`. `?expand=created_by` adds the uploader."),
+        request("Photo file", "GET", "assets/photos/{{photo_id}}/file", pre=photo_first,
+                desc="The image itself (Postman shows it in the response)."),
+        request("Update photo", "PATCH", "assets/photos/{{photo_id}}", pre=photo_first,
+                body={"summary": "Updated summary", "location": POINT, "is_public": True},
+                desc="Only the fields in the body change. The image cannot be replaced: upload a new photo."),
+        request("Delete photo", "DELETE", "assets/photos/{{photo_id}}", status=[200, 409], pre=SKIP_DELETES + photo_first,
+                test=['if (pm.response.code === 200) { pm.environment.unset("photo_id"); }'],
+                desc="Deletes the photo and its file. 409 while it is the main photo of a card, POI, post, gear, segment or track."),
+    ], "Photos: upload, read, change, delete. A card, POI or post gets its photo through its own Update call (main_photo_id).")
+    FIRST_ID_LISTS.append(("assets/gpx", "gpx_id"))
+    gpx_first = first_id_pre("assets/gpx", "gpx_id")
+    gpx = folder("gpx", [
+        request("List GPX files", "GET", "assets/gpx", enabled_query={},
+                test=["var jsonData = pm.response.json();",
+                      'if (!pm.environment.get("gpx_id") && jsonData.response_data.length) { pm.environment.set("gpx_id", jsonData.response_data[0].id); }'],
+                desc="GPX files you may read. A GPX file is created by explorer / tracks / Upload track. Filter `sha256` finds duplicates."),
+        request("Get one GPX file", "GET", "assets/gpx/{{gpx_id}}", pre=gpx_first),
+        request("Download GPX file", "GET", "assets/gpx/{{gpx_id}}/file", pre=gpx_first),
+        request("Update GPX file", "PATCH", "assets/gpx/{{gpx_id}}", pre=gpx_first, body={"summary": "Updated summary"},
+                desc="Name, summary and is_public. The file itself cannot be replaced."),
+        request("Delete GPX file", "DELETE", "assets/gpx/{{gpx_id}}", status=[200, 409], pre=SKIP_DELETES + gpx_first,
+                test=['if (pm.response.code === 200) { pm.environment.unset("gpx_id"); }'],
+                desc="Only a file that no track uses (an orphan); 409 otherwise. Delete the track instead."),
+    ], "GPX files of tracks: read, download, rename, delete orphans.")
+    return folder("assets", [photos, gpx], "Uploaded files: photos and GPX files.")
 
 
 def explorer_folder():
@@ -727,6 +813,7 @@ def cleanup_folder():
         ("DELETE", "core/resource-types/{{policy_resource_type_id}}", "policy_resource_type_id"),
         ("DELETE", "compendium/poi-regions/{{poi_region_id}}", "poi_region_id"),
         ("DELETE", "compendium/cards/{{card_id}}", "card_id"),
+        ("DELETE", "assets/photos/{{photo_id}}", "photo_id"),
         ("DELETE", "compendium/posts/{{post_id}}", "post_id"),
         ("DELETE", "compendium/pois/{{poi_id}}", "poi_id"),
         ("DELETE", "compendium/regions/{{region_id}}", "region_id"),
@@ -836,9 +923,9 @@ def build_collection():
 
 **Use:** import this collection and `Alpen API local.postman_environment.json`, select the environment, run **profile / auth / Login admin** once, then any call. Tokens last only a few minutes; the collection keeps the newest one automatically (header `X-Access-Token`). If a call answers 401, log in again.
 
-**URL:** `{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/<app>/<resource>`. Folders: one per app (core, compendium, explorer, profile, management), one per model inside.
+**URL:** `{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/<app>/<resource>`. Folders: one per app (core, compendium, assets, explorer, profile, management), one per model inside.
 
-**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV and Upload track calls need a file chosen in their body.
+**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV, Upload track and Upload photo calls need a file chosen in their body.
 
 **Not covered:** WebSocket requests (see management / ws for the ticket and the URLs)."""
     items = [
@@ -846,6 +933,7 @@ def build_collection():
         profile_folder(),
         core_folder(),
         compendium_folder(),
+        assets_folder(),
         explorer_folder(),
         management_folder(),
         cleanup_folder(),

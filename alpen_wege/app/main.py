@@ -21,6 +21,7 @@ from app.explorer.routes import router as explorer_router
 from app.core.routes import router as core_router
 from app.compendium.routes import router as compendium_router
 from app.management.routes import router as management_router
+from app.assets.routes import router as assets_router
 from app.management.utils.event_logger import load_entity_type_cache
 from app.management.utils.seed_entity_types import seed_entity_types
 from app.core.utils.api_paths import API_V1
@@ -147,6 +148,7 @@ def create_app() -> FastAPI:
     app.include_router(core_router, prefix=api_v1_prefix)
     app.include_router(compendium_router, prefix=api_v1_prefix)
     app.include_router(management_router, prefix=api_v1_prefix)
+    app.include_router(assets_router, prefix=api_v1_prefix)
 
     @app.get("/health")
     async def health():

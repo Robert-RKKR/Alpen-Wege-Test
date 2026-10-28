@@ -51,6 +51,7 @@ Swagger UI is available at **http://localhost:8000/docs**.
 | `CARD_STORAGE_DIR`     | `/data/cards`                  | generated card files           |
 | `PHOTO_STORAGE_DIR`    | `/data/photos`                 | `asset_agg_photo.path` is relative to it |
 | `CARD_FOOTER`          | `Alpen Wege`                   | small text at the bottom of every card |
+| `PHOTO_MAX_UPLOAD_MB`  | `25`                           | largest photo upload           |
 
 ---
 
@@ -300,6 +301,49 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
 }
 ```
 
+### Assets (photos and GPX files)
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/assets/photos` | List photos (filters: `q`, `created_by`, `is_public`, `altitude_min/max`, `taken_from/to`, `created_from/to`, `bbox`, `near` + `radius_m`; sort: `name`, `taken_at`, `altitude_m`, `created_at`) |
+| POST | `/assets/photos` | Upload a photo (multipart, `201`) |
+| GET | `/assets/photos/{id}` | Get one (`?expand=created_by`) |
+| GET | `/assets/photos/{id}/file` | The image |
+| PATCH | `/assets/photos/{id}` | Change name, summary, location, altitude, `taken_at`, `is_public` (the image itself cannot be replaced) |
+| DELETE | `/assets/photos/{id}` | Delete photo and file (`409` while it is the main photo of something) |
+| GET | `/assets/gpx` | List GPX files (filters: `q`, `created_by`, `is_public`, `sha256`, `created_from/to`) |
+| GET | `/assets/gpx/{id}` | Get one |
+| GET | `/assets/gpx/{id}/file` | Download the file |
+| PATCH | `/assets/gpx/{id}` | Change name, summary, `is_public` |
+| DELETE | `/assets/gpx/{id}` | Delete a file no track uses (`409` otherwise) |
+
+A GPX file is created by `POST /explorer/tracks`, not here. Access follows the `photo` and `gpx` policies (own, public, all).
+
+**Upload a photo** (form fields besides `file` are optional; `name` defaults to the file name):
+
+```bash
+curl -X POST http://localhost:8000/api/v1/assets/photos \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@pfannenstock.jpg" -F "name=Pfannenstock" -F "is_public=true"
+```
+
+JPEG, PNG or WebP up to `PHOTO_MAX_UPLOAD_MB`. The image is decoded (anything else answers `400`), turned upright,
+shrunk to at most 2560 px and saved without metadata under `PHOTO_STORAGE_DIR/<year>/<month>/<uuid>.<ext>`.
+Position, altitude and capture time are taken from the EXIF data unless the form gives `lon` + `lat`, `altitude_m`, `taken_at`.
+
+**Put it on a card, POI or post** with their own update call, like any other link:
+
+```bash
+curl -X PATCH http://localhost:8000/api/v1/compendium/cards/<card-uuid> \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"main_photo_id": "<photo-uuid>"}'
+```
+
+A card is rendered again. On a POI, every card of the POI without its own photo shows it. Create, update and CSV
+import of cards, POIs and posts accept only a photo the caller may read (own, or public when the role reads public
+photos); anything else answers `422` on `main_photo_id`, so a private photo of somebody else cannot be published
+through a card. `null` removes the photo.
+
 ### Collectible cards (graphics)
 
 A card is the printable picture of a POI, 63×88 mm (trading-card size) with 3 mm bleed. The front shows the
@@ -312,7 +356,7 @@ when set) and the description; the rarity sets the colour of the frame (Legendar
 | `No 013` | `card.card_number`: unique, assigned automatically; can be given on create, update or CSV to keep the number of an old printed card |
 | Name, description | `card.name*` / `card.description*` → `card.summary*` → `poi.name*` / `poi.description*` → `poi.summary*` |
 | Type | `card.compendium_type_id` → `poi.compendium_type_id` |
-| Photo | `card.main_photo_id` → `poi.main_photo_id`; without one a placeholder in the rarity colour |
+| Photo | `card.main_photo_id` → `poi.main_photo_id` (upload with `POST /assets/photos`, then set `main_photo_id`); without one a placeholder in the rarity colour |
 | Flags, country, region | `poi.main_region` → country, plus the regions in `compendium/poi-regions` |
 | Altitude | `poi.altitude_m` |
 | Difficulty | `card.difficulty_sport_id` (shown short: `SAC T3`) or else `card.difficulty_level_id`; nothing when both are empty |
@@ -552,6 +596,8 @@ app/
 │   ├── routes/            # /management/* (event-log, settings, jobs, my-jobs, ws, celery, broadcast)
 │   ├── schemas/
 │   └── utils/             # event_logger.py, seed_entity_types.py
+├── assets/                # Uploaded files: photos (upload, EXIF, resize) and GPX files
+│   ├── models/  routes/ (photo/, gpx/)  schemas/  services/photo_storage.py
 ├── compendium/            # Geographic / editorial catalog
 │   ├── cards/             # card graphics: render.py, service.py, templates/card.svg.j2, fonts/, flags/
 │   ├── models/

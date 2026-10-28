@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.assets.services.photo_access import check_photo_link
 from app.core.dependencies import get_db
 from app.management.utils.event_logger import log_updated
 from app.core.utils.responses import ApiResponse, ok
@@ -26,6 +27,8 @@ async def update_poi(
     obj = await db.get(CompendiumCatPoi, poi_id)
     check_object_access(access, obj, not_found_msg="POI not found")
     data = body.model_dump(exclude_unset=True)
+    if "main_photo_id" in data:
+        await check_photo_link(db, access.user, data["main_photo_id"])
     if "location" in data:
         data["location"] = geojson_to_wkt(data["location"], "POINT")
     old_values = {f: getattr(obj, f) for f in data}

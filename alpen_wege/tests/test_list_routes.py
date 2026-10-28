@@ -59,6 +59,11 @@ LIST_ROUTES.update({
         "created_by")),
     "/api/v1/compendium/posts": (P1000, "name", ["name", "created_at", "updated_at"], ("q", "post_type_id", "created_by")),
     "/api/v1/compendium/poi-regions": (P1000, "slot_position", ["slot_position", "created_at"], ("poi_id", "region_id", "created_by")),
+    "/api/v1/assets/photos": (P1000, "-created_at", ["name", "taken_at", "altitude_m", "created_at"], (
+        "q", "created_by", "is_public", "altitude_min", "altitude_max", "taken_from", "taken_to", "created_from", "created_to",
+        "bbox", "near", "radius_m")),
+    "/api/v1/assets/gpx": (P1000, "-created_at", ["name", "size_bytes", "created_at"], (
+        "q", "created_by", "is_public", "sha256", "created_from", "created_to")),
     "/api/v1/explorer/gear": (P1000, "-created_at", ["name", "created_at", "weight_g"], (
         "q", "company_id", "gear_type_id", "created_by", "weight_min", "weight_max")),
     "/api/v1/explorer/segments": (P1000, "-created_at", ["name", "created_at", "updated_at", "distance_m", "elevation_gain_m"], (
@@ -118,7 +123,7 @@ def test_the_list_routes_are_exactly_the_known_ones():
     # every GET that has page_params is in LIST_ROUTES and the other way round
     paging = {path for path, (_, deps) in _get_routes().items() if _own_dependencies(deps)[0]}
     assert paging == set(LIST_ROUTES)
-    assert len(LIST_ROUTES) == 35
+    assert len(LIST_ROUTES) == 37
 
 
 def test_every_list_route_has_the_documented_page_sort_and_filters():
@@ -180,7 +185,7 @@ def test_list_route_files_use_the_helpers_and_not_their_own_paging():
         assert not re.search(r"\blimit: int\b|\boffset: int\b|\bskip: int\b", text), name
         assert "count_stmt" not in text, name
         assert re.search(r"total=total, limit=page\.limit, offset=page\.offset", text), name
-    assert checked == 35
+    assert checked == 37
 
 
 def test_a_bad_paging_value_without_a_token_still_answers_401():
@@ -206,7 +211,7 @@ def test_every_list_route_with_an_access_context_narrows_by_the_scope():
         assert "apply_scope(" in text or "apply_visibility(" in text or 'access.scope == "own"' in text, f"{name} ignores the scope"
         if "apply_visibility" in text:
             assert "apply_visibility(" in text and "apply_scope(" in text, f"{name}: the track list needs both"
-    assert checked == 29   # 6 compendium lists, gear, segment, route, track and the 19 lookup tables
+    assert checked == 31   # 6 compendium lists, gear, segment, route, track, photo, gpx and the 19 lookup tables
 
 
 # ------------------------------------------------------------------ the default order is the old one
@@ -219,6 +224,8 @@ OLD_ORDER.update({
     "/api/v1/core/resource-types": ("key", False),
     "/api/v1/compendium/poi-regions": ("slot_position", False),
     "/api/v1/explorer/gear": ("created_at", True),
+    "/api/v1/assets/photos": ("created_at", True),
+    "/api/v1/assets/gpx": ("created_at", True),
     "/api/v1/explorer/segments": ("created_at", True),
     "/api/v1/explorer/routes": ("created_at", True),
     "/api/v1/explorer/tracks": ("coalesce", True),          # coalesce(recorded_at, created_at)
@@ -256,7 +263,8 @@ EXPECT = {
     "distance_min": ".distance_m >= 7", "distance_max": ".distance_m <= 7",
     "rank_min": ".rank >= 7", "rank_max": ".rank <= 7",
     "elevation_gain_min": ".elevation_gain_m >= 7", "elevation_gain_max": ".elevation_gain_m <= 7",
-    "created_from": ".created_at >= ", "created_to": ".created_at < ", "changed_from": ".changed_at >= ", "changed_to": ".changed_at < ",
+    "created_from": ".created_at >= ", "created_to": ".created_at < ", "taken_from": ".taken_at >= ", "taken_to": ".taken_at < ",
+    "changed_from": ".changed_at >= ", "changed_to": ".changed_at < ",
     "recorded_from": "coalesce(explorer_agg_track.recorded_at, explorer_agg_track.created_at) >= ",
     "recorded_to": "coalesce(explorer_agg_track.recorded_at, explorer_agg_track.created_at) < ",
     "group": "profile_access_policy.user_group = ", "resource_key": "core_ref_resource_type.key = ",
@@ -275,6 +283,7 @@ SKIP = {"archived", "radius_m"}          # archived is applied by apply_visibili
 Q_COLUMNS = {
     "/api/v1/compendium/pois": ["name", "name_de", "name_pl"],
     "/api/v1/explorer/gear": ["name", "name_de", "name_pl", "model"],
+    "/api/v1/assets/photos": ["name", "name_de", "name_pl", "summary", "summary_de", "summary_pl"],
     "/api/v1/explorer/tracks": ["name", "name_de", "name_pl", "summary"],
     "/api/v1/profile/users/": ["username", "email", "first_name", "last_name"],
     "/api/v1/core/resource-types": ["key"],
@@ -293,6 +302,8 @@ def _sample(name: str, annotation):
         return "ready" if name == "processing_status" else "queued"
     if name == "render_status":
         return "done"
+    if name == "sha256":
+        return "a" * 64
     if name == "bbox":
         return "7,46,8,47"
     if name == "near":
@@ -384,6 +395,8 @@ def test_the_map_filters_use_the_right_geometry_column():
         ("/api/v1/compendium/pois", "bbox", "compendium_cat_poi.location"),        # the point of the POI
         ("/api/v1/compendium/pois", "near", "compendium_cat_poi.location"),
         ("/api/v1/compendium/regions", "bbox", "compendium_cat_region.bbox"),      # the area of the region, not its centre
+        ("/api/v1/assets/photos", "bbox", "asset_agg_photo.location"),
+        ("/api/v1/assets/photos", "near", "asset_agg_photo.location"),
     ):
         filters_class = _filter_class(routes[path][1])
         names = [p.name for p in inspect.signature(filters_class.__init__).parameters.values() if p.name != "self"]

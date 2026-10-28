@@ -3,7 +3,7 @@ import json
 
 # Local application
 from app.config import get_settings
-from app.core.utils.api_paths import SEGMENT_UPLOAD_PATH, TRACK_UPLOAD_PATH
+from app.core.utils.api_paths import PHOTO_UPLOAD_PATH, SEGMENT_UPLOAD_PATH, TRACK_UPLOAD_PATH
 
 
 class UploadSizeLimitMiddleware:
@@ -16,6 +16,7 @@ class UploadSizeLimitMiddleware:
         self.limits = {
             TRACK_UPLOAD_PATH: (self.max_bytes, settings.GPX_MAX_UPLOAD_MB),
             SEGMENT_UPLOAD_PATH: ((settings.SEGMENT_GPX_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.SEGMENT_GPX_MAX_UPLOAD_MB),
+            PHOTO_UPLOAD_PATH: ((settings.PHOTO_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.PHOTO_MAX_UPLOAD_MB),
         }
 
     async def __call__(self, scope, receive, send):
