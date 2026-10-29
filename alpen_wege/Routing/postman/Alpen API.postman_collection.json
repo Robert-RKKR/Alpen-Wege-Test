@@ -10202,7 +10202,8 @@
                     "exec": [
                       "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
                       "var jsonData = pm.response.json();",
-                      "pm.test(\"Model has a number and a name\", function () { pm.expect(jsonData.response_data).to.have.property(\"number\"); pm.expect(jsonData.response_data).to.have.property(\"name\"); });"
+                      "pm.test(\"Model has a number and a name\", function () { pm.expect(jsonData.response_data).to.have.property(\"number\"); pm.expect(jsonData.response_data).to.have.property(\"name\"); });",
+                      "pm.test(\"Model is in the asked language\", function () { pm.expect(jsonData.response_data.lang).to.eql(pm.environment.get(\"card_lang\") || \"en\"); });"
                     ]
                   }
                 }
@@ -10211,7 +10212,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=json&lang=en",
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=json&lang={{card_lang}}",
                   "protocol": "http",
                   "host": [
                     "{{hostname}}"
@@ -10232,8 +10233,14 @@
                     },
                     {
                       "key": "lang",
-                      "value": "en",
-                      "description": "optional"
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2.",
+                      "disabled": true
                     },
                     {
                       "key": "download",
@@ -10243,7 +10250,7 @@
                     }
                   ]
                 },
-                "description": "Every value printed on the card, already translated: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end."
+                "description": "Every value printed on the card in the language of `{{card_lang}}`: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end. The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment variables that fill them: change the variables in the environment, or type a value in Params (for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422."
               }
             },
             {
@@ -10287,7 +10294,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=svg&lang=en",
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=svg&lang={{card_lang}}&ratio={{card_ratio}}",
                   "protocol": "http",
                   "host": [
                     "{{hostname}}"
@@ -10308,8 +10315,13 @@
                     },
                     {
                       "key": "lang",
-                      "value": "en",
-                      "description": "optional"
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "{{card_ratio}}",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
                     },
                     {
                       "key": "download",
@@ -10319,7 +10331,7 @@
                     }
                   ]
                 },
-                "description": "63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, so the answer is always current. Use Send and Download (or `download=true`) to save the file."
+                "description": "Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file. The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment variables that fill them: change the variables in the environment, or type a value in Params (for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422."
               }
             },
             {
@@ -10362,7 +10374,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=png&lang=en",
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=png&lang={{card_lang}}&ratio={{card_ratio}}",
                   "protocol": "http",
                   "host": [
                     "{{hostname}}"
@@ -10383,8 +10395,13 @@
                     },
                     {
                       "key": "lang",
-                      "value": "en",
-                      "description": "optional"
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "{{card_ratio}}",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
                     },
                     {
                       "key": "download",
@@ -10394,11 +10411,11 @@
                     }
                   ]
                 },
-                "description": "63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, so the answer is always current. Use Send and Download (or `download=true`) to save the file."
+                "description": "Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file. The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment variables that fill them: change the variables in the environment, or type a value in Params (for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422."
               }
             },
             {
-              "name": "Card image (JPG, German)",
+              "name": "Card image (JPG, 300 dpi)",
               "event": [
                 {
                   "listen": "prerequest",
@@ -10437,7 +10454,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=jpg&lang=de",
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=jpg&lang={{card_lang}}&ratio={{card_ratio}}",
                   "protocol": "http",
                   "host": [
                     "{{hostname}}"
@@ -10458,8 +10475,13 @@
                     },
                     {
                       "key": "lang",
-                      "value": "de",
-                      "description": "optional"
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "{{card_ratio}}",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
                     },
                     {
                       "key": "download",
@@ -10469,7 +10491,7 @@
                     }
                   ]
                 },
-                "description": "63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, so the answer is always current. Use Send and Download (or `download=true`) to save the file."
+                "description": "Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file. The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment variables that fill them: change the variables in the environment, or type a value in Params (for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422."
               }
             },
             {
@@ -10512,7 +10534,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=pdf&lang=en&download=true",
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=pdf&lang={{card_lang}}&ratio={{card_ratio}}&download=true",
                   "protocol": "http",
                   "host": [
                     "{{hostname}}"
@@ -10533,8 +10555,13 @@
                     },
                     {
                       "key": "lang",
-                      "value": "en",
-                      "description": "optional"
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "{{card_ratio}}",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
                     },
                     {
                       "key": "download",
@@ -10543,7 +10570,248 @@
                     }
                   ]
                 },
-                "description": "63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, so the answer is always current. Use Send and Download (or `download=true`) to save the file. Print at 100 % (not fit to page) and cut along the rounded edge."
+                "description": "Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file. Print at 100 % (not fit to page) and cut along the rounded edge. The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment variables that fill them: change the variables in the environment, or type a value in Params (for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422."
+              }
+            },
+            {
+              "name": "Card image, square (PNG 1:1)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Run alone? When {{card_id}} is empty, take the id of the first row of compendium/cards.",
+                      "if (!pm.environment.get(\"card_id\")) {",
+                      "    pm.sendRequest({",
+                      "        url: pm.variables.replaceIn(\"http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards?limit=1\"),",
+                      "        method: \"GET\",",
+                      "        header: { Authorization: \"Bearer \" + pm.environment.get(\"access_token\") }",
+                      "    }, function (err, res) {",
+                      "        if (err || res.code !== 200) { console.log(\"first id of compendium/cards: the list answered \" + (err || res.code)); return; }",
+                      "        var rows = res.json().response_data;",
+                      "        if (rows && rows.length) {",
+                      "            pm.environment.set(\"card_id\", rows[0].id);",
+                      "            console.log(\"card_id was empty, using the first row of compendium/cards: \" + rows[0].id);",
+                      "        } else { console.log(\"first id of compendium/cards: the list is empty\"); }",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=png&lang={{card_lang}}&ratio=1:1",
+                  "protocol": "http",
+                  "host": [
+                    "{{hostname}}"
+                  ],
+                  "port": "{{port}}",
+                  "path": [
+                    "{{api_path}}",
+                    "compendium",
+                    "cards",
+                    "{{card_id}}",
+                    "render"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "png",
+                      "description": "optional"
+                    },
+                    {
+                      "key": "lang",
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "1:1",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
+                    },
+                    {
+                      "key": "download",
+                      "value": "",
+                      "description": "optional",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Square card, e.g. for social media. Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file."
+              }
+            },
+            {
+              "name": "Card image, wide (PNG 16:9)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Run alone? When {{card_id}} is empty, take the id of the first row of compendium/cards.",
+                      "if (!pm.environment.get(\"card_id\")) {",
+                      "    pm.sendRequest({",
+                      "        url: pm.variables.replaceIn(\"http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards?limit=1\"),",
+                      "        method: \"GET\",",
+                      "        header: { Authorization: \"Bearer \" + pm.environment.get(\"access_token\") }",
+                      "    }, function (err, res) {",
+                      "        if (err || res.code !== 200) { console.log(\"first id of compendium/cards: the list answered \" + (err || res.code)); return; }",
+                      "        var rows = res.json().response_data;",
+                      "        if (rows && rows.length) {",
+                      "            pm.environment.set(\"card_id\", rows[0].id);",
+                      "            console.log(\"card_id was empty, using the first row of compendium/cards: \" + rows[0].id);",
+                      "        } else { console.log(\"first id of compendium/cards: the list is empty\"); }",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=png&lang={{card_lang}}&ratio=16:9",
+                  "protocol": "http",
+                  "host": [
+                    "{{hostname}}"
+                  ],
+                  "port": "{{port}}",
+                  "path": [
+                    "{{api_path}}",
+                    "compendium",
+                    "cards",
+                    "{{card_id}}",
+                    "render"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "png",
+                      "description": "optional"
+                    },
+                    {
+                      "key": "lang",
+                      "value": "{{card_lang}}",
+                      "description": "Language of the texts on the card: en, de or pl."
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "16:9",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
+                    },
+                    {
+                      "key": "download",
+                      "value": "",
+                      "description": "optional",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Wide card: the photo sits on the left, the texts on the right. Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, description, country, region, type, rarity, difficulty and labels. A text that is empty in that language is taken from the next language that has one (en, de, pl), first from the card, then from the POI. When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file."
+              }
+            },
+            {
+              "name": "Card ratio out of range (422)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Run alone? When {{card_id}} is empty, take the id of the first row of compendium/cards.",
+                      "if (!pm.environment.get(\"card_id\")) {",
+                      "    pm.sendRequest({",
+                      "        url: pm.variables.replaceIn(\"http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards?limit=1\"),",
+                      "        method: \"GET\",",
+                      "        header: { Authorization: \"Bearer \" + pm.environment.get(\"access_token\") }",
+                      "    }, function (err, res) {",
+                      "        if (err || res.code !== 200) { console.log(\"first id of compendium/cards: the list answered \" + (err || res.code)); return; }",
+                      "        var rows = res.json().response_data;",
+                      "        if (rows && rows.length) {",
+                      "            pm.environment.set(\"card_id\", rows[0].id);",
+                      "            console.log(\"card_id was empty, using the first row of compendium/cards: \" + rows[0].id);",
+                      "        } else { console.log(\"first id of compendium/cards: the list is empty\"); }",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 422\", function () { pm.response.to.have.status(422); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://{{hostname}}:{{port}}/{{api_path}}/compendium/cards/{{card_id}}/render?format=png&ratio=100:1",
+                  "protocol": "http",
+                  "host": [
+                    "{{hostname}}"
+                  ],
+                  "port": "{{port}}",
+                  "path": [
+                    "{{api_path}}",
+                    "compendium",
+                    "cards",
+                    "{{card_id}}",
+                    "render"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "png",
+                      "description": "optional"
+                    },
+                    {
+                      "key": "lang",
+                      "value": "",
+                      "description": "Language of the texts on the card: en, de or pl.",
+                      "disabled": true
+                    },
+                    {
+                      "key": "ratio",
+                      "value": "100:1",
+                      "description": "Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."
+                    },
+                    {
+                      "key": "download",
+                      "value": "",
+                      "description": "optional",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "A ratio outside 2:5 to 5:2 (or not width:height with whole numbers 1 to 100) answers 422 on `query.ratio`."
               }
             },
             {
@@ -10602,7 +10870,7 @@
                     "render"
                   ]
                 },
-                "description": "Starts a job that writes SVG, PNG and PDF in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."
+                "description": "Starts a job that writes SVG, PNG, JPG and PDF (63:88) in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."
               }
             },
             {

@@ -101,7 +101,7 @@ class CompendiumCatCard(TimestampMixin, CreatorMixin, IdentificationL18nMixin, B
     )
     render_hash: Mapped[str | None] = mapped_column(
         CHAR(64),
-        comment="SHA-256 of the English render model the stored files were made from. Files are stale when it no longer matches.",
+        comment="SHA-256 of the render models (all languages) the stored files were made from. Files are stale when it no longer matches.",
     )
     rendered_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

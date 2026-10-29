@@ -52,7 +52,7 @@ def render_card(self, card_id: str):
     # The hash is of the data read before rendering: an edit made meanwhile leaves the files stale, never wrongly fresh.
     _set_status(
         card_uuid, render_status="done", render_version=render.TEMPLATE_VERSION,
-        render_hash=render.render_hash(models["en"]), rendered_at=func.now(),
+        render_hash=service.models_hash(models), rendered_at=func.now(),
     )
     return {"status": "done", "card_id": card_id, "languages": list(models), "formats": list(service.STORED_FORMATS)}
 

@@ -65,7 +65,7 @@ END $$;
 
 COMMENT ON COLUMN compendium_cat_card.render_status IS 'State of the generated card files: pending, rendering, done or failed. NULL when never rendered.';
 COMMENT ON COLUMN compendium_cat_card.render_version IS 'Template version the stored files were rendered with. A newer template version makes the files stale.';
-COMMENT ON COLUMN compendium_cat_card.render_hash IS 'SHA-256 of the English render model the stored files were made from. Files are stale when it no longer matches.';
+COMMENT ON COLUMN compendium_cat_card.render_hash IS 'SHA-256 of the render models (all languages) the stored files were made from. Files are stale when it no longer matches.';
 COMMENT ON COLUMN compendium_cat_card.rendered_at IS 'When the stored card files were rendered.';
 
 COMMIT;

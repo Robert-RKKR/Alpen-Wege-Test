@@ -314,29 +314,46 @@ def compendium_folder():
                           ],
                           desc="Starts a background job for this card. Saves `job_id`.")
     card_first = first_id_pre("compendium/cards", "card_id")
-    render_note = ("63x88 mm card with 3 mm bleed. `lang`: en, de, pl. When the stored files are out of date the card is drawn now, "
-                   "so the answer is always current. Use Send and Download (or `download=true`) to save the file.")
+    render_note = ("Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; "
+                   "also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; "
+                   "the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, "
+                   "description, country, region, type, rarity, difficulty and labels. A text that is empty in that language "
+                   "is taken from the next language that has one (en, de, pl), first from the card, then from the POI. "
+                   "When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file.")
+    lang_note = (" The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment "
+                 "variables that fill them: change the variables in the environment, or type a value in Params "
+                 "(for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422.")
     card_render = [
         request("Card render model (JSON)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "json", "lang": "en"},
+                enabled_query={"format": "json", "lang": "{{card_lang}}"},
                 test=["var jsonData = pm.response.json();",
-                      'pm.test("Model has a number and a name", function () { pm.expect(jsonData.response_data).to.have.property("number"); pm.expect(jsonData.response_data).to.have.property("name"); });'],
-                desc="Every value printed on the card, already translated: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end."),
+                      'pm.test("Model has a number and a name", function () { pm.expect(jsonData.response_data).to.have.property("number"); pm.expect(jsonData.response_data).to.have.property("name"); });',
+                      'pm.test("Model is in the asked language", function () { pm.expect(jsonData.response_data.lang).to.eql(pm.environment.get("card_lang") || "en"); });'],
+                desc="Every value printed on the card in the language of `{{card_lang}}`: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end." + lang_note),
         request("Card image (SVG)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "svg", "lang": "en"},
+                enabled_query={"format": "svg", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"},
                 test=['pm.test("Answer is an SVG", function () { pm.expect(pm.response.headers.get("Content-Type")).to.include("image/svg+xml"); });'],
-                desc=render_note),
+                desc=render_note + lang_note),
         request("Card image (PNG, 300 dpi)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "png", "lang": "en"}, desc=render_note),
-        request("Card image (JPG, German)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "jpg", "lang": "de"}, desc=render_note),
+                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"}, desc=render_note + lang_note),
+        request("Card image (JPG, 300 dpi)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "jpg", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"}, desc=render_note + lang_note),
         request("Card for print (PDF)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "pdf", "lang": "en", "download": "true"},
-                desc=render_note + " Print at 100 % (not fit to page) and cut along the rounded edge."),
+                enabled_query={"format": "pdf", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}", "download": "true"},
+                desc=render_note + " Print at 100 % (not fit to page) and cut along the rounded edge." + lang_note),
+        request("Card image, square (PNG 1:1)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "1:1"},
+                desc="Square card, e.g. for social media. " + render_note),
+        request("Card image, wide (PNG 16:9)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
+                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "16:9"},
+                desc="Wide card: the photo sits on the left, the texts on the right. " + render_note),
+        request("Card ratio out of range (422)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first, status=422,
+                enabled_query={"format": "png", "ratio": "100:1"},
+                desc="A ratio outside 2:5 to 5:2 (or not width:height with whole numbers 1 to 100) answers 422 on `query.ratio`."),
         request("Render card files again", "POST", "compendium/cards/{{card_id}}/render", status=[202, 409], pre=card_first,
                 test=["var jsonData = pm.response.json();",
                       'if (pm.response.code === 202) { pm.environment.set("job_id", jsonData.response_data.job_id); }'],
-                desc="Starts a job that writes SVG, PNG and PDF in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."),
+                desc="Starts a job that writes SVG, PNG, JPG and PDF (63:88) in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."),
     ]
     card = crud_folder(
         "compendium", "cards", "card", "card_id",
@@ -967,6 +984,8 @@ def build_environment():
         var("new_user_password", "!Password@5005", True),
         var("skip_deletes", "false"),
         var("collect_overwrite", "false"),
+        var("card_lang", "en"),
+        var("card_ratio", "63:88"),
         var(ARGS.token_var, "", True),
     ]
     return {

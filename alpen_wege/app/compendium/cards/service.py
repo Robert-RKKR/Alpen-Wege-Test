@@ -18,7 +18,7 @@ from app.config import get_settings
 
 LANGS = ("en", "de", "pl")
 FORMATS = {"svg": "image/svg+xml", "png": "image/png", "jpg": "image/jpeg", "pdf": "application/pdf"}
-STORED_FORMATS = ("svg", "png", "pdf")   # jpg is made from the stored png when asked for
+STORED_FORMATS = ("svg", "png", "jpg", "pdf")
 _MAX_PHOTO_BYTES = 15 * 1024 * 1024
 _PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
@@ -78,16 +78,28 @@ def load_sync(session, card_id: UUID):
     return card, list(links), poi_photo
 
 
+def _col(field: str, lang: str) -> str:
+    return field if lang == "en" else f"{field}_{lang}"
+
+
+def _fallback_langs(lang: str) -> list[str]:
+    return [lang] + [x for x in LANGS if x != lang]
+
+
+def _text(lang: str, *sources: tuple) -> str | None:
+    # sources: (object, field) pairs in order of preference. The requested language is tried on every source first,
+    # so a German card shows the German POI name before the English card name; then the other languages, en, de, pl.
+    # Whitespace-only text counts as empty.
+    for code in _fallback_langs(lang):
+        for obj, field in sources:
+            value = getattr(obj, _col(field, code), None) if obj is not None else None
+            if value and value.strip():
+                return value.strip()
+    return None
+
+
 def _t(obj, field: str, lang: str) -> str | None:
-    # translated text with English fallback; empty strings count as missing
-    if obj is None:
-        return None
-    value = getattr(obj, f"{field}_{lang}", None) if lang != "en" else None
-    return value or getattr(obj, field, None) or None
-
-
-def _first(*values):
-    return next((v for v in values if v), None)
+    return _text(lang, (obj, field))
 
 
 def _short_grade(name: str | None) -> str | None:
@@ -110,21 +122,17 @@ def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, po
     for c in [country] + [link.region.country for link in extra_links if link.region]:
         if c is not None and c.iso_code and c.iso_code.upper() not in seen:
             seen.add(c.iso_code.upper())
-            name = _first(
-                getattr(c, f"name_common_{lang}", None) if lang != "en" else None,
-                getattr(c, f"name_{lang}", None) if lang != "en" else None,
-                c.name_common, c.name,
-            )
-            flags.append({"iso": c.iso_code.upper(), "name": name})
+            flags.append({"iso": c.iso_code.upper(), "name": _text(lang, (c, "name_common"), (c, "name"))})
 
     ctype = card.compendium_type or poi.compendium_type
-    difficulty = None
+    # sport grade (SAC T3): text chip, with its colour as a diamond before the card number; general level (Easy): after the rarity
+    difficulty_sport = difficulty_level = None
     if card.difficulty_sport is not None:
         d = card.difficulty_sport
-        difficulty = {"kind": "sport", "name": _t(d, "name", lang), "short": _short_grade(d.name), "rank": d.rank, "color": d.color}
-    elif card.difficulty_level is not None:
+        difficulty_sport = {"name": _t(d, "name", lang), "short": _short_grade(d.name), "rank": d.rank, "color": d.color}
+    if card.difficulty_level is not None:
         d = card.difficulty_level
-        difficulty = {"kind": "level", "name": _t(d, "name", lang), "short": _t(d, "name", lang), "rank": d.rank, "color": d.color}
+        difficulty_level = {"name": _t(d, "name", lang), "rank": d.rank, "color": d.color}
 
     rarity = None
     if card.rarity is not None:
@@ -137,17 +145,17 @@ def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, po
         "lang": lang,
         "card_id": str(card.id),
         "number": card.card_number,
-        "name": _first(_t(card, "name", lang), _t(poi, "name", lang)),
+        "name": _text(lang, (card, "name"), (poi, "name")),
         "flags": flags,
         "country": flags[0]["name"] if flags else None,
         "region": _t(region, "name", lang),
         "type": _t(ctype, "name", lang),
         "altitude_m": poi.altitude_m,
         "rarity": rarity,
-        "difficulty": difficulty,
+        "difficulty_sport": difficulty_sport,
+        "difficulty_level": difficulty_level,
         "photo": {"id": str(photo.id), "path": photo.path} if photo is not None else None,
-        "description": _first(_t(card, "description", lang), _t(card, "summary", lang),
-                              _t(poi, "description", lang), _t(poi, "summary", lang)),
+        "description": _text(lang, (card, "description"), (card, "summary"), (poi, "description"), (poi, "summary")),
         "labels": LABELS[lang],
         "footer": get_settings().CARD_FOOTER,
     }
@@ -167,8 +175,8 @@ def photo_data_uri(model: dict) -> str | None:
     return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode()
 
 
-def render_card(model: dict, fmt: str) -> bytes:
-    svg = render.render_svg(model, photo_data_uri(model))
+def render_card(model: dict, fmt: str, ratio: tuple[int, int] = render.DEFAULT_RATIO) -> bytes:
+    svg = render.render_svg(model, photo_data_uri(model), ratio)
     return render.svg_to(svg, fmt)
 
 
@@ -202,9 +210,14 @@ def remove_files(card_id: UUID | str) -> None:
         d.rmdir()
 
 
-def is_fresh(card: CompendiumCatCard, model_en: dict) -> bool:
+def models_hash(models: dict[str, dict]) -> str:
+    # one hash over every language, so a change of only a German or Polish text makes the files stale too
+    return render.render_hash({lang: models[lang] for lang in LANGS})
+
+
+def is_fresh(card: CompendiumCatCard, models: dict[str, dict]) -> bool:
     return (
         card.render_status == "done"
         and card.render_version == render.TEMPLATE_VERSION
-        and card.render_hash == render.render_hash(model_en)
+        and card.render_hash == models_hash(models)
     )

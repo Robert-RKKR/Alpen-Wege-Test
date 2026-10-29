@@ -346,33 +346,55 @@ through a card. `null` removes the photo.
 
 ### Collectible cards (graphics)
 
-A card is the printable picture of a POI, 63×88 mm (trading-card size) with 3 mm bleed. The front shows the
+A card is the printable picture of a POI, by default 63×88 mm (trading-card size), with a dark 3 mm bleed. The front shows the
 order number, the flag of every country the POI lies in (main region first, then `compendium/poi-regions` by
 `slot_position`), the main photo, the name, region and country, the type, the altitude, the difficulty (only
 when set) and the description; the rarity sets the colour of the frame (Legendary and Mythic get a holographic one).
 
-| Card shows | Taken from (card value first, then the POI) |
+| Card shows | Taken from |
 |---|---|
 | `No 013` | `card.card_number`: unique, assigned automatically; can be given on create, update or CSV to keep the number of an old printed card |
-| Name, description | `card.name*` / `card.description*` → `card.summary*` → `poi.name*` / `poi.description*` → `poi.summary*` |
-| Type | `card.compendium_type_id` → `poi.compendium_type_id` |
+| Name | `card.name` → `poi.name` |
+| Description | `card.description` → `card.summary` → `poi.description` → `poi.summary` |
+| Country | `country.name_common` → `country.name` (flags: main region, then `compendium/poi-regions` by `slot_position`) |
+| Region, type, rarity, difficulty | their `name` (type: `card.compendium_type_id` → `poi.compendium_type_id`) |
 | Photo | `card.main_photo_id` → `poi.main_photo_id` (upload with `POST /assets/photos`, then set `main_photo_id`); without one a placeholder in the rarity colour |
-| Flags, country, region | `poi.main_region` → country, plus the regions in `compendium/poi-regions` |
 | Altitude | `poi.altitude_m` |
-| Difficulty | `card.difficulty_sport_id` (shown short: `SAC T3`) or else `card.difficulty_level_id`; nothing when both are empty |
+| Difficulty (sport) | `card.difficulty_sport_id`: short name (`SAC T3`) as plain text in the difficulty box, its colour as a diamond before the card number; both left out when empty |
+| Difficulty (level) | `card.difficulty_level_id`: its name after the rarity at the bottom (`COMMON / EASY`); left out when empty |
 | Frame colour | `card.rarity_id` → `core_ref_rarity.color` |
 
-German and Polish fall back to English per field.
+**Language.** `lang` (`en`, `de`, `pl`) of `GET .../render` sets the language of every text on the card. Each text is
+looked up in that language first on every source in the order of the table, and only when none has it in the next
+language that has text (en, de, pl in this order). For `lang=de` the name is `card.name_de` → `poi.name_de` →
+`card.name` → `poi.name` → `card.name_pl` → `poi.name_pl`: a German card shows the German POI name before an English
+name written on the card. Empty or whitespace-only text counts as missing. German and Polish country names are filled by
+`scripts/sql/country_names_l18n.sql` (Unicode CLDR; only empty fields are filled).
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/compendium/cards/{id}/render?format=svg&lang=en` | The card. `format`: `json` (the render model: every value on the card, translated, for your own front end), `svg`, `png` (300 dpi), `jpg` (300 dpi), `pdf` (print). `lang`: `en`, `de`, `pl`. `download=true` saves instead of showing |
+| GET | `/compendium/cards/{id}/render?format=svg&lang=en&ratio=63:88` | The card. `format`: `json` (the render model: every value on the card, translated, for your own front end), `svg`, `png` (300 dpi), `jpg` (300 dpi), `pdf` (print). `lang`: `en`, `de`, `pl`. `ratio`: shape as width:height (see below). `download=true` saves instead of showing |
 | POST | `/compendium/cards/{id}/render` | Render the stored files again (job, `202` with `job_id`; `409` when one is already queued or running) |
 
+**Shape.** `ratio` is width:height with whole numbers 1 to 100, between 2:5 and 5:2 (so `100:1` answers `422`):
+`63:88` (default, trading card), `1:1`, `4:5`, `9:16`, `3:2`, `16:9`, ... The shorter side is always 63 mm, so text keeps its
+size on every shape; the photo grows with the longer side. From 13:10 on (wide cards) the photo sits on the left and the
+type, altitude, difficulty and description on the right.
+
+**Colours.** The card body is a soft gradient of the rarity colour, the 3 mm bleed is dark navy and a ring of the two
+mixed sits between them (holographic from Legendary). Every text on the body is dark or white, whichever has more contrast
+on that rarity colour (WCAG formula); the boxes behind type, altitude and description get a light or dark veil that is
+made just strong enough for 4.5 : 1. The colour of the sport difficulty only appears as the diamond before the card
+number, on the dark number pill with a white outline, so it reads on every rarity. A new rarity colour needs no code change.
+
+**Postman variables.** `card_lang` and `card_ratio` are Postman environment variables that fill the API parameters `lang`
+and `ratio` in the saved requests. The API itself only knows `format`, `lang`, `ratio` and `download`; any other parameter
+(such as `card_ratio=1:1` typed into the URL) answers `422`.
+
 Creating or changing a card queues a `card.render` job automatically (follow it like any job, see below). It writes
-`svg`, `png` and `pdf` in the three languages to `CARD_STORAGE_DIR/{card_id}/{lang}.{format}` and sets
+`svg`, `png`, `jpg` and `pdf` (63:88) in the three languages to `CARD_STORAGE_DIR/{card_id}/{lang}.{format}` and sets
 `render_status` (`pending`, `rendering`, `done`, `failed`), `render_version` and `rendered_at` on the card. `GET .../render`
-serves those files while they are up to date; when the card, its POI or a reference value changed since (or the
+serves those files while they are up to date (other ratios are always drawn on request); when the card, its POI or a reference value changed since (or the
 template is newer), the card is drawn on the spot, so the answer is always current. Deleting a card deletes its files.
 The list takes `sort=card_number` and the filters `difficulty_level_id`, `difficulty_sport_id` and `render_status`.
 
@@ -387,7 +409,7 @@ The design is one Jinja2 SVG template, `app/compendium/cards/templates/card.svg.
 layout, raise `TEMPLATE_VERSION` in `render.py`: every card then counts as stale and is drawn fresh until it is rendered again.
 Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT), font: [Inter](https://rsms.me/inter/) (SIL OFL), both in `app/compendium/cards/`.
 
-Database change: `scripts/sql/card_render_ddl.sql`.
+Database changes: `scripts/sql/card_render_ddl.sql`, `scripts/sql/country_names_l18n.sql`.
 
 ### Expanding linked objects (`?expand=`)
 

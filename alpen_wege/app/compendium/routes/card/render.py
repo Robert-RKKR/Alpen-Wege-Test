@@ -1,12 +1,13 @@
 from typing import Literal
 from uuid import UUID
 
-from fastapi import Depends, Query, Response, status
+from fastapi import Depends, Query, Request, Response, status
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
+from app.compendium.cards import render as card_render
 from app.compendium.cards import service
 from app.compendium.models.models_cat.card import CompendiumCatCard
 from app.core.dependencies import get_db
@@ -21,9 +22,18 @@ from app.profile.permissions import AccessContext, check_object_access, resource
 
 from ._router import router
 
+RENDER_PARAMS = {"format", "lang", "ratio", "download"}
+
 _DESCRIPTION = (
     "The card as printed. `format=json` gives the render model (every value on the card, translated); "
-    "`svg`, `png` (300 dpi), `jpg` (300 dpi) and `pdf` give the file, 63x88 mm with 3 mm bleed. "
+    "`lang` picks the language of every text on the card (name, description, country, region, type, rarity, "
+    "difficulty, labels). A text that is empty in that language is taken from the next language that has one "
+    "(en, de, pl in this order), first from the card, then from the POI. "
+    "`ratio` is the shape of the card as width:height (default 63:88, the trading card; also 1:1, 4:5, 9:16, 3:2, "
+    "16:9, ...), whole numbers 1 to 100, between 2:5 and 5:2. From 13:10 on the photo moves to the left of the texts. "
+    "The shorter side is always 63 mm, so text keeps its size. Only 63:88 is stored by the render job; other ratios are "
+    "drawn on request. Any other parameter answers 422. "
+    "`svg`, `png` (300 dpi), `jpg` (300 dpi) and `pdf` give the file with 3 mm bleed in the rarity colour. "
     "Files made by the render job are served when they are up to date, otherwise the card is drawn now. "
     "`download=true` asks the browser to save the file."
 )
@@ -36,29 +46,43 @@ _DESCRIPTION = (
     responses={200: {"content": {mime: {} for mime in service.FORMATS.values()}}},
 )
 async def get_card_render(
+    request: Request,
     card_id: UUID,
     format: Literal["json", "svg", "png", "jpg", "pdf"] = Query("svg"),
-    lang: Literal["en", "de", "pl"] = Query("en"),
+    lang: Literal["en", "de", "pl"] = Query("en", description="Language of the texts on the card: en, de or pl."),
+    ratio: str = Query("63:88", max_length=7, description="Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."),
     download: bool = Query(False),
     access: AccessContext = Depends(resource_access("card", "read")),
     db: AsyncSession = Depends(get_db),
 ):
+    unknown = sorted(set(request.query_params) - RENDER_PARAMS)
+    if unknown:
+        # card_lang / card_ratio are Postman variables, not parameters: say so instead of drawing the default card
+        text = f"Unknown parameter(s): {', '.join(unknown)}. Allowed: format, lang, ratio, download."
+        raise AppError(422, "Validation failed", error_message=text,
+                       error_errors=[{"field": f"query.{name}", "code": "unknown_parameter", "message": text} for name in unknown])
+    try:
+        size = card_render.parse_ratio(ratio)
+    except ValueError as exc:
+        raise AppError(422, "Validation failed", error_message=str(exc),
+                       error_errors=[{"field": "query.ratio", "code": "ratio", "message": str(exc)}])
     loaded = await service.load_async(db, card_id)
     check_object_access(access, loaded[0] if loaded else None, not_found_msg="Card not found")
     card, links, poi_photo = loaded
-    model = service.build_render_model(card, links, lang, poi_photo)
+    models = {code: service.build_render_model(card, links, code, poi_photo) for code in service.LANGS}
+    model = models[lang]
     if format == "json":
         return ok(model)
 
-    stored_fmt = "png" if format == "jpg" else format
-    stored = service.stored_file(card.id, lang, stored_fmt)
-    fresh = stored.is_file() and service.is_fresh(card, service.build_render_model(card, links, "en", poi_photo))
-    if fresh and format != "jpg":
+    stored = service.stored_file(card.id, lang, format)
+    fresh = size == card_render.DEFAULT_RATIO and stored.is_file() and service.is_fresh(card, models)
+    if fresh:
         data = await run_in_threadpool(stored.read_bytes)
     else:
-        data = await run_in_threadpool(service.render_card, model, format)
+        data = await run_in_threadpool(service.render_card, model, format, size)
 
-    filename = f"card-{card.card_number:03d}-{lang}.{format}"
+    shape = "" if size == card_render.DEFAULT_RATIO else f"-{size[0]}x{size[1]}"
+    filename = f"card-{card.card_number:03d}-{lang}{shape}.{format}"
     disposition = "attachment" if download else "inline"
     return Response(
         content=data,
@@ -107,7 +131,7 @@ async def queue_render(db: AsyncSession, card_id: UUID, user_id: UUID) -> dict:
     response_model=ApiResponse[JobAccepted],
     status_code=status.HTTP_202_ACCEPTED,
     summary="Render the card files again",
-    description="Starts a job that writes SVG, PNG and PDF in English, German and Polish. `409` when one is already queued or running.",
+    description="Starts a job that writes SVG, PNG, JPG and PDF (63:88) in English, German and Polish. `409` when one is already queued or running.",
 )
 async def post_card_render(
     card_id: UUID,
