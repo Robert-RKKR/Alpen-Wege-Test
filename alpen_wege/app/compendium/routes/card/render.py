@@ -22,7 +22,7 @@ from app.profile.permissions import AccessContext, check_object_access, resource
 
 from ._router import router
 
-RENDER_PARAMS = {"format", "lang", "ratio", "download"}
+RENDER_PARAMS = {"format", "lang", "ratio", "style", "dpi", "download"}
 
 _DESCRIPTION = (
     "The card as printed. `format=json` gives the render model (every value on the card, translated); "
@@ -31,8 +31,14 @@ _DESCRIPTION = (
     "(en, de, pl in this order), first from the card, then from the POI. "
     "`ratio` is the shape of the card as width:height (default 63:88, the trading card; also 1:1, 4:5, 9:16, 3:2, "
     "16:9, ...), whole numbers 1 to 100, between 2:5 and 5:2. From 13:10 on the photo moves to the left of the texts. "
-    "The shorter side is always 63 mm, so text keeps its size. Only 63:88 is stored by the render job; other ratios are "
-    "drawn on request. Any other parameter answers 422. "
+    "The shorter side is always 63 mm, so text keeps its size. "
+    "`style` is the look of the card: `standard` (default) or `3d` (raised frame, glass panels, holographic sheen); "
+    "any other name answers 422. "
+    "`dpi` is the sharpness of a `png` or `jpg`, 72 to 2000 (default 300: 815 x 1110 px on 63:88; `dpi=600` is twice as "
+    "wide and high). The file records it, so a print program knows the size. A wide or tall shape has more pixels at the "
+    "same dpi, so very high values answer 422 with the highest dpi that fits. It is ignored for `svg`, `pdf` and `json`. "
+    "Only 63:88 in the standard style at 300 dpi is stored by the render job; other ratios, styles and dpi are drawn on request. "
+    "Any other parameter answers 422. "
     "`svg`, `png` (300 dpi), `jpg` (300 dpi) and `pdf` give the file with 3 mm bleed in the rarity colour. "
     "Files made by the render job are served when they are up to date, otherwise the card is drawn now. "
     "`download=true` asks the browser to save the file."
@@ -48,17 +54,19 @@ _DESCRIPTION = (
 async def get_card_render(
     request: Request,
     card_id: UUID,
-    format: Literal["json", "svg", "png", "jpg", "pdf"] = Query("svg"),
-    lang: Literal["en", "de", "pl"] = Query("en", description="Language of the texts on the card: en, de or pl."),
-    ratio: str = Query("63:88", max_length=7, description="Shape as width:height, e.g. 63:88 (default), 1:1, 4:5, 9:16, 16:9. Between 2:5 and 5:2."),
-    download: bool = Query(False),
+    format: Literal["json", "svg", "png", "jpg", "pdf"] = Query("svg", description="What to return: json (the render model, every value on the card), svg, png, jpg or pdf (print, with 3 mm bleed). Default svg."),
+    lang: Literal["en", "de", "pl"] = Query("en", description="Language of every text on the card: en, de or pl. A text empty in that language is taken from the next language that has one (en, de, pl)."),
+    ratio: str = Query("63:88", max_length=7, description="Shape as width:height, whole numbers 1 to 100, between 2:5 and 5:2. Default 63:88 (trading card); also 1:1, 4:5, 9:16, 3:2, 16:9. The shorter side is always 63 mm; from 13:10 on the photo moves to the left of the texts."),
+    style: str = Query(card_render.DEFAULT_STYLE, max_length=20, description="Look of the card: standard (default, flat) or 3d (raised frame, glass panels, holographic sheen). Any other name answers 422."),
+    dpi: int | None = Query(None, ge=card_render.MIN_DPI, le=card_render.MAX_DPI, description=f"Sharpness of a png or jpg: pixels per inch of the printed card, {card_render.MIN_DPI} to {card_render.MAX_DPI}, default {card_render.DEFAULT_DPI} (815 x 1110 px on 63:88; 600 gives twice the width and height). The jpg records it. Very wide or tall shapes allow less (16:9 up to 1990, 5:2 up to 1690): a higher value answers 422 and names the limit. Ignored for svg, pdf and json."),
+    download: bool = Query(False, description="true: the browser or Postman saves the file (Content-Disposition attachment); false (default): it is shown. The file content is the same."),
     access: AccessContext = Depends(resource_access("card", "read")),
     db: AsyncSession = Depends(get_db),
 ):
     unknown = sorted(set(request.query_params) - RENDER_PARAMS)
     if unknown:
         # card_lang / card_ratio are Postman variables, not parameters: say so instead of drawing the default card
-        text = f"Unknown parameter(s): {', '.join(unknown)}. Allowed: format, lang, ratio, download."
+        text = f"Unknown parameter(s): {', '.join(unknown)}. Allowed: format, lang, ratio, style, dpi, download."
         raise AppError(422, "Validation failed", error_message=text,
                        error_errors=[{"field": f"query.{name}", "code": "unknown_parameter", "message": text} for name in unknown])
     try:
@@ -66,6 +74,11 @@ async def get_card_render(
     except ValueError as exc:
         raise AppError(422, "Validation failed", error_message=str(exc),
                        error_errors=[{"field": "query.ratio", "code": "ratio", "message": str(exc)}])
+    try:
+        style = card_render.parse_style(style)
+    except ValueError as exc:
+        raise AppError(422, "Validation failed", error_message=str(exc),
+                       error_errors=[{"field": "query.style", "code": "style", "message": str(exc)}])
     loaded = await service.load_async(db, card_id)
     check_object_access(access, loaded[0] if loaded else None, not_found_msg="Card not found")
     card, links, poi_photo = loaded
@@ -75,14 +88,25 @@ async def get_card_render(
         return ok(model)
 
     stored = service.stored_file(card.id, lang, format)
-    fresh = size == card_render.DEFAULT_RATIO and stored.is_file() and service.is_fresh(card, models)
+    # dpi only changes a png / jpg; svg, pdf and json are vector or text
+    sharpness = dpi if format in ("png", "jpg") and dpi else card_render.DEFAULT_DPI
+    try:
+        card_render.check_dpi(size, sharpness)
+    except ValueError as exc:
+        raise AppError(422, "Validation failed", error_message=str(exc),
+                       error_errors=[{"field": "query.dpi", "code": "dpi", "message": str(exc)}])
+    # the render job stores only the default shape in the default style at the default dpi
+    fresh = (size == card_render.DEFAULT_RATIO and style == card_render.DEFAULT_STYLE
+             and sharpness == card_render.DEFAULT_DPI and stored.is_file() and service.is_fresh(card, models))
     if fresh:
         data = await run_in_threadpool(stored.read_bytes)
     else:
-        data = await run_in_threadpool(service.render_card, model, format, size)
+        data = await run_in_threadpool(service.render_card, model, format, size, style, sharpness)
 
     shape = "" if size == card_render.DEFAULT_RATIO else f"-{size[0]}x{size[1]}"
-    filename = f"card-{card.card_number:03d}-{lang}{shape}.{format}"
+    look = "" if style == card_render.DEFAULT_STYLE else f"-{style}"
+    sharp = "" if sharpness == card_render.DEFAULT_DPI else f"-{sharpness}dpi"
+    filename = f"card-{card.card_number:0{card_render.NUMBER_DIGITS}d}-{lang}{shape}{look}{sharp}.{format}"
     disposition = "attachment" if download else "inline"
     return Response(
         content=data,

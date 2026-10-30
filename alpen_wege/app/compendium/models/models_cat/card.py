@@ -36,7 +36,7 @@ class CompendiumCatCard(TimestampMixin, CreatorMixin, IdentificationL18nMixin, B
         Identity(always=False),
         nullable=False,
         comment=(
-            "Unique order number of the card, printed on it as No 013. Assigned from an identity sequence; "
+            "Unique order number of the card, printed on it as No 00013 (5 digits). Assigned from an identity sequence; "
             "may be set explicitly (create, update, CSV) to keep the number of a card printed earlier."
         ),
     )

@@ -13,3 +13,7 @@ TRACK_UPLOAD_PATH = f"{API_V1}/explorer/tracks"
 SEGMENT_UPLOAD_PATH = f"{API_V1}/explorer/segments"
 # POST to this path uploads a photo; the same middleware watches it.
 PHOTO_UPLOAD_PATH = f"{API_V1}/assets/photos"
+# POST to this path uploads an SVG icon (small limit); the same middleware watches it.
+ICON_UPLOAD_PATH = f"{API_V1}/assets/icons"
+# POST to this path creates many icons from one CSV file (bigger limit); the same middleware watches it.
+ICON_CSV_UPLOAD_PATH = f"{API_V1}/assets/icons/upload-csv"

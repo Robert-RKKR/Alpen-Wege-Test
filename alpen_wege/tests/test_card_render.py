@@ -109,9 +109,31 @@ def test_wrapped_lines_fit_the_box():
 
 
 def test_flag_lookup_rejects_paths():
-    assert render.flag_href("CH").startswith("data:image/svg+xml;base64,")
+    assert render.flag_href("CH").startswith("data:image/png;base64,")
     assert render.flag_href("../") is None
     assert render.flag_href("ZZ") is None
+
+
+def test_flags_are_png_not_nested_svg():
+    # an SVG inside an <image> is dropped by many viewers: the flag circles stayed empty in a downloaded file
+    svg = render.render_svg(model())
+    assert "data:image/png;base64," in svg
+    assert "image/svg+xml" not in svg
+
+
+def test_every_bundled_flag_converts():
+    import base64
+    from io import BytesIO
+    from PIL import Image
+    for path in sorted(render.FLAG_DIR.glob("??.svg")):          # two-letter country codes; arab, eu-style files are not countries
+        href = render.flag_href(path.stem)
+        assert href is not None, path.name
+        assert Image.open(BytesIO(base64.b64decode(href.split(",", 1)[1]))).size == (render.FLAG_PX, render.FLAG_PX), path.name
+
+
+@pytest.mark.parametrize("number,label", [(1, "No 00001"), (13, "No 00013"), (99999, "No 99999"), (123456, "No 123456")])
+def test_card_number_has_five_digits(number, label):
+    assert f">{label}</text>" in render.render_svg(model(make_card(card_number=number)))
 
 
 def test_hash_changes_with_content_and_template_version(monkeypatch):
@@ -210,6 +232,42 @@ def test_ratio_rejected(value):
         render.parse_ratio(value)
 
 
+# ------------------------------------------------------------------ style
+
+@pytest.mark.parametrize("value,expected", [
+    (None, "standard"), ("", "standard"), ("standard", "standard"), ("3d", "3d"), (" 3D ", "3d"), ("Standard", "standard"),
+])
+def test_style_accepted(value, expected):
+    assert render.parse_style(value) == expected
+
+
+@pytest.mark.parametrize("value", ["old", "card", "../standard", "standard.svg.j2", "3d/../standard", "x" * 50])
+def test_style_rejected(value):
+    with pytest.raises(ValueError):
+        render.parse_style(value)
+
+
+@pytest.mark.parametrize("style", render.STYLES)
+def test_every_style_has_a_template_and_draws_valid_svg(style):
+    assert (render._HERE / "templates" / f"{style}.svg.j2").is_file()
+    root = ElementTree.fromstring(render.render_svg(model(), None, (63, 88), style))
+    assert root.tag == f"{SVG_NS}svg"
+    assert root.get("viewBox") == "-30 -30 690 940"
+
+
+@pytest.mark.parametrize("ratio", [(63, 88), (1, 1), (16, 9)])
+def test_3d_style_follows_the_ratio_and_differs_from_standard(ratio):
+    standard = render.render_svg(model(), None, ratio, "standard")
+    raised = render.render_svg(model(), None, ratio, "3d")
+    assert standard != raised
+    assert 'id="bevel"' in raised and 'id="bevel"' not in standard
+    assert ElementTree.fromstring(raised).get("viewBox") == ElementTree.fromstring(standard).get("viewBox")
+
+
+def test_default_style_is_standard():
+    assert render.render_svg(model()) == render.render_svg(model(), None, render.DEFAULT_RATIO, "standard")
+
+
 @pytest.mark.parametrize("ratio,size", [((63, 88), (630, 880)), ((1, 1), (630, 630)), ((16, 9), (1120, 630)), ((9, 16), (630, 1120))])
 def test_shorter_side_stays_63_mm(ratio, size):
     assert render.card_size(ratio) == size
@@ -228,8 +286,8 @@ def test_every_box_stays_inside_the_card(ratio):
     assert L["desc_h"] > 60 and L["desc_x"] + L["desc_w"] < W and L["desc_y"] + L["desc_h"] < H
     for c in L["stats"]:
         assert c["x"] + c["w"] <= W - 17
-        assert render.text_width(c["value"], c["size"], True) <= c["w"] - 30
-    last_line_y = L["desc_y"] + 36 + (len(L["desc_lines"]) - 1) * L["desc_lh"]
+        assert render.text_width(c["value"], c["size"], True) <= c["w"] - 2 * render.PAD
+    last_line_y = L["desc_y"] + L["desc_top"] + (len(L["desc_lines"]) - 1) * L["desc_lh"]
     assert last_line_y <= L["desc_y"] + L["desc_h"] - 6
     for line in L["desc_lines"]:
         assert render.text_width(line, L["desc_size"]) <= L["desc_w"] - 44
@@ -276,7 +334,7 @@ def test_sport_difficulty_is_plain_text_with_its_colour_as_diamond_before_the_nu
     chip_value = [t for t in root.iter(f"{SVG_NS}text") if t.text == "SAC T3"]
     assert chip_value and chip_value[0].get("fill") in (render.TEXT_DARK, render.TEXT_LIGHT)
     L = render._layout(model())
-    assert L["diamond"] == "#F1C40F" and L["number_x"] == 40
+    assert L["diamond"] == "#F1C40F" and L["number_x"] == 45
     diamond = next(p for p in root.iter(f"{SVG_NS}path") if p.get("fill") == "#F1C40F")
     assert diamond.get("d").startswith("M0 -9")
 
@@ -320,6 +378,160 @@ def test_png_width_follows_the_ratio():
     from PIL import Image
     png = render.svg_to(render.render_svg(model(), None, (16, 9)), "png", dpi=100)
     assert Image.open(BytesIO(png)).size == (465, 272)     # (112 + 6) mm and (63 + 6) mm at 100 dpi
+
+
+@pytest.mark.parametrize("fmt", ["png", "jpg"])
+@pytest.mark.parametrize("dpi,size", [(72, (196, 266)), (150, (407, 555)), (300, (815, 1110)), (600, (1630, 2220))])
+def test_dpi_sets_the_pixels(fmt, dpi, size):
+    pytest.importorskip("cairosvg")
+    from io import BytesIO
+    from PIL import Image
+    img = Image.open(BytesIO(render.svg_to(render.render_svg(model()), fmt, dpi)))
+    assert img.size[0] == size[0] and abs(img.size[1] - size[1]) <= 1    # 63:88 card with bleed: 69 x 94 mm (height rounds by 1 px)
+    if fmt == "jpg":
+        assert img.info["dpi"] == (dpi, dpi)                     # the file says how large it prints
+
+
+def test_dpi_follows_the_ratio_and_is_ignored_by_vector_formats():
+    pytest.importorskip("cairosvg")
+    from io import BytesIO
+    from PIL import Image
+    svg = render.render_svg(model(), None, (16, 9))
+    assert Image.open(BytesIO(render.svg_to(svg, "png", 254))).size == (1180, 690)    # (112 + 6) x (63 + 6) mm at 254 dpi
+    assert render.svg_to(svg, "svg", 600) == svg.encode()
+    assert render.picture_px((16, 9), 254) == (1180, 690)
+    assert render.svg_to(svg, "pdf", 600).startswith(b"%PDF")
+
+
+def test_picture_px_matches_what_is_drawn():
+    pytest.importorskip("cairosvg")
+    from io import BytesIO
+    from PIL import Image
+    for ratio in ((63, 88), (1, 1), (16, 9)):
+        img = Image.open(BytesIO(render.svg_to(render.render_svg(model(), None, ratio), "png", 200)))
+        assert abs(img.size[0] - render.picture_px(ratio, 200)[0]) <= 1
+        assert abs(img.size[1] - render.picture_px(ratio, 200)[1]) <= 1
+
+
+def test_dpi_limit_depends_on_the_shape():
+    render.check_dpi((63, 88), 300)
+    render.check_dpi((63, 88), render.MAX_DPI)                   # 5433 x 7400 px, within the pixel limit
+    with pytest.raises(ValueError, match=r"Use up to \d+ dpi"):
+        render.check_dpi((5, 2), render.MAX_DPI)                 # a wide card has far more pixels at the same dpi
+    top = int(str(pytest.raises(ValueError, render.check_dpi, (5, 2), render.MAX_DPI).value).rsplit("up to ", 1)[1].split(" ")[0])
+    render.check_dpi((5, 2), top)                                # the highest dpi named in the message is accepted
+    with pytest.raises(ValueError):
+        render.check_dpi((5, 2), top + 20)
+
+
+# ------------------------------------------------------------------ stat chips and their icons
+
+def test_chip_icons_follow_the_content_not_the_position():
+    no_altitude = render._layout(model(make_card(poi=NS(**{**make_card().poi.__dict__, "altitude_m": None}))))
+    assert [s["icon"] for s in no_altitude["stats"]] == ["type", "difficulty"]
+    assert [s["icon"] for s in render._layout(model())["stats"]] == ["type", "altitude", "difficulty"]
+
+
+@pytest.mark.parametrize("style", render.STYLES)
+@pytest.mark.parametrize("lang", ["en", "de", "pl"])
+@pytest.mark.parametrize("ratio", [(63, 88), (1, 1), (16, 9), (2, 5)])
+def test_chip_label_never_reaches_the_icon_or_the_edge(style, lang, ratio):
+    # the icon sits left of the label, so the label only has to stay inside its chip, one CHIP_LABEL_RIGHT from the edge
+    L = render._layout(model(lang=lang), ratio)
+    for s in L["stats"]:
+        label = s["label"].upper()
+        end = L["chip_label_x"] + render.text_width(label, s["label_size"], True) + 0.12 * s["label_size"] * len(label)
+        assert end <= s["w"] - render.CHIP_LABEL_RIGHT + 0.01, (s["label"], s["w"])
+        assert render.text_width(s["value"], s["size"], True) <= s["w"] - 2 * render.PAD     # the same PAD on both sides
+    root = ElementTree.fromstring(render.render_svg(model(lang=lang), None, ratio, style))
+    icons = [g for g in root.iter(f"{SVG_NS}g") if g.get("transform", "").endswith("scale(0.8333)")
+             and g.get("stroke-opacity") is None]                 # the pressed-in copy of the 3d style has a stroke-opacity
+    assert len(icons) == len(L["stats"])
+    for g in icons:
+        assert len(list(g)) >= 2                                 # an icon was drawn (known key), not an empty space
+        assert g.get("stroke") == render.palette(model()["rarity"]["color"])["text"]    # plain, in the colour of the text
+
+
+@pytest.mark.parametrize("style", render.STYLES)
+def test_icons_have_no_circle_behind_them(style):
+    svg = render.render_svg(model(), None, (63, 88), style)
+    root = ElementTree.fromstring(svg)
+    for g in root.iter(f"{SVG_NS}g"):
+        if g.get("transform", "").endswith("scale(0.8333)"):
+            assert all(child.tag != f"{SVG_NS}circle" or child.get("r") == "1.4" or child.get("r") == "1.3" for child in g)   # only the details of an icon
+    assert 'r="12"' not in svg
+
+
+@pytest.mark.parametrize("lang", ["en", "de"])
+def test_label_is_centred_on_the_icon_at_every_label_size(lang):
+    L = render._layout(model(lang=lang), (16, 9))                  # narrow chips: the German label shrinks
+    sizes = {s["label_size"] for s in L["stats"]}
+    for s in L["stats"]:
+        middle_of_capitals = s["label_y"] - 0.73 * s["label_size"] / 2
+        assert abs(middle_of_capitals - render.CHIP_ICON_CY) < 0.2
+    assert L["chip_icon_y"] + render.ICON / 2 == render.CHIP_ICON_CY and sizes
+
+
+def test_short_description_gets_a_larger_size():
+    short = render._layout(model(make_card(description="Short.")))
+    long_text = render._layout(model(make_card(description="Pfannenstock mountain lies within the canton of Schwyz. " * 12)))
+    assert short["desc_size"] == 24 and long_text["desc_size"] < 21
+
+
+# ------------------------------------------------------------------ one spacing system
+
+@pytest.mark.parametrize("ratio", [(63, 88), (1, 1), (4, 5), (9, 16), (3, 2), (16, 9)])
+def test_boxes_share_one_gap_and_one_padding(ratio):
+    L = render._layout(model(), ratio)
+    E, P = render.EDGE, render.PAD
+    first = L["stats"][0]
+    assert first["x"] == (L["px"] if not L["landscape"] else L["desc_x"])
+    assert L["desc_y"] - (first["y"] + render.CHIP_H) == E                       # chips to description
+    if not L["landscape"]:
+        assert first["y"] - (L["py"] + L["ph"]) == E                             # photo to chips
+        assert L["px"] == E and L["W"] - (L["px"] + L["pw"]) == E                # margin of the card
+    else:
+        assert L["desc_x"] - (L["px"] + L["pw"]) == E                            # photo to the boxes
+    for a, b in zip(L["stats"], L["stats"][1:]):
+        assert b["x"] - (a["x"] + a["w"]) == E                                   # chip to chip
+    assert L["stats"][-1]["x"] + L["stats"][-1]["w"] == L["desc_x"] + L["desc_w"]  # the chip row is as wide as the description
+    assert L["desc_top"] - round(0.73 * L["desc_size"]) == P                     # space above the text = space at the left
+    assert L["footer_x"] == L["desc_x"] + P                                      # footer starts where the description text starts
+    assert L["footer_right"] == L["desc_x"] + L["desc_w"] - P if not L["landscape"] else True
+    assert L["flag_x"] + 22 == L["px"] + L["pw"] - P                              # flags end one PAD from the photo edge
+
+
+@pytest.mark.parametrize("style", render.STYLES)
+def test_every_box_has_the_same_corner_radius(style):
+    root = ElementTree.fromstring(render.render_svg(model(), None, (63, 88), style))
+    radii = {r.get("rx") for r in root.iter(f"{SVG_NS}rect")
+             if r.get("rx") not in (None, "30", "27", "22", "23", "28.5", "20", "10") or r.get("rx") == "18"}
+    assert radii == {"18"}, radii
+
+
+@pytest.mark.parametrize("style", render.STYLES)
+def test_texts_on_the_photo_start_at_the_pad_of_the_number_pill(style):
+    L = render._layout(model())
+    root = ElementTree.fromstring(render.render_svg(model(), None, (63, 88), style))
+    name_x = {t.get("x") for t in root.iter(f"{SVG_NS}text") if t.text == "Pfannenstock"}
+    assert name_x == {str(L["px"] + render.PAD)}
+
+
+def test_number_pill_has_18_of_room_on_both_ends():
+    L = render._layout(model())
+    assert L["diamond_x"] - 9 == 18                                              # left edge of the diamond
+    assert L["number_x"] == L["diamond_x"] + 9 + 9                               # then 9 to the number
+    no_diamond = render._layout(model(make_card(difficulty_sport=None)))
+    assert no_diamond["number_x"] == 18
+    label = no_diamond["number_label"]
+    assert no_diamond["pill_w"] - 18 == round(render.text_width(label, 20, True) + 1.5 * len(label) + 18)
+
+
+def test_default_picture_is_300_dpi():
+    pytest.importorskip("cairosvg")
+    from io import BytesIO
+    from PIL import Image
+    assert Image.open(BytesIO(render.svg_to(render.render_svg(model()), "png"))).size == (815, 1110)
 
 
 # ------------------------------------------------------------------ justified description

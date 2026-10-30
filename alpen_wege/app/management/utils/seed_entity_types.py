@@ -18,6 +18,7 @@ NONE_TABLES = frozenset({
 
 IGNORE_FIELDS_MAP: dict[str, list[str]] = {
     "profile_usr_user": ["last_active_at", "updated_at"],
+    "asset_agg_icon": ["svg"],      # up to 300 KB of text; the change of the picture shows as a new sha256
 }
 
 

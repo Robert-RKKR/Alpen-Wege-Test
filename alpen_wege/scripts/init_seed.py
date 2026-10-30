@@ -75,13 +75,14 @@ RESOURCE_TYPES = [
     ("gpx", "GPX", "#CDDC39", "gps_fixed"),
     ("achievement", "Achievement", "#FFC107", "emoji_events"),
     ("ref", "Reference Data", "#9E9E9E", "list"),
+    ("icon", "Icon", "#607D8B", "image"),
 ]
 
 EXPLORER_KEYS = {"gear", "journey", "route", "segment", "track", "trip"}
 COMPENDIUM_KEYS = {"poi", "country", "region", "card", "post", "poi_region"}
 ASSET_KEYS = {"photo", "gpx"}
 ACHIEVEMENT_KEYS = {"achievement"}
-REF_KEYS = {"ref"}
+REF_KEYS = {"ref", "icon"}   # everybody reads, only the administrator writes (icons are shared pictures)
 
 ALL_KEYS = EXPLORER_KEYS | COMPENDIUM_KEYS | ASSET_KEYS | ACHIEVEMENT_KEYS | REF_KEYS
 

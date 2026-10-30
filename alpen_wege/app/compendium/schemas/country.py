@@ -1,11 +1,15 @@
 from uuid import UUID
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.schemas.geo import GeoPoint, GeoPointField
 from app.core.utils.expand import Link
 from app.profile.schemas.user_read import ExpandedUser
+
+
+FLAG_WRITE = "The flag: the id of an icon (`GET /assets/icons`, an SVG; the flags are the icons with the key `flag_` + the ISO code in lower case, for example `flag_at`). Optional. An unknown id answers 422."
+FLAG_READ = "Id of the flag (an icon, an SVG), or null. The picture: `GET /assets/icons/{icon_id}/file`."
 
 
 class CountryCreate(BaseModel):
@@ -25,6 +29,7 @@ class CountryCreate(BaseModel):
     capital: str | None = None
     capital_de: str | None = None
     capital_pl: str | None = None
+    icon_id: UUID | None = Field(None, description=FLAG_WRITE)
     name_de: str | None = None
     name_pl: str | None = None
     summary: str | None = None
@@ -52,6 +57,7 @@ class CountryUpdate(BaseModel):
     capital: str | None = None
     capital_de: str | None = None
     capital_pl: str | None = None
+    icon_id: UUID | None = Field(None, description=FLAG_WRITE + " `null` removes the link; leave the field out to keep it.")
     name_de: str | None = None
     name_pl: str | None = None
     summary: str | None = None
@@ -69,6 +75,7 @@ class CountrySlimRead(BaseModel):
     name: str
     iso_code: str
     location: GeoPointField = None
+    icon_id: UUID | None = Field(description=FLAG_READ)
 
 
 class CountryRead(BaseModel):
@@ -91,6 +98,7 @@ class CountryRead(BaseModel):
     capital: str | None
     capital_de: str | None
     capital_pl: str | None
+    icon_id: UUID | None = Field(description=FLAG_READ)
     name_de: str | None
     name_pl: str | None
     summary: str | None

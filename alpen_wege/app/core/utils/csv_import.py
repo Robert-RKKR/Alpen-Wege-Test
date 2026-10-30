@@ -9,6 +9,7 @@ from geoalchemy2.elements import WKTElement
 from pydantic import BaseModel
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
 
 
 # ------------------------------------------------------------------
@@ -170,6 +171,7 @@ async def import_csv(
 
     objects = []
     errors: list[str] = []
+    icon_known: dict[uuid.UUID, bool] = {}     # icon_id -> exists; one query per distinct id
     for row_idx, row in enumerate(reader, start=2):
         try:
             data: dict = {}
@@ -199,6 +201,14 @@ async def import_csv(
             empty = [k for k in required if data.get(k) is None]
             if empty:
                 raise ValueError(f"missing value for {', '.join(empty)}")
+            if data.get("icon_id") is not None:
+                # an unknown icon_id would fail the whole commit; name the row instead (22 tables have this column)
+                icon = data["icon_id"]
+                if icon not in icon_known:
+                    from app.assets.models.models_agg.icon import AssetAggIcon   # not at the top: assets imports core
+                    icon_known[icon] = await db.get(AssetAggIcon, icon, options=[defer(AssetAggIcon.svg)]) is not None
+                if not icon_known[icon]:
+                    raise ValueError("icon_id: the icon does not exist")
             if row_check is not None:
                 await row_check(data)
 

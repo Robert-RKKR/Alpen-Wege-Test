@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     CARD_STORAGE_DIR: str = "/data/cards"        # generated files: {card_id}/{lang}.{svg,png,jpg,pdf}
     PHOTO_STORAGE_DIR: str = "/data/photos"      # asset_agg_photo.path is relative to this directory
     PHOTO_MAX_UPLOAD_MB: int = 25
+    ICON_MAX_UPLOAD_KB: int = 300                # an SVG icon or flag; the largest flag of flag-icons is 184 KB
+    ICON_CSV_MAX_UPLOAD_MB: int = 5              # the CSV that creates many icons at once (438 icons are about 0.2 MB, 270 flags 2.4 MB)
+    ICON_CSV_MAX_ROWS: int = 2000                # icons in one CSV
     CARD_FOOTER: str = "Alpen Wege"              # small text at the bottom right of every card
 
     # Planned hierarchy: segments, routes, journeys

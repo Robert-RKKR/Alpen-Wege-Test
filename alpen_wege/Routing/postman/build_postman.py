@@ -14,10 +14,18 @@ Names of the Postman variables (match them to the ones you already use):
 URL pattern of every request:  {scheme}://{{host-var}}:{{port-var}}/{{api-var}}/<app>/<resource>
 The value of the api variable is `api/v1`.
 
-Structure: one folder per app (core, compendium, assets, explorer, profile, management), one folder per model
-inside. Every model folder has List, Create, Get one, Update, Delete (and Upload CSV or the special
+Structure: one folder per app (core, assets, compendium, explorer, profile, management), one folder per
+model inside. Every model folder has List, Create, Get one, Update, Delete (and Upload CSV or the special
 calls where the API has them). Create calls save the new id in a variable (`country_id`, `poi_id`, ...)
 that the following calls of that model and the models that depend on it use.
+
+Asset links (photo and GPX): `assets / photos / Upload photo` saves `photo_id`; every request whose body can
+carry a photo field (`main_photo_id`, see ASSET_LINKS) uses `{{photo_id}}`. The build stops when the API gets
+a request body with such a field that the collection does not fill (see check_asset_links), so a new photo
+relation cannot be forgotten. Sample files for the upload requests: sample_photo.jpg, sample_track.gpx, sample_icon.svg.
+
+Icon links (the same mechanism): `assets / icons / Upload icon` saves `icon_id` (and `icon_key`); the Create and Update bodies of the
+20 reference tables, resource types, countries and regions start with `"icon_id": "{{icon_id}}"` (see ASSET_LINKS).
 """
 import argparse
 import json
@@ -83,7 +91,9 @@ def key_of(method: str, path: str) -> str:
     return f"{method.upper()} {norm_path(path)}"
 
 
-def query_for(method: str, path: str, enabled=()):
+def query_for(method: str, path: str, enabled=(), values=None):
+    # enabled: {name: value} of the parameters that are switched on; values: {name: example} for the switched-off ones,
+    # so a parameter only has to be ticked in Postman (no typing, no guessing of the format)
     out = []
     for name, schema in QUERY_PARAMS.get(key_of(method, path), []):
         q = {"key": name, "value": "", "description": schema}
@@ -91,6 +101,7 @@ def query_for(method: str, path: str, enabled=()):
             q["value"] = enabled[name]
         else:
             q["disabled"] = True
+            q["value"] = (values or {}).get(name, "")
         out.append(q)
     return out
 
@@ -98,6 +109,22 @@ def query_for(method: str, path: str, enabled=()):
 # ------------------------------------------------------------------ request builder
 
 REQUESTS: list = []  # (method, path) of every request built, for the coverage check
+BODIES: dict = {}    # key_of(method, path) -> list of the raw JSON bodies built for it, for the asset-link check
+
+# Body fields that point at an asset, and the variable the collection fills them from. A request body that carries one
+# of these fields uses the variable; Upload photo (or the first photo of the list) fills it. Add a line here when the
+# API gets a new asset field (for example avatar_photo_id on the profile).
+ASSET_LINKS = {
+    "main_photo_id": "photo_id",
+    "avatar_photo_id": "photo_id",
+    "icon_id": "icon_id",
+}
+
+
+def pretty(obj):
+    # Raw JSON bodies are always written the same way: 4 spaces, one member per line (Postman shows them readable and the
+    # Beautify button changes nothing).
+    return json.dumps(obj, indent=4, ensure_ascii=False)
 
 
 def tests_status(codes):
@@ -115,7 +142,7 @@ def set_from_response(var, expr="jsonData.response_data.id"):
 
 
 def request(name, method, path, *, body=None, form=None, test=None, status=200, desc="", pre=None,
-            auth=True, enabled_query=(), headers=None):
+            auth=True, enabled_query=(), query_values=None, headers=None):
     REQUESTS.append((method, path))
     item = {"name": name}
     events = []
@@ -124,11 +151,12 @@ def request(name, method, path, *, body=None, form=None, test=None, status=200, 
     t = tests_status(status) + (test or [])
     events.append(event("test", t))
     item["event"] = events
-    req = {"method": method, "header": list(headers or []), "url": make_url(path, query_for(method, path, enabled_query))}
+    req = {"method": method, "header": list(headers or []), "url": make_url(path, query_for(method, path, enabled_query, query_values))}
     if body is not None:
+        raw = body if isinstance(body, str) else pretty(body)
+        BODIES.setdefault(key_of(method, path), []).append(raw)
         req["header"].append({"key": "Content-Type", "value": "application/json"})
-        req["body"] = {"mode": "raw", "raw": body if isinstance(body, str) else json.dumps(body, indent=4),
-                       "options": {"raw": {"language": "json"}}}
+        req["body"] = {"mode": "raw", "raw": raw, "options": {"raw": {"language": "json"}}}
     if form is not None:
         req["body"] = {"mode": "formdata", "formdata": form}
     if not auth:
@@ -149,6 +177,10 @@ def folder(name, items, desc=""):
 # ------------------------------------------------------------------ reusable pieces
 
 POINT = {"type": "Point", "coordinates": [13.3333, 47.3333]}
+SAMPLE_PHOTO = "sample_photo.jpg"    # next to the collection; has a GPS position, altitude and capture time in its EXIF data
+SAMPLE_GPX = "sample_track.gpx"      # next to the collection; made with scripts/make_sample_gpx.py --variant full
+SAMPLE_ICON = "sample_icon.svg"      # next to the collection; a small clean outline icon (a mountain)
+SAMPLE_ICONS_CSV = "icons_import.csv"   # next to the collection; the graphics of all 438 icons (scripts/make_icon_set.py)
 CSV_NOTE = "Pick a CSV file in the body (key `file`). The header row must use the column names of the model; the Swagger page `/docs` lists them for this endpoint."
 
 
@@ -197,8 +229,93 @@ def first_id_pre(list_path, var, *, second=None, extra=None):
     return lines
 
 
+def photo_link_pre(field="main_photo_id"):
+    """Pre-request lines for a request whose body has the photo field `field` set to {{photo_id}}: when photo_id is empty the
+    first photo of assets / photos is taken; when there is no photo at all the field is cut out of the body, so the request still
+    works (without a photo). The body is written with the field first, so cutting it never leaves a stray comma."""
+    return [
+        "// Photo link: this body uses {{photo_id}}, the photo made by assets / photos / Upload photo.",
+        '// Empty? The first photo you may read is taken. No photo at all? The field is left out of the body.',
+        "function dropPhotoField() {",
+        '    var raw = pm.request.body.raw || "";',
+        f'    var cut = raw.replace(/"{field}"\\s*:\\s*"\\{{\\{{photo_id\\}}\\}}"\\s*,?\\s*/, "");',
+        '    pm.request.body.update({ mode: "raw", raw: cut, options: { raw: { language: "json" } } });',
+        "}",
+        'if (!pm.environment.get("photo_id")) {',
+        "    pm.sendRequest({",
+        f'        url: pm.variables.replaceIn("{api_url("assets/photos")}?limit=1"),',
+        '        method: "GET",',
+        f'        header: {{ Authorization: "Bearer " + pm.environment.get("{ARGS.token_var}") }}',
+        "    }, function (err, res) {",
+        "        var rows = (!err && res.code === 200) ? res.json().response_data : [];",
+        "        if (rows && rows.length) {",
+        '            pm.environment.set("photo_id", rows[0].id);',
+        '            console.log("photo_id was empty, using the first photo of assets/photos: " + rows[0].id);',
+        "        } else {",
+        '            console.log("photo_id is empty and no photo exists: " + "' + field + '" + " is left out. Run assets / photos / Upload photo first.");',
+        "            dropPhotoField();",
+        "        }",
+        "    });",
+        "}",
+    ]
+
+
+def uses_photo_test(field="main_photo_id"):
+    return [
+        'var wantedPhoto = pm.environment.get("photo_id");',
+        f'if (wantedPhoto && pm.response.code < 300) {{ pm.test("{field} is the photo of assets / photos", function () {{ pm.expect(pm.response.json().response_data.{field}).to.eql(wantedPhoto); }}); }}',
+    ]
+
+
+def icon_link_pre(field="icon_id"):
+    """Pre-request lines for a request whose body has `"icon_id": "{{icon_id}}"` as its FIRST member: when icon_id is empty the
+    first icon of assets / icons is taken (the flags, when they are loaded); when there is no icon at all the field is cut out of
+    the body, so the request still works (without an icon). Same idea as photo_link_pre."""
+    return [
+        "// Icon link: this body uses {{icon_id}}, the icon made by assets / icons / Upload icon.",
+        '// Empty? The first icon of assets / icons is taken. No icon at all? The field is left out of the body.',
+        "function dropIconField() {",
+        '    var raw = pm.request.body.raw || "";',
+        f'    var cut = raw.replace(/"{field}"\\s*:\\s*"\\{{\\{{icon_id\\}}\\}}"\\s*,?\\s*/, "");',
+        '    pm.request.body.update({ mode: "raw", raw: cut, options: { raw: { language: "json" } } });',
+        "}",
+        'if (!pm.environment.get("icon_id")) {',
+        "    pm.sendRequest({",
+        f'        url: pm.variables.replaceIn("{api_url("assets/icons")}?limit=1"),',
+        '        method: "GET",',
+        f'        header: {{ Authorization: "Bearer " + pm.environment.get("{ARGS.token_var}") }}',
+        "    }, function (err, res) {",
+        "        var rows = (!err && res.code === 200) ? res.json().response_data : [];",
+        "        if (rows && rows.length) {",
+        '            pm.environment.set("icon_id", rows[0].id);',
+        '            console.log("icon_id was empty, using the first icon of assets/icons: " + rows[0].id);',
+        "        } else {",
+        '            console.log("icon_id is empty and no icon exists: " + "' + field + '" + " is left out. Run assets / icons / Upload icon first.");',
+        "            dropIconField();",
+        "        }",
+        "    });",
+        "}",
+    ]
+
+
+def uses_icon_test(field="icon_id"):
+    return [
+        'var wantedIcon = pm.environment.get("icon_id");',
+        f'if (wantedIcon && pm.response.code < 300) {{ pm.test("{field} is the icon of assets / icons", function () {{ pm.expect(pm.response.json().response_data.{field}).to.eql(wantedIcon); }}); }}',
+    ]
+
+
+def icon_link():
+    # the keyword arguments of crud_folder for a model that has icon_id (called when the folders are built, ARGS is set then)
+    return dict(create_pre=icon_link_pre(), update_pre=icon_link_pre(), create_test=uses_icon_test(), update_test=uses_icon_test(),
+                update_desc=("Only the fields in the body change. `icon_id` is `{{icon_id}}`, the icon made by assets / icons / Upload icon "
+                             "(the first icon of the list when it is empty; the field is left out when there is no icon at all). "
+                             "An unknown icon answers 422 (`icon_not_found`); `null` removes the link."))
+
+
 def crud_folder(app, slug, label, var, create_body, update_body, *, needs="", extras=None, csv=True,
-                list_extra_test=None, create_pre=None, create_desc=""):
+                list_extra_test=None, create_pre=None, create_desc="", update_pre=None, create_test=None,
+                update_test=None, update_desc=""):
     base = f"{app}/{slug}"
     FIRST_ID_LISTS.append((base, var))
     first = first_id_pre(base, var)
@@ -212,11 +329,13 @@ def crud_folder(app, slug, label, var, create_body, update_body, *, needs="", ex
                 ] + (list_extra_test or []),
                 desc=f"All {label} you may read. Query parameters (limit, offset, ...) are listed but switched off."),
         request(f"Create {label}", "POST", base, body=create_body, status=201, pre=create_pre,
-                test=set_from_response(var), desc=create_desc or f"Creates one record and saves its id in `{{{{{var}}}}}`.{needs_txt}"),
+                test=set_from_response(var) + (create_test or []),
+                desc=create_desc or f"Creates one record and saves its id in `{{{{{var}}}}}`.{needs_txt}"),
         request(f"Get one {label}", "GET", f"{base}/{{{{{var}}}}}", pre=first,
                 desc=f"Uses `{{{{{var}}}}}` (set by Create, List or Collect first IDs; when empty the first row of the list is used)."),
-        request(f"Update {label}", "PATCH", f"{base}/{{{{{var}}}}}", body=update_body, pre=first,
-                desc="Only the fields in the body change. When `{{" + var + "}}` is empty the first row of the list is changed."),
+        request(f"Update {label}", "PATCH", f"{base}/{{{{{var}}}}}", body=update_body, pre=first + (update_pre or []),
+                test=update_test,
+                desc=update_desc or ("Only the fields in the body change. When `{{" + var + "}}` is empty the first row of the list is changed.")),
     ]
     items += (extras or [])
     if csv:
@@ -237,18 +356,18 @@ RANKED_TABLES = {"difficulty-levels", "difficulty-sports", "rarities", "visibili
 
 
 def ref_folder(slug, label, var, *, factor=True, extra_fields=None, name_required=False):
-    body = {"name": "{{random_name}}", "name_de": "{{random_name}}", "color": "#2196F3", "icon": "star"}
+    body = {"icon_id": "{{icon_id}}", "name": "{{random_name}}", "name_de": "{{random_name}}", "color": "#2196F3", "icon": "star"}
     if factor:
         body["point_factor"] = 1.0
     if slug in RANKED_TABLES:
         body["rank"] = 3
     body.update(extra_fields or {})
-    upd = {"color": "#FF9800"}
+    upd = {"icon_id": "{{icon_id}}", "color": "#FF9800"}
     if factor:
         upd["point_factor"] = 2.0
     if slug in RANKED_TABLES:
         upd["rank"] = 4
-    return crud_folder("core", slug, label, var, body, upd)
+    return crud_folder("core", slug, label, var, body, upd, **icon_link())
 
 
 # ------------------------------------------------------------------ the folders
@@ -278,22 +397,200 @@ def core_folder():
     items = [ref_folder(slug, label, var, factor=f, extra_fields=extra) for slug, label, var, f, extra in refs]
     items.append(crud_folder(
         "core", "resource-types", "resource type", "resource_type_id",
-        {"key": "{{random_key}}", "name": "{{random_name}}", "color": "#9C27B0", "icon": "lock"},
-        {"name": "{{random_name}} renamed"},
-        extras=None,
+        {"icon_id": "{{icon_id}}", "key": "{{random_key}}", "name": "{{random_name}}", "color": "#9C27B0", "icon": "lock"},
+        {"icon_id": "{{icon_id}}", "name": "{{random_name}} renamed"},
+        extras=None, **icon_link(),
     ))
     return folder("core", items, "Reference data (19 lookup tables) and resource types. Administrator for create, update, delete.")
+
+
+def assets_folder():
+    FIRST_ID_LISTS.append(("assets/photos", "photo_id"))
+    FIRST_ID_LISTS.append(("assets/gpx", "gpx_id"))
+    FIRST_ID_LISTS.append(("assets/icons", "icon_id"))
+    icon_first = first_id_pre("assets/icons", "icon_id")
+    # by-key requests: when icon_key is empty take the key of the first icon of the list
+    icon_key_pre = [
+        "// Run alone? When {{icon_key}} is empty, take the key of the first icon of assets/icons.",
+        'if (!pm.environment.get("icon_key")) {',
+        "    pm.sendRequest({",
+        f'        url: pm.variables.replaceIn("{api_url("assets/icons")}?limit=1"),',
+        '        method: "GET",',
+        f'        header: {{ Authorization: "Bearer " + pm.environment.get("{ARGS.token_var}") }}',
+        "    }, function (err, res) {",
+        "        var rows = (!err && res.code === 200) ? res.json().response_data : [];",
+        '        if (rows && rows.length) { pm.environment.set("icon_key", rows[0].key); console.log("icon_key was empty, using " + rows[0].key); }',
+        '        else { console.log("icon_key is empty and no icon exists. Run assets / icons / Upload icon first."); }',
+        "    });",
+        "}",
+    ]
+    photo_first = first_id_pre("assets/photos", "photo_id")
+    gpx_first = first_id_pre("assets/gpx", "gpx_id")
+
+    def list_test(var):
+        return ["var jsonData = pm.response.json();",
+                'pm.test("Response has a list in response_data", function () { pm.expect(jsonData.response_data).to.be.an("array"); });',
+                f'if (!pm.environment.get("{var}") && jsonData.response_data.length) {{ pm.environment.set("{var}", jsonData.response_data[0].id); }}']
+
+    photos = folder("photos", [
+        request("List photos", "GET", "assets/photos", test=list_test("photo_id"),
+                desc="The photos you may read: your own and the public ones (an administrator sees all). Filters (switched off): `q`, `created_by`, `is_public`, "
+                     "`altitude_min` / `altitude_max`, `taken_from` / `taken_to`, `created_from` / `created_to`, `bbox`, `near` + `radius_m`, `sort`."),
+        request("Upload photo", "POST", "assets/photos", status=201,
+                form=[{"key": "file", "type": "file", "src": SAMPLE_PHOTO},
+                      {"key": "name", "value": "Postman photo {{random_name}}", "type": "text"},
+                      {"key": "summary", "value": "Uploaded from Postman", "type": "text"},
+                      {"key": "is_public", "value": "true", "type": "text"},
+                      {"key": "name_de", "value": "", "type": "text", "disabled": True},
+                      {"key": "summary_de", "value": "", "type": "text", "disabled": True},
+                      {"key": "lon", "value": "13.35", "type": "text", "disabled": True},
+                      {"key": "lat", "value": "47.33", "type": "text", "disabled": True},
+                      {"key": "altitude_m", "value": "1800", "type": "text", "disabled": True},
+                      {"key": "taken_at", "value": "2026-07-14T09:30:00Z", "type": "text", "disabled": True}],
+                test=set_from_response("photo_id") + remember("created_photo_ids", "jsonData.response_data.id") + [
+                    'pm.test("the photo is stored (relative path) and is public", function () { var p = jsonData.response_data; pm.expect(p.path).to.match(/^\\d{4}\\/\\d{2}\\/.+\\.(jpg|png|webp)$/); pm.expect(p.is_public).to.eql(true); });',
+                    'pm.test("the position comes from the EXIF data of the file when the form gives none", function () { var p = jsonData.response_data; pm.expect(p).to.have.property("location"); });'],
+                desc=(f"Multipart form. The body points at `{SAMPLE_PHOTO}` (put it in the Postman working directory, or pick any JPEG, PNG or WebP file in the body, key `file`). "
+                      "Saves the id in `{{photo_id}}`: **from now on every request that has a photo field (the Create and Update calls of cards, POIs and posts: `main_photo_id`) uses this photo.** "
+                      "The image is checked, turned upright, shrunk to 2560 px at most and saved without its metadata; position, altitude and capture time are read from EXIF "
+                      "unless the (switched-off) form fields `lon` + `lat`, `altitude_m`, `taken_at` give them. `is_public` is true here so that every login (editor, viewer, guest) can use or see the photo.")),
+        request("Get one photo", "GET", "assets/photos/{{photo_id}}", pre=photo_first,
+                desc="Uses `{{photo_id}}` (when empty the first photo of the list). Add `?expand=created_by` for the owner."),
+        request("Photo file (the image)", "GET", "assets/photos/{{photo_id}}/file", pre=photo_first,
+                test=['pm.test("the answer is an image", function () { pm.expect(pm.response.headers.get("Content-Type")).to.match(/^image\\/(jpeg|png|webp)$/); });'],
+                desc="The image itself (inline). Postman shows it in the Preview of the answer."),
+        request("Update photo", "PATCH", "assets/photos/{{photo_id}}", pre=photo_first,
+                body={"name": "Renamed {{random_name}}", "summary": "Changed from Postman", "is_public": True},
+                desc="Name, texts (`name_de`, `summary_pl`, ...), `location` (GeoJSON point or null), `altitude_m`, `taken_at`, `is_public`. The image itself cannot be replaced: upload a new photo."),
+        request("Delete photo", "DELETE", "assets/photos/{{photo_id}}", pre=SKIP_DELETES + photo_first, status=[200, 409],
+                test=['if (pm.response.code === 200) { pm.environment.unset("photo_id"); }',
+                      'pm.test("409 names who still uses the photo", function () { if (pm.response.code === 409) { pm.expect(pm.response.json().response_details.error_message).to.include("main photo"); } });'],
+                desc="Deletes the photo and its file and clears `photo_id`. **409** while a card, POI, post, gear, segment or track still has it as its main photo "
+                     "(use \"Remove the main photo\" in those folders first). When `photo_id` is empty it deletes the FIRST photo of the list."),
+    ], "Photo files (JPEG, PNG, WebP). Upload photo saves `photo_id`; the requests that can carry a photo use it.")
+
+    gpx = folder("gpx", [
+        request("List GPX files", "GET", "assets/gpx", test=list_test("gpx_id"),
+                desc="The stored GPX files you may read (own, public; an administrator sees all). Filters (switched off): `q`, `created_by`, `is_public`, `sha256` (duplicates), "
+                     "`created_from` / `created_to`, `sort`. A GPX file is made by `explorer / tracks / Upload track`, not here."),
+        request("Get one GPX file", "GET", "assets/gpx/{{gpx_id}}", pre=gpx_first,
+                desc="Uses `{{gpx_id}}` (set by Upload track, Get one track or List GPX files). Add `?expand=created_by` for the owner."),
+        request("Download GPX file", "GET", "assets/gpx/{{gpx_id}}/file", pre=gpx_first,
+                test=['pm.test("the answer is a GPX file", function () { pm.expect(pm.response.headers.get("Content-Type")).to.include("gpx"); pm.expect(pm.response.text()).to.include("<gpx"); });'],
+                desc="The original file as it was uploaded."),
+        request("Update GPX file", "PATCH", "assets/gpx/{{gpx_id}}", pre=gpx_first,
+                body={"name": "Renamed {{random_name}}", "summary": "Changed from Postman"},
+                desc="Name, texts and `is_public`. The file itself cannot be replaced."),
+        request("Delete GPX file", "DELETE", "assets/gpx/{{gpx_id}}", pre=SKIP_DELETES + gpx_first, status=[200, 409],
+                test=['if (pm.response.code === 200) { pm.environment.unset("gpx_id"); }'],
+                desc="Deletes a GPX file that no track uses any more. **409** while a track (or its geometry) uses it: delete or archive-and-remove the track first. "
+                     "When `gpx_id` is empty it tries the FIRST file of the list."),
+    ], "The original GPX files of the tracks. They are created by Upload track.")
+    icons = folder("icons", [
+        request("List icons", "GET", "assets/icons", test=list_test("icon_id"),
+                desc="The icons (SVG pictures: flags and symbols) without their SVG text. Everybody who is logged in may read them. Filters (switched off): `q`, `key`, "
+                     "`key_prefix` (for example `flag_` or `sport_`), `created_by`, `created_from` / `created_to`, `sort` (`key`, `name`, `created_at`, `updated_at`)."),
+        request("Upload icon", "POST", "assets/icons", status=201,
+                form=[{"key": "file", "type": "file", "src": SAMPLE_ICON},
+                      {"key": "key", "value": "{{random_key}}", "type": "text"},
+                      {"key": "name", "value": "Postman icon {{random_name}}", "type": "text"},
+                      {"key": "summary", "value": "Uploaded from Postman", "type": "text"},
+                      {"key": "name_de", "value": "", "type": "text", "disabled": True},
+                      {"key": "summary_de", "value": "", "type": "text", "disabled": True}],
+                test=set_from_response("icon_id") + ['pm.environment.set("icon_key", jsonData.response_data.key);'] + remember("created_icon_ids", "jsonData.response_data.id") + [
+                    'pm.test("the icon has a key in lower case and a SHA-256", function () { var i = jsonData.response_data; pm.expect(i.key).to.match(/^[a-z0-9_.-]+$/); pm.expect(i.sha256).to.have.lengthOf(64); });',
+                    'pm.test("the answer lists what the cleaning removed (nothing for the sample file)", function () { pm.expect(jsonData.response_details.removed).to.be.an("array").that.is.empty; });'],
+                desc=(f"Multipart form (admin only). The body points at `{SAMPLE_ICON}` (put it in the Postman working directory, or pick any SVG file, key `file`). "
+                      "Saves the id in `{{icon_id}}` and the key in `{{icon_key}}`: **from now on every request that has `icon_id` (the Create and Update calls of the reference tables, "
+                      "resource types, countries and regions) uses this icon.** The SVG is cleaned before it is stored: script, `<style>`, `<foreignObject>`, animation, event handlers, "
+                      "links to other files and foreign namespaces are removed and listed in `response_details.removed`. `key` is the name icons are found by (lower-case letters, "
+                      "digits and `_ . -`; default: the file name); the same key twice answers 409. The limit is 300 KB (`ICON_MAX_UPLOAD_KB`).")),
+        request("Upload icons CSV (dry run)", "POST", "assets/icons/upload-csv", status=[200, 201],
+                form=[{"key": "file", "type": "file", "src": SAMPLE_ICONS_CSV}],
+                enabled_query={"dry_run": "true"}, query_values={"update": "true", "link": "false"},
+                test=['var jsonData = pm.response.json();',
+                      'pm.test("dry run: every row is usable, nothing is saved", function () { var r = jsonData.response_data; pm.expect(r.dry_run).to.eql(true); pm.expect(r.rejected).to.eql(0); pm.expect(r.errors).to.be.empty; });',
+                      'pm.test("the counts add up to the rows of the file", function () { var r = jsonData.response_data; pm.expect(r.inserted + r.updated + r.unchanged).to.be.above(0); });'],
+                desc=(f"Admin only. Multipart form: the CSV `{SAMPLE_ICONS_CSV}` (next to the collection; the graphics of all icons, made by `scripts/make_icon_set.py`; put it in the Postman working directory "
+                      "or pick your own file, key `file`). **`dry_run=true` checks and counts everything and saves nothing**: run this first. The answer: `inserted` (new keys), `updated`, `unchanged`, "
+                      "`rejected` with `errors` (one text per wrong row, by row number), `notes` (what the cleaner took out of an SVG), and with `link=true` (the default) `linked` and `still_without_icon` per table. "
+                      "Switched-off parameters: `update` (replace icons whose key exists), `link` (default on).")),
+        request("Upload icons CSV (import all)", "POST", "assets/icons/upload-csv", status=[200, 201],
+                form=[{"key": "file", "type": "file", "src": SAMPLE_ICONS_CSV}],
+                query_values={"update": "true", "dry_run": "true", "link": "false"},
+                test=['var jsonData = pm.response.json();',
+                      'pm.test("import: no row was rejected", function () { var r = jsonData.response_data; pm.expect(r.dry_run).to.eql(false); pm.expect(r.rejected).to.eql(0); pm.expect(r.errors).to.be.empty; });',
+                      'pm.test("a second run creates nothing new (the keys exist)", function () { var r = jsonData.response_data; pm.expect(r.inserted + r.updated + r.unchanged).to.be.above(0); });'],
+                desc=(f"**Creates every icon of the CSV `{SAMPLE_ICONS_CSV}` in one call** (admin only): the 438 icons of the reference tables and resource types, each cleaned like an upload and with its names in English, German and Polish. "
+                      "An icon whose key exists is left alone (`unchanged`), so the call can be run again. With `link=true` (the default) every reference row, resource type, country (`flag_at`) and region whose icon text or code matches "
+                      "the key of an icon then gets its `icon_id` (the answer lists how many per table). Switched-off parameters to try: `update=true` replaces icons that exist (SVG and names) when they differ; "
+                      "`dry_run=true` only counts; `link=false` skips the linking. Run `Upload icons CSV (dry run)` before the first real import.")),
+        request("Link rows to icons by key", "POST", "assets/icons/link", status=200,
+                query_values={"dry_run": "true"},
+                test=['var jsonData = pm.response.json();',
+                      'pm.test("the answer lists what was linked and what still has no icon", function () { var r = jsonData.response_data; pm.expect(r.linked).to.be.an("object"); pm.expect(r.still_without_icon).to.be.an("object"); });'],
+                desc="Admin only. Sets `icon_id` on every row that has none and whose icon text (reference tables, resource types: the old `icon` column in lower case), ISO code (countries: `flag_<iso code>`) or "
+                     "ISO 3166-2 code (regions: `flag_ch_zh`) matches the **key** of an icon: the API version of `scripts/sql/icons_link.sql`. A link that is set is never changed, so it can be run again after every import. "
+                     "`dry_run=true` (switched off here) counts without saving. `still_without_icon` shows which tables have rows whose key has no icon yet."),
+        request("Get one icon", "GET", "assets/icons/{{icon_id}}", pre=icon_first,
+                desc="Uses `{{icon_id}}` (when empty the first icon of the list). The JSON has no SVG text: see \"Icon file\". Add `?expand=created_by` for the owner."),
+        request("Icon file (the SVG)", "GET", "assets/icons/{{icon_id}}/file", pre=icon_first,
+                test=['pm.test("the answer is an SVG with a version tag and safe headers", function () {',
+                      '    pm.expect(pm.response.headers.get("Content-Type")).to.include("image/svg+xml");',
+                      '    pm.expect(pm.response.headers.get("ETag")).to.match(/^"[0-9a-f]{64}"$/);',
+                      '    pm.expect(pm.response.headers.get("X-Content-Type-Options")).to.eql("nosniff");',
+                      '    pm.expect(pm.response.headers.get("Content-Security-Policy")).to.include("sandbox");',
+                      '    pm.expect(pm.response.text()).to.include("<svg");',
+                      "});"],
+                desc="The picture as stored (inline). Postman shows it in the Preview of the answer. The `ETag` is the SHA-256 of the text: send it back in the header `If-None-Match` to get 304."),
+        request("Icon file as PNG", "GET", "assets/icons/{{icon_id}}/file", pre=icon_first,
+                enabled_query={"format": "png", "size": "64"},
+                test=['pm.test("the answer is a PNG", function () { pm.expect(pm.response.headers.get("Content-Type")).to.eql("image/png"); });'],
+                desc="The same icon drawn as a PNG: `format=png`, `size` = width in pixels (16 to 1024, default 64; the height follows the shape)."),
+        request("Icon file by key", "GET", "assets/icons/by-key/{{icon_key}}/file", pre=icon_key_pre,
+                test=['pm.test("the answer is an SVG", function () { pm.expect(pm.response.headers.get("Content-Type")).to.include("image/svg+xml"); });'],
+                desc="The icon found by its key instead of its id, for example `flag_at` or `sport_hiking` (the text still in the `icon` column of the reference tables). "
+                     "Uses `{{icon_key}}` (set by Upload icon; when empty the first icon of the list). Upper case is read as lower case. `format` and `size` work here too."),
+        request("Replace the SVG of an icon", "PUT", "assets/icons/{{icon_id}}/file", pre=icon_first,
+                form=[{"key": "file", "type": "file", "src": SAMPLE_ICON}],
+                test=['var jsonData = pm.response.json();',
+                      'pm.test("the icon keeps its id and key and has a SHA-256", function () { pm.expect(jsonData.response_data.id).to.eql(pm.environment.get("icon_id")); pm.expect(jsonData.response_data.sha256).to.have.lengthOf(64); });'],
+                desc="Admin only. Replaces the picture of `{{icon_id}}`; the id, the key and every link stay, so every country, region and reference value that uses the icon shows the new picture. Cleaned like an upload."),
+        request("Update icon", "PATCH", "assets/icons/{{icon_id}}", pre=icon_first,
+                body={"name": "Renamed {{random_name}}", "summary": "Changed from Postman"},
+                desc="Names, summaries and `key` (lower case; 409 when the key exists; links are by id, so a new key breaks nothing). The SVG is replaced with \"Replace the SVG of an icon\"."),
+        request("Delete icon", "DELETE", "assets/icons/{{icon_id}}", pre=SKIP_DELETES + icon_first, status=[200, 409],
+                test=['if (pm.response.code === 200) { pm.environment.unset("icon_id"); pm.environment.unset("icon_key"); }',
+                      'pm.test("409 names who still uses the icon", function () { if (pm.response.code === 409) { pm.expect(pm.response.json().response_details.error_message).to.include("is used by"); } });'],
+                desc="Deletes the icon and clears `icon_id` and `icon_key`. **409** while a country, region or reference value still uses it (the answer says how many of which). "
+                     "When `icon_id` is empty it deletes the FIRST icon of the list."),
+    ], "SVG icons and flags. Upload icon saves `icon_id` and `icon_key`; the Create and Update calls of the reference tables, resource types, countries and regions use `icon_id`.")
+    return folder("assets", [photos, gpx, icons],
+                  "Files that other records point at: photos, GPX files and icons. Upload photo saves `photo_id`, Upload track saves `gpx_id`, Upload icon saves `icon_id`.")
+
+
+PHOTO_UPDATE_DESC = ("Only the fields in the body change. `main_photo_id` is `{{photo_id}}`, the photo made by assets / photos / Upload photo "
+                     "(the first photo of the list when it is empty; the field is left out when there is no photo at all). "
+                     "A photo you may not read, or an unknown one, answers 422.")
+
+
+def remove_photo(label, base, var):
+    # PATCH main_photo_id = null: a photo can only be deleted (assets / photos / Delete photo) when nothing uses it as its main photo
+    return request(f"Remove the main photo of the {label}", "PATCH", f"{base}/{{{{{var}}}}}", body={"main_photo_id": None},
+                   pre=first_id_pre(base, var),
+                   test=['pm.test("main_photo_id is empty now", function () { pm.expect(pm.response.json().response_data.main_photo_id).to.eql(null); });'],
+                   desc=f"Clears the main photo of the {label}. A photo can only be deleted while no card, POI, post, gear, segment or track uses it as its main photo.")
 
 
 def compendium_folder():
     country = crud_folder(
         "compendium", "countries", "country", "country_id",
-        {"name": "{{random_name}}", "iso_code": "{{random_iso_code}}", "location": POINT, "capital": "Test City"},
-        {"capital": "Updated City"})
+        {"icon_id": "{{icon_id}}", "name": "{{random_name}}", "iso_code": "{{random_iso_code}}", "location": POINT, "capital": "Test City"},
+        {"icon_id": "{{icon_id}}", "capital": "Updated City"}, **icon_link())
     region = crud_folder(
         "compendium", "regions", "region", "region_id",
-        {"name": "{{random_name}}", "location": POINT, "country_id": "{{country_id}}", "region_type_id": "{{region_type_id}}"},
-        {"summary": "Updated summary"}, needs="`country_id` (compendium/countries), `region_type_id` (core/region-types)")
+        {"icon_id": "{{icon_id}}", "name": "{{random_name}}", "location": POINT, "country_id": "{{country_id}}", "region_type_id": "{{region_type_id}}"},
+        {"icon_id": "{{icon_id}}", "summary": "Updated summary"}, needs="`country_id` (compendium/countries), `region_type_id` (core/region-types)", **icon_link())
     poi_rescan = request("Rescan POI", "POST", "compendium/pois/{{poi_id}}/rescan", status=202, pre=first_id_pre("compendium/pois", "poi_id"),
                          test=[
                              "var jsonData = pm.response.json();",
@@ -303,133 +600,66 @@ def compendium_folder():
                          desc="Starts a background job that matches existing visits against this POI. Saves `job_id`; follow it with management/my-jobs.")
     poi = crud_folder(
         "compendium", "pois", "POI", "poi_id",
-        {"name": "{{random_name}}", "location": POINT, "compendium_type_id": "{{compendium_type_id}}",
+        {"main_photo_id": "{{photo_id}}", "name": "{{random_name}}", "location": POINT, "compendium_type_id": "{{compendium_type_id}}",
          "main_region_id": "{{region_id}}", "altitude_m": 2000},
-        {"altitude_m": 2100}, needs="`compendium_type_id` (core/compendium-types), `region_id` (compendium/regions)",
-        extras=[poi_rescan])
+        {"main_photo_id": "{{photo_id}}", "altitude_m": 2100},
+        needs="`compendium_type_id` (core/compendium-types), `region_id` (compendium/regions); the photo comes from `photo_id` (assets / photos / Upload photo)",
+        extras=[poi_rescan, remove_photo("POI", "compendium/pois", "poi_id")],
+        create_pre=photo_link_pre(), update_pre=photo_link_pre(), create_test=uses_photo_test(), update_test=uses_photo_test(),
+        update_desc=PHOTO_UPDATE_DESC)
     card_rescan = request("Rescan card", "POST", "compendium/cards/{{card_id}}/rescan", status=202, pre=first_id_pre("compendium/cards", "card_id"),
                           test=[
                               "var jsonData = pm.response.json();",
                               'pm.environment.set("job_id", jsonData.response_data.job_id);',
                           ],
                           desc="Starts a background job for this card. Saves `job_id`.")
-    card_first = first_id_pre("compendium/cards", "card_id")
-    render_note = ("Card body in the rarity colour; text is dark or white, whichever reads better on it; dark 3 mm bleed. `ratio` is the shape as width:height ({{card_ratio}}, default 63:88; "
-                   "also 1:1, 4:5, 9:16, 3:2, 16:9, ...; between 2:5 and 5:2, from 13:10 the photo moves left of the texts; "
-                   "the shorter side is always 63 mm). `lang` (en, de, pl) is the language of every text on the card: name, "
-                   "description, country, region, type, rarity, difficulty and labels. A text that is empty in that language "
-                   "is taken from the next language that has one (en, de, pl), first from the card, then from the POI. "
-                   "When the stored files are out of date the card is drawn now. Use Send and Download (or `download=true`) to save the file.")
-    lang_note = (" The API parameters are `lang` and `ratio`. `{{card_lang}}` and `{{card_ratio}}` are only Postman environment "
-                 "variables that fill them: change the variables in the environment, or type a value in Params "
-                 "(for example `ratio=1:1`). Writing `card_ratio=` or `card_lang=` in the URL answers 422.")
-    card_render = [
-        request("Card render model (JSON)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "json", "lang": "{{card_lang}}"},
-                test=["var jsonData = pm.response.json();",
-                      'pm.test("Model has a number and a name", function () { pm.expect(jsonData.response_data).to.have.property("number"); pm.expect(jsonData.response_data).to.have.property("name"); });',
-                      'pm.test("Model is in the asked language", function () { pm.expect(jsonData.response_data.lang).to.eql(pm.environment.get("card_lang") || "en"); });'],
-                desc="Every value printed on the card in the language of `{{card_lang}}`: number, name, flags, country, region, type, altitude, rarity, difficulty, photo, description. For your own front end." + lang_note),
-        request("Card image (SVG)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "svg", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"},
-                test=['pm.test("Answer is an SVG", function () { pm.expect(pm.response.headers.get("Content-Type")).to.include("image/svg+xml"); });'],
-                desc=render_note + lang_note),
-        request("Card image (PNG, 300 dpi)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"}, desc=render_note + lang_note),
-        request("Card image (JPG, 300 dpi)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "jpg", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}"}, desc=render_note + lang_note),
-        request("Card for print (PDF)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "pdf", "lang": "{{card_lang}}", "ratio": "{{card_ratio}}", "download": "true"},
-                desc=render_note + " Print at 100 % (not fit to page) and cut along the rounded edge." + lang_note),
-        request("Card image, square (PNG 1:1)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "1:1"},
-                desc="Square card, e.g. for social media. " + render_note),
-        request("Card image, wide (PNG 16:9)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first,
-                enabled_query={"format": "png", "lang": "{{card_lang}}", "ratio": "16:9"},
-                desc="Wide card: the photo sits on the left, the texts on the right. " + render_note),
-        request("Card ratio out of range (422)", "GET", "compendium/cards/{{card_id}}/render", pre=card_first, status=422,
-                enabled_query={"format": "png", "ratio": "100:1"},
-                desc="A ratio outside 2:5 to 5:2 (or not width:height with whole numbers 1 to 100) answers 422 on `query.ratio`."),
-        request("Render card files again", "POST", "compendium/cards/{{card_id}}/render", status=[202, 409], pre=card_first,
-                test=["var jsonData = pm.response.json();",
-                      'if (pm.response.code === 202) { pm.environment.set("job_id", jsonData.response_data.job_id); }'],
-                desc="Starts a job that writes SVG, PNG, JPG and PDF (63:88) in en, de and pl. Saves `job_id`; 409 when a render is already queued or running. Create and Update queue one by themselves."),
-    ]
+    card_render = request("Card graphic (render)", "GET", "compendium/cards/{{card_id}}/render", pre=first_id_pre("compendium/cards", "card_id"),
+                          enabled_query={"format": "svg", "lang": "en"},
+                          # example values of the switched-off parameters: tick one in Postman and it works
+                          query_values={"ratio": "63:88", "style": "3d", "dpi": "300", "download": "true"},
+                          test=['pm.test("an image or the card as JSON", function () { var t = pm.response.headers.get("Content-Type") || ""; pm.expect(t).to.match(/svg|png|jpeg|pdf|json/); });'],
+                          desc="The card as printed. The picture is the main photo of the card; a card without its own photo uses the main photo of its POI.\n\n"
+                               "Query parameters (the two switched on are the defaults; tick the others to try them, each has an example value):\n"
+                               "- `format`: json (every value on the card, translated), svg, png, jpg or pdf (print, 3 mm bleed). Default svg.\n"
+                               "- `lang`: en, de or pl, the language of every text on the card. A text empty in that language comes from the next one (en, de, pl).\n"
+                               "- `ratio`: shape as width:height, whole numbers 1 to 100, between 2:5 and 5:2. Default 63:88 (trading card); also 1:1, 4:5, 9:16, 3:2, 16:9. "
+                               "The shorter side is always 63 mm. From 13:10 on the photo moves to the left of the texts.\n"
+                               "- `style`: look of the card, `standard` (default) or `3d` (raised frame, glass panels, holographic sheen). Another name answers 422.\n"
+                               "- `dpi`: sharpness of a png or jpg, 72 to 2000, default 300 (815 x 1110 px on 63:88; 600 gives twice the width and height). "
+                               "The jpg records it. Wide or tall shapes have more pixels, so very high values answer 422 with the highest dpi that fits "
+                               "(63:88 up to 2000, 16:9 up to 1990, 5:2 up to 1690). Ignored for svg, pdf and json.\n"
+                               "- `download`: true saves the file instead of showing it.\n\n"
+                               "Only 63:88, standard style, 300 dpi is stored by the render job and served from disk when up to date; everything else is drawn on request "
+                               "(a 2000 dpi picture takes several seconds). The file name says what was asked: `card-00013-en.svg`, `card-00013-de-2x3-3d.jpg`, "
+                               "`card-00013-en-600dpi.png`. Any other query parameter answers 422.")
+    card_render_job = request("Render the card files again (job)", "POST", "compendium/cards/{{card_id}}/render", status=[202, 409],
+                              pre=first_id_pre("compendium/cards", "card_id"),
+                              test=["var jsonData = pm.response.json();",
+                                    'if (pm.response.code === 202) { pm.environment.set("job_id", jsonData.response_data.job_id); }'],
+                              desc="Starts a job that writes SVG, PNG, JPG and PDF in English, German and Polish (63:88, standard style, 300 dpi). Saves `job_id`. 409 when a render is already queued or running "
+                                   "(a card made or changed a moment ago already has one).")
     card = crud_folder(
         "compendium", "cards", "card", "card_id",
-        {"poi_id": "{{poi_id}}", "rarity_id": "{{rarity_id}}", "difficulty_sport_id": "{{difficulty_sport_id}}"},
-        {"name": "{{random_name}} renamed"},
-        needs="`poi_id` (compendium/pois); optional `rarity_id` (core/rarities), `difficulty_sport_id` (core/difficulty-sports)",
-        extras=[card_rescan,
-                request("Set card photo", "PATCH", "compendium/cards/{{card_id}}", pre=card_first + first_id_pre("assets/photos", "photo_id"),
-                        body={"main_photo_id": "{{photo_id}}"},
-                        desc=("Makes `{{photo_id}}` (assets / photos / Upload photo) the main photo of the card and queues a new render. "
-                              "Same as Update card with only main_photo_id. 422 when the photo does not exist or you may not read it. "
-                              "Send null to remove it; the card then shows the photo of its POI."))] + card_render,
-        create_desc=("Creates a card and saves its id in `{{card_id}}`. Only `poi_id` is required; `card_number` is assigned when left out. "
-                     "Name, description, type, photo, altitude, country and region come from the POI unless set on the card. "
-                     "A render job is queued at once. Needs `poi_id`; `rarity_id` and `difficulty_sport_id` are optional (remove them when empty)."))
+        {"main_photo_id": "{{photo_id}}", "name": "{{random_name}}", "poi_id": "{{poi_id}}"},
+        {"main_photo_id": "{{photo_id}}", "name": "{{random_name}} renamed"},
+        needs="`poi_id` (compendium/pois); the photo comes from `photo_id` (assets / photos / Upload photo)",
+        extras=[card_rescan, card_render, card_render_job, remove_photo("card", "compendium/cards", "card_id")],
+        create_pre=photo_link_pre(), update_pre=photo_link_pre(), create_test=uses_photo_test(), update_test=uses_photo_test(),
+        update_desc=PHOTO_UPDATE_DESC)
     post = crud_folder(
         "compendium", "posts", "post", "post_id",
-        {"name": "{{random_name}}", "post_type_id": "{{post_type_id}}"}, {"summary": "Updated summary"},
-        needs="`post_type_id` (core/post-types)")
+        {"main_photo_id": "{{photo_id}}", "name": "{{random_name}}", "post_type_id": "{{post_type_id}}"},
+        {"main_photo_id": "{{photo_id}}", "summary": "Updated summary"},
+        needs="`post_type_id` (core/post-types); the photo comes from `photo_id` (assets / photos / Upload photo)",
+        extras=[remove_photo("post", "compendium/posts", "post_id")],
+        create_pre=photo_link_pre(), update_pre=photo_link_pre(), create_test=uses_photo_test(), update_test=uses_photo_test(),
+        update_desc=PHOTO_UPDATE_DESC)
     poi_region = crud_folder(
         "compendium", "poi-regions", "POI-region link", "poi_region_id",
         {"poi_id": "{{poi_id}}", "region_id": "{{region_id}}", "slot_position": 2}, {"slot_position": 3},
         needs="`poi_id` (compendium/pois), `region_id` (compendium/regions)")
     return folder("compendium", [country, region, poi, card, post, poi_region],
                   "Geographic and editorial catalog. Order of Create calls: core region-types, compendium-types, post-types, then country, region, POI, card, post, POI-region link.")
-
-
-def assets_folder():
-    FIRST_ID_LISTS.append(("assets/photos", "photo_id"))
-    photo_first = first_id_pre("assets/photos", "photo_id")
-    photos = folder("photos", [
-        request("List photos", "GET", "assets/photos", enabled_query={},
-                test=["var jsonData = pm.response.json();",
-                      "pm.test(\"Response has a list in response_data\", function () { pm.expect(jsonData.response_data).to.be.an('array'); });",
-                      'if (!pm.environment.get("photo_id") && jsonData.response_data.length) { pm.environment.set("photo_id", jsonData.response_data[0].id); }'],
-                desc="All photos you may read. Filters: q, created_by, is_public, altitude, taken_from/to, created_from/to, bbox, near + radius_m."),
-        request("Upload photo", "POST", "assets/photos", status=201,
-                form=[{"key": "file", "type": "file", "src": []},
-                      {"key": "name", "value": "{{random_name}}", "type": "text"},
-                      {"key": "summary", "value": "Uploaded from Postman", "type": "text", "disabled": True},
-                      {"key": "lon", "value": "8.82", "type": "text", "disabled": True},
-                      {"key": "lat", "value": "46.99", "type": "text", "disabled": True},
-                      {"key": "altitude_m", "value": "2572", "type": "text", "disabled": True},
-                      {"key": "is_public", "value": "true", "type": "text"}],
-                test=set_from_response("photo_id"),
-                desc=("Pick a JPEG, PNG or WebP in the body (key `file`, at most 25 MB). The image is turned upright, shrunk to 2560 px "
-                      "and stored without metadata; position, altitude and time come from EXIF unless the form gives them. Saves `photo_id`. "
-                      "Put it on a card, POI or post with their Update call: `{\"main_photo_id\": \"{{photo_id}}\"}` "
-                      "(compendium / cards / Set card photo).")),
-        request("Get one photo", "GET", "assets/photos/{{photo_id}}", pre=photo_first,
-                desc="Uses `{{photo_id}}`. `?expand=created_by` adds the uploader."),
-        request("Photo file", "GET", "assets/photos/{{photo_id}}/file", pre=photo_first,
-                desc="The image itself (Postman shows it in the response)."),
-        request("Update photo", "PATCH", "assets/photos/{{photo_id}}", pre=photo_first,
-                body={"summary": "Updated summary", "location": POINT, "is_public": True},
-                desc="Only the fields in the body change. The image cannot be replaced: upload a new photo."),
-        request("Delete photo", "DELETE", "assets/photos/{{photo_id}}", status=[200, 409], pre=SKIP_DELETES + photo_first,
-                test=['if (pm.response.code === 200) { pm.environment.unset("photo_id"); }'],
-                desc="Deletes the photo and its file. 409 while it is the main photo of a card, POI, post, gear, segment or track."),
-    ], "Photos: upload, read, change, delete. A card, POI or post gets its photo through its own Update call (main_photo_id).")
-    FIRST_ID_LISTS.append(("assets/gpx", "gpx_id"))
-    gpx_first = first_id_pre("assets/gpx", "gpx_id")
-    gpx = folder("gpx", [
-        request("List GPX files", "GET", "assets/gpx", enabled_query={},
-                test=["var jsonData = pm.response.json();",
-                      'if (!pm.environment.get("gpx_id") && jsonData.response_data.length) { pm.environment.set("gpx_id", jsonData.response_data[0].id); }'],
-                desc="GPX files you may read. A GPX file is created by explorer / tracks / Upload track. Filter `sha256` finds duplicates."),
-        request("Get one GPX file", "GET", "assets/gpx/{{gpx_id}}", pre=gpx_first),
-        request("Download GPX file", "GET", "assets/gpx/{{gpx_id}}/file", pre=gpx_first),
-        request("Update GPX file", "PATCH", "assets/gpx/{{gpx_id}}", pre=gpx_first, body={"summary": "Updated summary"},
-                desc="Name, summary and is_public. The file itself cannot be replaced."),
-        request("Delete GPX file", "DELETE", "assets/gpx/{{gpx_id}}", status=[200, 409], pre=SKIP_DELETES + gpx_first,
-                test=['if (pm.response.code === 200) { pm.environment.unset("gpx_id"); }'],
-                desc="Only a file that no track uses (an orphan); 409 otherwise. Delete the track instead."),
-    ], "GPX files of tracks: read, download, rename, delete orphans.")
-    return folder("assets", [photos, gpx], "Uploaded files: photos and GPX files.")
 
 
 def explorer_folder():
@@ -440,7 +670,18 @@ def explorer_folder():
         {"weight_g": 450}, needs="`company_id` (core/companies), `gear_type_id` (core/gear-types)")
     FIRST_ID_LISTS.append(("explorer/tracks", "track_id"))
     track_first = first_id_pre("explorer/tracks", "track_id")
-    gpx_note = "Pick a .gpx file in the body (key `gpx_file`). `python scripts/make_sample_gpx.py --variant full --out full.gpx` makes one."
+    gpx_note = (f"The body points at `{SAMPLE_GPX}` (put it in the Postman working directory, or pick any .gpx file in the body, key `gpx_file`). "
+                "`python scripts/make_sample_gpx.py --variant full --out full.gpx` makes another one.")
+    track_gpx_id = [
+        "// The stored GPX file is an asset of its own (assets / gpx). Save its id in gpx_id.",
+        "pm.sendRequest({",
+        f'    url: pm.variables.replaceIn("{api_url("explorer/tracks")}/" + jsonData.response_data.id),',
+        '    method: "GET",',
+        f'    header: {{ Authorization: "Bearer " + pm.environment.get("{ARGS.token_var}") }}',
+        "}, function (err, res) {",
+        '    if (!err && res.code === 200 && res.json().response_data.gpx_id) { pm.environment.set("gpx_id", res.json().response_data.gpx_id); }',
+        "});",
+    ]
     tracks = folder("tracks", [
         request("List tracks", "GET", "explorer/tracks",
                 test=[
@@ -450,7 +691,7 @@ def explorer_folder():
                 ], desc="Your tracks. Switch on `archived` to see archived ones."),
         request("Upload track (GPX)", "POST", "explorer/tracks", status=202,
                 form=[{"key": "name", "value": "Postman track {{random_name}}", "type": "text"},
-                      {"key": "gpx_file", "type": "file", "src": []},
+                      {"key": "gpx_file", "type": "file", "src": SAMPLE_GPX},
                       {"key": "summary", "value": "Uploaded from Postman", "type": "text"},
                       {"key": "is_public", "value": "false", "type": "text"}],
                 test=[
@@ -458,8 +699,12 @@ def explorer_folder():
                     'pm.environment.set("track_id", jsonData.response_data.id);',
                     'pm.environment.set("job_id", jsonData.response_data.job_id);',
                     'pm.test("Location header points to the job", function () { pm.expect(pm.response.headers.get("Location")).to.include("/management/my-jobs/"); });',
-                ], desc=f"Accepts the file and starts processing as a job (202). Saves `track_id` and `job_id`. {gpx_note}"),
-        request("Get one track", "GET", "explorer/tracks/{{track_id}}", pre=track_first),
+                ] + track_gpx_id,
+                desc=f"Accepts the file and starts processing as a job (202). Saves `track_id`, `job_id` and `gpx_id` (the stored file, see assets / gpx). {gpx_note}"),
+        request("Get one track", "GET", "explorer/tracks/{{track_id}}", pre=track_first,
+                test=['var gpxOfTrack = pm.response.json().response_data.gpx_id;',
+                      'if (gpxOfTrack) { pm.environment.set("gpx_id", gpxOfTrack); }'],
+                desc="Also saves `gpx_id`, the stored GPX file of the track (assets / gpx)."),
         request("Track geometry", "GET", "explorer/tracks/{{track_id}}/geometry", status=[200, 404], pre=track_first,
                 desc="404 until the processing job has finished."),
         request("Track performance", "GET", "explorer/tracks/{{track_id}}/performance", status=[200, 404], pre=track_first,
@@ -509,7 +754,8 @@ def drawn_trail(first, count):
 def segments_folder():
     FIRST_ID_LISTS.append(("explorer/segments", "segment_id"))
     first = first_id_pre("explorer/segments", "segment_id")
-    gpx_note = "Pick a .gpx file in the body (key `gpx_file`). Times and heart rate in the file are dropped; the file itself is not kept."
+    gpx_note = (f"The body points at `{SAMPLE_GPX}` (put it in the Postman working directory, or pick any .gpx file in the body, key `gpx_file`). "
+                "Times and heart rate in the file are dropped; the file itself is not kept.")
     sport = "`sport_type_id` (core/sport-types; Create sport type, or Collect first IDs)"
     return folder("segments", [
         request("List segments", "GET", "explorer/segments",
@@ -520,7 +766,7 @@ def segments_folder():
                      "`unused`, `created_by`, `sport_type_id`, `distance_min` / `distance_max`, `sort`."),
         request("Create segment from a GPX file", "POST", "explorer/segments", status=201,
                 form=[{"key": "name", "value": "Postman segment {{random_name}}", "type": "text"},
-                      {"key": "gpx_file", "type": "file", "src": []},
+                      {"key": "gpx_file", "type": "file", "src": SAMPLE_GPX},
                       {"key": "sport_type_id", "value": "{{sport_type_id}}", "type": "text"},
                       {"key": "is_public", "value": "false", "type": "text"}],
                 test=set_from_response("segment_id") + remember("created_segment_ids", "jsonData.response_data.id") + [
@@ -778,7 +1024,7 @@ def management_folder():
                     "}",
                 ], desc="Administrator only. Runtime settings. Saves the first key and its value in `setting_key` and `setting_value`."),
         request("Get one setting", "GET", "management/settings/{{setting_key}}", pre=setting_first),
-        request("Update setting", "PATCH", "management/settings/{{setting_key}}", body='{"value": {{setting_value}}}', pre=setting_first,
+        request("Update setting", "PATCH", "management/settings/{{setting_key}}", body='{\n    "value": {{setting_value}}\n}', pre=setting_first,
                 desc="Sends back the value that List settings saved (no change). Edit the body to change a setting."),
         request("Reset setting", "POST", "management/settings/{{setting_key}}/reset", pre=setting_first, desc="Puts the default value back."),
     ])
@@ -830,9 +1076,10 @@ def cleanup_folder():
         ("DELETE", "core/resource-types/{{policy_resource_type_id}}", "policy_resource_type_id"),
         ("DELETE", "compendium/poi-regions/{{poi_region_id}}", "poi_region_id"),
         ("DELETE", "compendium/cards/{{card_id}}", "card_id"),
-        ("DELETE", "assets/photos/{{photo_id}}", "photo_id"),
         ("DELETE", "compendium/posts/{{post_id}}", "post_id"),
         ("DELETE", "compendium/pois/{{poi_id}}", "poi_id"),
+        ("PHOTOS", "", ""),     # after the cards, posts and POIs that hold a photo as their main photo
+        ("DELETE", "assets/photos/{{photo_id}}", "photo_id"),
         ("DELETE", "compendium/regions/{{region_id}}", "region_id"),
         ("DELETE", "compendium/countries/{{country_id}}", "country_id"),
         ("DELETE", "explorer/gear/{{gear_id}}", "gear_id"),
@@ -849,6 +1096,8 @@ def cleanup_folder():
             "visibilities/{{visibility_id}}", "waypoint-types/{{waypoint_type_id}}", "weather-conditions/{{weather_condition_id}}"]
     for r in refs:
         order.append(("DELETE", f"core/{r}", re.search(r"\{\{(\w+)\}\}", r).group(1)))
+    order.append(("ICONS", "", ""))     # last: countries, regions, reference values and resource types hold icons (a used icon cannot be deleted)
+    order.append(("DELETE", "assets/icons/{{icon_id}}", "icon_id"))
     items = [
         request("Delete the routes this collection made", "GET", "explorer/routes", pre=delete_all_pre("created_route_ids", "explorer/routes"),
                 desc="Deletes every route whose id was kept by a Create call of this collection (variable `created_route_ids`)."),
@@ -856,6 +1105,18 @@ def cleanup_folder():
                 desc="Deletes every segment that a Create call or a route save of this collection made (variable `created_segment_ids`), after the routes are gone."),
     ]
     for method, path, var in order:
+        if method == "PHOTOS":
+            items.append(request("Delete the photos this collection made", "GET", "assets/photos",
+                                 pre=delete_all_pre("created_photo_ids", "assets/photos"),
+                                 desc="Deletes every photo that Upload photo of this collection made (variable `created_photo_ids`), after the cards, posts and POIs that used them are gone "
+                                      "(a photo cannot be deleted while it is the main photo of something). GPX files are not removed here: a track keeps its file."))
+            continue
+        if method == "ICONS":
+            items.append(request("Delete the icons this collection made", "GET", "assets/icons",
+                                 pre=delete_all_pre("created_icon_ids", "assets/icons"),
+                                 desc="Deletes every icon that Upload icon of this collection made (variable `created_icon_ids`), after the countries, regions, reference values and resource types "
+                                      "that used them are gone (an icon cannot be deleted while something uses it). Icons that the collection did not make (the flags) stay."))
+            continue
         label = path.split("/")[0] + " / " + path.split("/")[1]
         it = request(f"Delete {label}", method, path, status=[200, 204, 404, 409, 422],
                      test=[f'pm.environment.unset("{var}");'])
@@ -940,18 +1201,24 @@ def build_collection():
 
 **Use:** import this collection and `Alpen API local.postman_environment.json`, select the environment, run **profile / auth / Login admin** once, then any call. Tokens last only a few minutes; the collection keeps the newest one automatically (header `X-Access-Token`). If a call answers 401, log in again.
 
-**URL:** `{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/<app>/<resource>`. Folders: one per app (core, compendium, assets, explorer, profile, management), one per model inside.
+**URL:** `{ARGS.scheme}://{ARGS.host_ref}:{ARGS.port_ref}/{ARGS.api_var_ref}/<app>/<resource>`. Folders: one per app (core, assets, compendium, explorer, profile, management), one per model inside.
 
-**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV, Upload track and Upload photo calls need a file chosen in their body.
+**Photos and GPX files (assets):** run **assets / photos / Upload photo** once. It saves `photo_id`, and from then on the Create and Update calls of cards, POIs and posts send `"main_photo_id": "{{{{photo_id}}}}"`, so they all use that photo (an empty `photo_id` is filled with the first photo of the list; when there is no photo at all the field is left out). **explorer / tracks / Upload track** saves `gpx_id`, the stored file shown in assets / gpx. The upload requests point at `{SAMPLE_PHOTO}` and `{SAMPLE_GPX}`: put both files in the Postman working directory (Settings, General, Working directory) or choose a file in the body once.
+
+**Icons and flags (assets):** run **assets / icons / Upload icon** once (admin). It saves `icon_id` and `icon_key`, and from then on the Create and Update calls of the 19 reference tables, resource types, countries and regions send `"icon_id": "{{{{icon_id}}}}"`, so they all use that icon (an empty `icon_id` is filled with the first icon of the list, for example a flag; when there is no icon at all the field is left out). `assets / icons / Icon file ...` shows the picture (SVG, PNG, by id or by key). **All icons at once:** `Upload icons CSV (dry run)`, then `Upload icons CSV (import all)` (the CSV `{SAMPLE_ICONS_CSV}` carries the graphics of all 438 icons; with `link=true` the reference rows get their `icon_id` too), and `Link rows to icons by key` for later. The upload requests point at `{SAMPLE_ICON}` and `{SAMPLE_ICONS_CSV}`: put both in the Postman working directory too.
+
+**Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV and Upload track calls need a file chosen in their body.
 
 **Not covered:** WebSocket requests (see management / ws for the ticket and the URLs)."""
     items = [
         health_folder(),
         profile_folder(),
         core_folder(),
-        compendium_folder(),
-        assets_folder(),
+        # Order for a full Runner run: explorer (Upload track saves gpx_id) before assets (the GPX files exist now, Upload photo
+        # saves photo_id) before compendium (cards, POIs and posts use photo_id). Nothing in explorer needs compendium data.
         explorer_folder(),
+        assets_folder(),
+        compendium_folder(),
         management_folder(),
         cleanup_folder(),
     ]
@@ -984,8 +1251,6 @@ def build_environment():
         var("new_user_password", "!Password@5005", True),
         var("skip_deletes", "false"),
         var("collect_overwrite", "false"),
-        var("card_lang", "en"),
-        var("card_ratio", "63:88"),
         var(ARGS.token_var, "", True),
     ]
     return {
@@ -997,6 +1262,60 @@ def build_environment():
 
 
 # ------------------------------------------------------------------ coverage check
+
+BODY_FIELDS: dict = {}  # key_of(method, path) -> names of the JSON body fields the API accepts there
+
+
+def _schema_fields(spec, schema, seen=()):
+    if not schema:
+        return set()
+    if "$ref" in schema:
+        name = schema["$ref"].rsplit("/", 1)[-1]
+        if name in seen:
+            return set()
+        return _schema_fields(spec, spec["components"]["schemas"].get(name), seen + (name,))
+    fields = set(schema.get("properties", {}))
+    for part in schema.get("allOf", []):
+        fields |= _schema_fields(spec, part, seen)
+    return fields
+
+
+def check_asset_links():
+    """The photo mechanism cannot be forgotten: for every request body the API accepts with a field of ASSET_LINKS, at least one
+    request of the collection sends that field, and every request that sends it uses the variable (or null, to clear the link)."""
+    problems = []
+    for key, fields in sorted(BODY_FIELDS.items()):
+        for field, var in ASSET_LINKS.items():
+            if field not in fields:
+                continue
+            bodies = BODIES.get(key, [])
+            if not any(f'"{field}": "{{{{{var}}}}}"' in b for b in bodies):
+                problems.append(f"{key}: the API accepts `{field}` but no request body sends \"{field}\": \"{{{{{var}}}}}\"")
+    for key, bodies in sorted(BODIES.items()):
+        for b in bodies:
+            for field, var in ASSET_LINKS.items():
+                m = re.search(rf'"{field}":\s*("(?:[^"\\]|\\.)*"|null|[^,\s}}]+)', b)
+                if m and m.group(1) not in (f'"{{{{{var}}}}}"', "null"):
+                    problems.append(f"{key}: `{field}` is {m.group(1)}, expected \"{{{{{var}}}}}\" or null")
+    return problems
+
+
+def check_body_format():
+    """Every raw JSON body is written the same way (pretty() = 4 spaces, one member per line). A placeholder {{x}} is replaced by a
+    dummy value and the body must equal json.dumps(indent=4) of what it parses to."""
+    problems = []
+    for key, bodies in sorted(BODIES.items()):
+        for b in bodies:
+            probe = re.sub(r"\{\{\w+\}\}", "0", re.sub(r'"\{\{\w+\}\}"', '"x"', b))
+            try:
+                again = json.dumps(json.loads(probe), indent=4, ensure_ascii=False)
+            except ValueError as e:
+                problems.append(f"{key}: the body is not valid JSON ({e})")
+                continue
+            if again != probe:
+                problems.append(f"{key}: the body is not formatted with 4 spaces, one member per line")
+    return problems
+
 
 def load_openapi(path):
     spec = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -1011,6 +1330,9 @@ def load_openapi(path):
             if m.upper() in ("GET", "POST", "PUT", "PATCH", "DELETE"):
                 k = key_of(m, rel)
                 ops[k] = o
+                json_body = ((o.get("requestBody") or {}).get("content") or {}).get("application/json")
+                if json_body:
+                    BODY_FIELDS[k] = _schema_fields(spec, json_body.get("schema"))
                 QUERY_PARAMS[k] = [
                     (prm["name"], (prm.get("description") or ("required" if prm.get("required") else "optional")))
                     for prm in o.get("parameters", []) if prm["in"] == "query"
@@ -1044,6 +1366,13 @@ def main():
             print("  no request for", k)
         for k in extra:
             print("  request without a route in the API:", k)
+        sys.exit(1)
+    link_problems = check_asset_links()
+    format_problems = check_body_format()
+    if link_problems or format_problems:
+        print("ASSET LINK / BODY FORMAT PROBLEM")
+        for p in link_problems + format_problems:
+            print("  ", p)
         sys.exit(1)
 
     out = Path(ARGS.out)

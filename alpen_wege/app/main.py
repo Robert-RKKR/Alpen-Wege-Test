@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -25,6 +26,7 @@ from app.assets.routes import router as assets_router
 from app.management.utils.event_logger import load_entity_type_cache
 from app.management.utils.seed_entity_types import seed_entity_types
 from app.core.utils.api_paths import API_V1
+from app.core.utils.integrity import is_missing_icon
 from app.core.utils.responses import AppError, fail, request_id_ctx
 from app.core.utils.upload_limit import UploadSizeLimitMiddleware
 
@@ -58,7 +60,7 @@ async def lifespan(app: FastAPI):
 
 # Shown at the top of Swagger (/docs) and ReDoc (/redoc).
 API_DESCRIPTION = """
-REST API of Alpen Wege. Every URL is `/api/v1/{app}/{resource}` (apps: `profile`, `core`, `compendium`, `explorer`, `management`).
+REST API of Alpen Wege. Every URL is `/api/v1/{app}/{resource}` (apps: `profile`, `core`, `compendium`, `explorer`, `assets`, `management`).
 
 **Login.** `POST /api/v1/profile/auth/login`, then press *Authorize* and paste the `access_token`. A token lasts a few minutes;
 when it is half used up the answer carries a fresh one in the header `X-Access-Token`: use that one from then on.
@@ -77,6 +79,13 @@ A value the database cannot take (a negative `limit`, a date in the year 9999, a
 
 **Depth of one object (`GET .../{id}`).** Linked objects come as IDs. `expand=main_region.country,created_by` fills the ones
 you name (3 levels deep, 10 links at most; a wrong name answers 400 and lists the allowed ones).
+
+**Icons and flags.** An icon is an SVG picture kept in the database (`/assets/icons`). Reference values (sport types, rarities, ...),
+resource types, countries and regions point to one with `icon_id`; countries use the icon `flag_<iso code>` (`flag_at`). The picture is
+`GET /assets/icons/{id}/file`, or `/assets/icons/by-key/{key}/file`; add `?format=png&size=64` for a PNG. Everybody who is logged in
+reads icons, only the administrator writes them. An uploaded SVG is cleaned (script, style, external links are removed and listed in
+`response_details.removed`). `POST /assets/icons/upload-csv` creates many icons from one CSV (try `dry_run=true` first) and `POST /assets/icons/link`
+sets `icon_id` on the rows whose icon text or code matches an icon key. An unknown `icon_id` answers 422. The text column `icon` still exists and is unchanged.
 
 **Jobs.** Uploading a track and the rescan / reprocess endpoints answer 202 with a `job_id` (and a `Location` header);
 follow it with `management/my-jobs/{job_id}` or the WebSocket `management/ws`.
@@ -124,6 +133,22 @@ def create_app() -> FastAPI:
                 "Validation failed",
                 error_message=f"The request contains {len(errors)} invalid field(s). Check error_errors for details.",
                 errors=errors,
+            ),
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def integrity_exc_handler(request: Request, exc: IntegrityError):
+        # An icon_id that names no icon (any of the 22 tables with the column) is the caller's mistake: 422, like the
+        # photo link. Every other integrity error is raised again and ends as before (500 from the handler below).
+        if not is_missing_icon(exc):
+            raise exc
+        return JSONResponse(
+            status_code=422,
+            content=fail(
+                422,
+                "Validation failed",
+                error_message="icon_id: the icon does not exist.",
+                errors=[{"field": "icon_id", "code": "icon_not_found", "message": "The icon does not exist."}],
             ),
         )
 

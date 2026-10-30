@@ -64,6 +64,8 @@ LIST_ROUTES.update({
         "bbox", "near", "radius_m")),
     "/api/v1/assets/gpx": (P1000, "-created_at", ["name", "size_bytes", "created_at"], (
         "q", "created_by", "is_public", "sha256", "created_from", "created_to")),
+    "/api/v1/assets/icons": (P1000, "key", ["key", "name", "created_at", "updated_at"], (
+        "q", "key", "key_prefix", "created_by", "created_from", "created_to")),
     "/api/v1/explorer/gear": (P1000, "-created_at", ["name", "created_at", "weight_g"], (
         "q", "company_id", "gear_type_id", "created_by", "weight_min", "weight_max")),
     "/api/v1/explorer/segments": (P1000, "-created_at", ["name", "created_at", "updated_at", "distance_m", "elevation_gain_m"], (
@@ -123,7 +125,7 @@ def test_the_list_routes_are_exactly_the_known_ones():
     # every GET that has page_params is in LIST_ROUTES and the other way round
     paging = {path for path, (_, deps) in _get_routes().items() if _own_dependencies(deps)[0]}
     assert paging == set(LIST_ROUTES)
-    assert len(LIST_ROUTES) == 37
+    assert len(LIST_ROUTES) == 38
 
 
 def test_every_list_route_has_the_documented_page_sort_and_filters():
@@ -185,7 +187,7 @@ def test_list_route_files_use_the_helpers_and_not_their_own_paging():
         assert not re.search(r"\blimit: int\b|\boffset: int\b|\bskip: int\b", text), name
         assert "count_stmt" not in text, name
         assert re.search(r"total=total, limit=page\.limit, offset=page\.offset", text), name
-    assert checked == 37
+    assert checked == 38
 
 
 def test_a_bad_paging_value_without_a_token_still_answers_401():
@@ -211,7 +213,7 @@ def test_every_list_route_with_an_access_context_narrows_by_the_scope():
         assert "apply_scope(" in text or "apply_visibility(" in text or 'access.scope == "own"' in text, f"{name} ignores the scope"
         if "apply_visibility" in text:
             assert "apply_visibility(" in text and "apply_scope(" in text, f"{name}: the track list needs both"
-    assert checked == 31   # 6 compendium lists, gear, segment, route, track, photo, gpx and the 19 lookup tables
+    assert checked == 32   # 6 compendium lists, gear, segment, route, track, photo, gpx, icons and the 19 lookup tables
 
 
 # ------------------------------------------------------------------ the default order is the old one
@@ -226,6 +228,7 @@ OLD_ORDER.update({
     "/api/v1/explorer/gear": ("created_at", True),
     "/api/v1/assets/photos": ("created_at", True),
     "/api/v1/assets/gpx": ("created_at", True),
+    "/api/v1/assets/icons": ("key", False),
     "/api/v1/explorer/segments": ("created_at", True),
     "/api/v1/explorer/routes": ("created_at", True),
     "/api/v1/explorer/tracks": ("coalesce", True),          # coalesce(recorded_at, created_at)
@@ -271,6 +274,7 @@ EXPECT = {
     "user_group": "profile_user_credentials.user_group = ", "entity_type": "mgmt_ref_entity_type.key = ",
     "iso_code": "upper(compendium_cat_country.iso_code) = ",
     "unused": "NOT (EXISTS (SELECT",
+    "key_prefix": "asset_agg_icon.key LIKE 'ab%'",
 }
 # the same parameter name on a list whose column has another name (the totals of a route are called agg_...)
 EXPECT_BY_PATH = {
@@ -284,6 +288,7 @@ Q_COLUMNS = {
     "/api/v1/compendium/pois": ["name", "name_de", "name_pl"],
     "/api/v1/explorer/gear": ["name", "name_de", "name_pl", "model"],
     "/api/v1/assets/photos": ["name", "name_de", "name_pl", "summary", "summary_de", "summary_pl"],
+    "/api/v1/assets/icons": ["key", "name", "name_de", "name_pl", "summary", "summary_de", "summary_pl"],
     "/api/v1/explorer/tracks": ["name", "name_de", "name_pl", "summary"],
     "/api/v1/profile/users/": ["username", "email", "first_name", "last_name"],
     "/api/v1/core/resource-types": ["key"],
@@ -308,6 +313,8 @@ def _sample(name: str, annotation):
         return "7,46,8,47"
     if name == "near":
         return "7.7,46.0"
+    if name in ("key", "key_prefix"):
+        return "AB" if name == "key" else "ab"           # an icon key is compared in lower case
     if name in ("entity_type", "resource_key", "kind", "task_name", "subject_type", "action", "q"):
         return "ab"
     if name == "iso_code":

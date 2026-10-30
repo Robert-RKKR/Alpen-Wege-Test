@@ -7,12 +7,21 @@ from app.core.utils.expand import Link
 from app.profile.schemas.user_read import ExpandedUser
 
 
+ICON_ID_WRITE = (
+    "Link to the picture of this value: the id of an icon (`GET /assets/icons`, an SVG). Optional. An unknown id answers 422. "
+    "The text in `icon` stays as it is."
+)
+ICON_ID_CLEAR = " `null` removes the link; leave the field out to keep it."
+ICON_ID_READ = "Id of the icon (an SVG) of this value, or null. The picture: `GET /assets/icons/{icon_id}/file`. The text `icon` is still used until every value has an icon."
+
+
 class RefBaseCreate(BaseModel):
     name: str | None = None
     name_de: str | None = None
     name_pl: str | None = None
     color: str
     icon: str
+    icon_id: UUID | None = Field(None, description=ICON_ID_WRITE)
 
 
 class RefBaseUpdate(BaseModel):
@@ -21,6 +30,7 @@ class RefBaseUpdate(BaseModel):
     name_pl: str | None = None
     color: str | None = None
     icon: str | None = None
+    icon_id: UUID | None = Field(None, description=ICON_ID_WRITE + ICON_ID_CLEAR)
 
     @model_validator(mode="after")
     def _required_columns_cannot_be_set_to_null(self):
@@ -40,6 +50,7 @@ class RefBaseRead(BaseModel):
     name_pl: str | None
     color: str
     icon: str
+    icon_id: UUID | None = Field(description=ICON_ID_READ)
     created_by: UUID
     created_at: datetime
     updated_at: datetime

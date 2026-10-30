@@ -3,7 +3,7 @@ import uuid
 
 # Third-party
 from geoalchemy2 import Geometry
-from sqlalchemy import ARRAY, Text, func
+from sqlalchemy import ARRAY, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # Local application
@@ -137,5 +137,13 @@ class CompendiumCatCountry(TimestampMixin, CreatorMixin, IdentificationL18nMixin
         Text,
         comment=(
             "Polish (pl) translation of the capital city name (e.g. 'Wiedeń')."
+        ),
+    )
+    icon_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("asset_agg_icon.id", ondelete="RESTRICT"),
+        index=True,
+        comment=(
+            "FK to asset_agg_icon with RESTRICT delete. The flag of the "
+            "country (an SVG). NULL until one is linked."
         ),
     )

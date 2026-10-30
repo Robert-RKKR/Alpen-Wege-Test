@@ -34,8 +34,9 @@ from app.core.schemas.ref import (
 from app.core.utils.expand import ExpandPlan, links_of
 from app.explorer.models.models_agg.gear import ExplorerAggGear
 from app.assets.models.models_agg.gpx import AssetAggGpx
+from app.assets.models.models_agg.icon import AssetAggIcon
 from app.assets.models.models_agg.photo import AssetAggPhoto
-from app.assets.schemas.asset import GpxDetail, PhotoDetail
+from app.assets.schemas.asset import GpxDetail, IconDetail, PhotoDetail
 from app.explorer.models.models_agg.route import ExplorerAggRoute
 from app.explorer.models.models_agg.segment import ExplorerAggSegment
 from app.explorer.models.models_agg.track import ExplorerAggTrack
@@ -71,6 +72,7 @@ PAIRS = {
     GearDetail: ExplorerAggGear,
     PhotoDetail: AssetAggPhoto,
     GpxDetail: AssetAggGpx,
+    IconDetail: AssetAggIcon,
     TrackDetail: ExplorerAggTrack,
     SegmentDetail: ExplorerAggSegment,
     RouteDetail: ExplorerAggRoute,

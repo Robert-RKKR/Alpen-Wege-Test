@@ -1,0 +1,132 @@
+{#- Collectible card. Trim L.W x L.H (10 user units = 1 mm) + 3 mm dark bleed. Body in the rarity colour; every text on it
+    uses P.text, the one of dark or white that reads better on it (render.palette). Every text value is auto-escaped.
+    Spacing comes from render.py (one system for every style): L.pad inside every box and from the photo edge to the texts on it,
+    L.radius for the photo window and every box, 18 between all boxes. -#}
+{%- import "_parts.j2" as parts -%}
+{%- set W, H, B = L.W, L.H, L.bleed -%}
+{%- set R, PAD = L.radius, L.pad -%}
+{%- set c = rarity.color -%}
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="{{ (W + 2*B) / 10 }}mm" height="{{ (H + 2*B) / 10 }}mm" viewBox="{{ -B }} {{ -B }} {{ W + 2*B }} {{ H + 2*B }}"
+     font-family="{{ font }}">
+  <title>{{ number_label }} {{ name }}</title>
+  <defs>
+    <clipPath id="card"><rect width="{{ W }}" height="{{ H }}" rx="30"/></clipPath>
+    <clipPath id="photo"><rect x="{{ L.px }}" y="{{ L.py }}" width="{{ L.pw }}" height="{{ L.ph }}" rx="{{ R }}"/></clipPath>
+    <clipPath id="flag"><circle r="20"/></clipPath>
+    <linearGradient id="body" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="{{ P.body_top }}"/><stop offset="1" stop-color="{{ P.body_bottom }}"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B0F14" stop-opacity="0.55"/>
+      <stop offset="0.22" stop-color="#0B0F14" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#0B0F14" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0B0F14" stop-opacity="0.92"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      {%- if rarity.foil %}
+      <stop offset="0" stop-color="#FFE29A"/><stop offset="0.25" stop-color="{{ c }}"/>
+      <stop offset="0.5" stop-color="#9BE7FF"/><stop offset="0.75" stop-color="#F5A8FF"/>
+      <stop offset="1" stop-color="{{ c }}"/>
+      {%- else %}
+      <stop offset="0" stop-color="{{ P.ring }}"/><stop offset="1" stop-color="{{ P.ring }}"/>
+      {%- endif %}
+    </linearGradient>
+    <linearGradient id="nophoto" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="{{ c }}" stop-opacity="0.55"/><stop offset="1" stop-color="#1A2230"/>
+    </linearGradient>
+  </defs>
+
+  {#- bleed: dark band past the cut line #}
+  <rect x="{{ -B }}" y="{{ -B }}" width="{{ W + 2*B }}" height="{{ H + 2*B }}" fill="{{ P.band }}"/>
+
+  <g clip-path="url(#card)">
+    <rect width="{{ W }}" height="{{ H }}" fill="url(#body)"/>
+
+    {#- ---------- photo ---------- #}
+    <g clip-path="url(#photo)">
+      {%- if photo_href %}
+      <image x="{{ L.px }}" y="{{ L.py }}" width="{{ L.pw }}" height="{{ L.ph }}" preserveAspectRatio="xMidYMid slice" xlink:href="{{ photo_href }}"/>
+      {%- else %}
+      <rect x="{{ L.px }}" y="{{ L.py }}" width="{{ L.pw }}" height="{{ L.ph }}" fill="url(#nophoto)"/>
+      <path d="{{ L.mountain }}" fill="#0F141B" opacity="0.45"/>
+      {%- endif %}
+      <rect x="{{ L.px }}" y="{{ L.py }}" width="{{ L.pw }}" height="{{ L.ph }}" fill="url(#shade)"/>
+    </g>
+    {#- fine light edge so the photo window reads as a window on every rarity colour #}
+    <rect x="{{ L.px }}" y="{{ L.py }}" width="{{ L.pw }}" height="{{ L.ph }}" rx="{{ R }}" fill="none" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="2"/>
+
+    {#- number pill, PAD from the photo edge; 18 of room on both ends. The colour of the sport difficulty as a diamond before the number #}
+    <g transform="translate({{ L.px + PAD }} {{ L.py + PAD }})">
+      <rect width="{{ L.pill_w }}" height="40" rx="20" fill="#0B0F14" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.25"/>
+      {%- if L.diamond %}
+      <path d="M0 -9 L9 0 L0 9 L-9 0 Z" transform="translate({{ L.diamond_x }} 20)" fill="{{ L.diamond }}" stroke="#FFFFFF" stroke-width="1.5"/>
+      {%- endif %}
+      <text x="{{ L.number_x }}" y="27" font-size="20" font-weight="700" letter-spacing="1.5" fill="#FFFFFF">{{ number_label }}</text>
+    </g>
+
+    {#- flags: overlapping round badges on the line of the number pill, the first (main region) country on top #}
+    {%- for f in flags | reverse %}
+    <g transform="translate({{ L.flag_x - (flags|length - loop.index) * 34 }} {{ L.py + PAD + 20 }})">
+      <circle r="22" fill="#0B0F14" stroke="#FFFFFF" stroke-width="3"/>
+      {%- if f.href %}
+      <image x="-20" y="-20" width="40" height="40" clip-path="url(#flag)" preserveAspectRatio="xMidYMid slice" xlink:href="{{ f.href }}"/>
+      {%- else %}
+      <text y="6" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">{{ f.iso }}</text>
+      {%- endif %}
+    </g>
+    {%- endfor %}
+
+    {#- name + location on the photo, PAD from its left edge; a soft dark copy underneath keeps the letters readable on a bright photo #}
+    {%- for line in L.name_lines %}
+    <text x="{{ L.px + PAD }}" y="{{ L.name_y + loop.index0 * L.name_lh + 2.5 }}" font-size="{{ L.name_size }}" font-weight="700" letter-spacing="-0.5" fill="#000000" fill-opacity="0.4">{{ line }}</text>
+    {%- endfor %}
+    {%- for line in L.name_lines %}
+    <text x="{{ L.px + PAD }}" y="{{ L.name_y + loop.index0 * L.name_lh }}" font-size="{{ L.name_size }}" font-weight="700" letter-spacing="-0.5" fill="#FFFFFF">{{ line }}</text>
+    {%- endfor %}
+    {#- map pin in the rarity colour with a white outline, so it shows on every rarity and on every photo #}
+    <g transform="translate({{ L.px + PAD }} {{ L.loc_y }})">
+      <path d="{{ parts.pin_path() }}" transform="translate(0 -19) scale(1.1)" fill="{{ c }}" fill-rule="evenodd" stroke="#FFFFFF" stroke-width="1.3" stroke-linejoin="round"/>
+      <text x="30" y="0" font-size="{{ L.loc_size }}" fill="#FFFFFF" fill-opacity="0.9">{{ L.location }}</text>
+    </g>
+
+    {#- ---------- stat chips: icon and label on one row (the icon is centred on the label), the value on a row of its own.
+        Padding: PAD left and right, about 16 above the icon and 15 below the value. The label is sized in render.py to end
+        before the chip edge, so no text can run into the icon. ---------- #}
+    {%- for s in L.stats %}
+    <g transform="translate({{ s.x }} {{ s.y }})">
+      <rect width="{{ s.w }}" height="74" rx="{{ R }}" fill="{{ P.panel }}" fill-opacity="{{ P.panel_op }}"/>
+      <rect width="{{ s.w }}" height="74" rx="{{ R }}" fill="none" stroke="{{ P.text }}" stroke-opacity="0.22" stroke-width="1.2"/>
+      {#- icon: plain outline in the text colour; the 24 box is scaled to 20, its drawing starts 1.5 inside the box edge, so the
+          visible left edge lines up with the value below #}
+      <g transform="translate({{ PAD - 1.5 }} {{ L.chip_icon_y }}) scale(0.8333)" fill="none" stroke="{{ P.text }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">{{ parts.icon(s.icon) }}</g>
+      <text x="{{ L.chip_label_x }}" y="{{ s.label_y }}" font-size="{{ s.label_size }}" font-weight="700" letter-spacing="{{ (s.label_size * 0.12) | round(2) }}" fill="{{ P.text }}" fill-opacity="0.75">{{ s.label | upper }}</text>
+      <text x="{{ PAD }}" y="59" font-size="{{ s.size }}" font-weight="700" fill="{{ P.text }}">{{ s.value }}</text>
+    </g>
+    {%- endfor %}
+
+    {#- ---------- description: the same padding on all sides (render._description puts the first baseline one PAD plus the cap height below the top) ---------- #}
+    <rect x="{{ L.desc_x }}" y="{{ L.desc_y }}" width="{{ L.desc_w }}" height="{{ L.desc_h }}" rx="{{ R }}" fill="{{ P.panel }}" fill-opacity="{{ P.panel_op }}"/>
+    <rect x="{{ L.desc_x }}" y="{{ L.desc_y }}" width="{{ L.desc_w }}" height="{{ L.desc_h }}" rx="{{ R }}" fill="none" stroke="{{ P.text }}" stroke-opacity="0.22" stroke-width="1.2"/>
+    {#- justified: every word has its own x (render.justify); the last line stays left-aligned #}
+    <text font-size="{{ L.desc_size }}" fill="{{ P.text }}">
+      {%- for row in L.desc_words %}
+      {%- set y = L.desc_y + L.desc_top + loop.index0 * L.desc_lh %}
+      {%- for x, word in row %}
+      <tspan x="{{ L.desc_x + PAD + x }}" y="{{ y }}">{{ word }}</tspan>
+      {%- endfor %}
+      {%- endfor %}
+    </text>
+
+    {#- ---------- footer: centred between the description and the frame, aligned with the texts above (PAD from the box edges) ---------- #}
+    <g transform="translate({{ L.footer_x }} {{ L.footer_y }})">
+      <path d="M0 -10 L10 0 L0 10 L-10 0 Z" transform="translate(10 -6)" fill="{{ P.text }}"/>
+      <text x="30" y="0" font-size="16" font-weight="700" letter-spacing="3" fill="{{ P.text }}">{{ L.rarity_label }}</text>
+    </g>
+    <text x="{{ L.footer_right }}" y="{{ L.footer_y }}" text-anchor="end" font-size="{{ L.footer_size }}" fill="{{ P.text }}" fill-opacity="0.6">{{ L.footer }}</text>
+  </g>
+
+  {#- inner ring between body and band: rarity colour mixed with the band (holographic from Legendary) #}
+  <rect x="4" y="4" width="{{ W - 8 }}" height="{{ H - 8 }}" rx="27" fill="none" stroke="url(#frame)" stroke-width="10"/>
+  <rect x="11" y="11" width="{{ W - 22 }}" height="{{ H - 22 }}" rx="22" fill="none" stroke="{{ P.text }}" stroke-opacity="0.18" stroke-width="1.5"/>
+</svg>

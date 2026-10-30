@@ -88,6 +88,14 @@ class CompendiumCatRegion(TimestampMixin, CreatorMixin, IdentificationL18nMixin,
             "queries and map viewport fitting."
         ),
     )
+    icon_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("asset_agg_icon.id", ondelete="RESTRICT"),
+        index=True,
+        comment=(
+            "FK to asset_agg_icon with RESTRICT delete. The flag or coat of "
+            "arms of the region (an SVG). NULL until one is linked."
+        ),
+    )
 
     country = relationship("CompendiumCatCountry", foreign_keys=[country_id], lazy="raise")
     region_type = relationship("CoreRefRegionType", foreign_keys=[region_type_id], lazy="raise")

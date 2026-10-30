@@ -1,8 +1,8 @@
-# All API routes (current repo, 2026-10-27)
+# All API routes (current repo, 2026-10-30)
 
-Every URL starts with the base URL of your API plus `/api/v1`. On your machine that is `http://localhost:8000/api/v1` (in Postman: `{{hostname}}:{{port}}/{{api_path}}`). This list was written from the app's own route table, so it matches the code: 228 HTTP routes under `/api/v1`, `GET /health`, and 2 WebSocket routes (231 in total). Swagger is at `/docs`, ReDoc at `/redoc`, the OpenAPI file at `/openapi.json`.
+Every URL starts with the base URL of your API plus `/api/v1`. On your machine that is `http://localhost:8000/api/v1` (in Postman: `{{hostname}}:{{port}}/{{api_path}}`). This list was written from the app's own route table, so it matches the code: 251 HTTP routes under `/api/v1`, `GET /health`, and 2 WebSocket routes (254 in total). Swagger is at `/docs`, ReDoc at `/redoc`, the OpenAPI file at `/openapi.json`.
 
-**Access** column: `login` = any logged-in user; `administrator` = administrator group only; `key.action` (for example `track.read`, `segment.create`) = the access policy of your role for that resource and action (scope own, public or all); `public` = no token needed.
+**Access** column: `login` = any logged-in user; `administrator` = administrator group only; `key.action` (for example `track.read`, `segment.create`, `icon.read`) = the access policy of your role for that resource and action (scope own, public or all); `public` = no token needed.
 
 ## profile
 
@@ -22,7 +22,7 @@ Every URL starts with the base URL of your API plus `/api/v1`. On your machine t
 | Method | URL | Access | What |
 |---|---|---|---|
 | POST | `/api/v1/profile/auth/login` | `public` | Login |
-| POST | `/api/v1/profile/auth/logout` | `public` | Logout |
+| POST | `/api/v1/profile/auth/logout` | `login` | Logout |
 | POST | `/api/v1/profile/auth/refresh` | `login` | Refresh Token |
 | POST | `/api/v1/profile/auth/register` | `public` | Register |
 
@@ -40,18 +40,137 @@ Every URL starts with the base URL of your API plus `/api/v1`. On your machine t
 
 ## core
 
-**Lookup tables (19):** `achievement-categories`, `achievement-scopes`, `achievement-types`, `companies`, `compendium-types`, `difficulty-levels`, `difficulty-sports`, `gear-types`, `point-reasons`, `post-types`, `rarities`, `region-types`, `schedule-statuses`, `snow-conditions`, `sport-types`, `trail-conditions`, `visibilities`, `waypoint-types`, `weather-conditions`. Each one has the same routes; `{slug}` stands for the table name:
+### achievement-categories
 
 | Method | URL | Access | What |
 |---|---|---|---|
-| GET | `/api/v1/core/{slug}` | `ref.read` | List Items |
-| POST | `/api/v1/core/{slug}` | `ref.create` | Create Item |
-| POST | `/api/v1/core/{slug}/upload-csv` | `ref.create` | Import rows from CSV |
-| DELETE | `/api/v1/core/{slug}/{item_id}` | `ref.delete` | Delete Item |
-| GET | `/api/v1/core/{slug}/{item_id}` | `ref.read` | Get Item |
-| PATCH | `/api/v1/core/{slug}/{item_id}` | `ref.update` | Update Item |
+| GET | `/api/v1/core/achievement-categories` | `ref.read` | List Items |
+| POST | `/api/v1/core/achievement-categories` | `ref.create` | Create Item |
+| POST | `/api/v1/core/achievement-categories/upload-csv` | `ref.create` | Import achievement-categories from CSV |
+| DELETE | `/api/v1/core/achievement-categories/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/achievement-categories/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/achievement-categories/{item_id}` | `ref.update` | Update Item |
 
-Differences: `difficulty-sports` has the extra list filter `sport_type_id`; `compendium-types` has the field `is_collectable`; `difficulty-levels`, `difficulty-sports`, `rarities` and `visibilities` have `rank` and the list filters `rank_min` and `rank_max`.
+### achievement-scopes
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/achievement-scopes` | `ref.read` | List Items |
+| POST | `/api/v1/core/achievement-scopes` | `ref.create` | Create Item |
+| POST | `/api/v1/core/achievement-scopes/upload-csv` | `ref.create` | Import achievement-scopes from CSV |
+| DELETE | `/api/v1/core/achievement-scopes/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/achievement-scopes/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/achievement-scopes/{item_id}` | `ref.update` | Update Item |
+
+### achievement-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/achievement-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/achievement-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/achievement-types/upload-csv` | `ref.create` | Import achievement-types from CSV |
+| DELETE | `/api/v1/core/achievement-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/achievement-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/achievement-types/{item_id}` | `ref.update` | Update Item |
+
+### companies
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/companies` | `ref.read` | List Items |
+| POST | `/api/v1/core/companies` | `ref.create` | Create Item |
+| POST | `/api/v1/core/companies/upload-csv` | `ref.create` | Import companies from CSV |
+| DELETE | `/api/v1/core/companies/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/companies/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/companies/{item_id}` | `ref.update` | Update Item |
+
+### compendium-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/compendium-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/compendium-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/compendium-types/upload-csv` | `ref.create` | Import compendium-types from CSV |
+| DELETE | `/api/v1/core/compendium-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/compendium-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/compendium-types/{item_id}` | `ref.update` | Update Item |
+
+### difficulty-levels
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/difficulty-levels` | `ref.read` | List Items |
+| POST | `/api/v1/core/difficulty-levels` | `ref.create` | Create Item |
+| POST | `/api/v1/core/difficulty-levels/upload-csv` | `ref.create` | Import difficulty-levels from CSV |
+| DELETE | `/api/v1/core/difficulty-levels/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/difficulty-levels/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/difficulty-levels/{item_id}` | `ref.update` | Update Item |
+
+### difficulty-sports
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/difficulty-sports` | `ref.read` | List Items |
+| POST | `/api/v1/core/difficulty-sports` | `ref.create` | Create Item |
+| POST | `/api/v1/core/difficulty-sports/upload-csv` | `ref.create` | Import difficulty-sports from CSV |
+| DELETE | `/api/v1/core/difficulty-sports/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/difficulty-sports/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/difficulty-sports/{item_id}` | `ref.update` | Update Item |
+
+### gear-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/gear-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/gear-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/gear-types/upload-csv` | `ref.create` | Import gear-types from CSV |
+| DELETE | `/api/v1/core/gear-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/gear-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/gear-types/{item_id}` | `ref.update` | Update Item |
+
+### point-reasons
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/point-reasons` | `ref.read` | List Items |
+| POST | `/api/v1/core/point-reasons` | `ref.create` | Create Item |
+| POST | `/api/v1/core/point-reasons/upload-csv` | `ref.create` | Import point-reasons from CSV |
+| DELETE | `/api/v1/core/point-reasons/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/point-reasons/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/point-reasons/{item_id}` | `ref.update` | Update Item |
+
+### post-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/post-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/post-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/post-types/upload-csv` | `ref.create` | Import post-types from CSV |
+| DELETE | `/api/v1/core/post-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/post-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/post-types/{item_id}` | `ref.update` | Update Item |
+
+### rarities
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/rarities` | `ref.read` | List Items |
+| POST | `/api/v1/core/rarities` | `ref.create` | Create Item |
+| POST | `/api/v1/core/rarities/upload-csv` | `ref.create` | Import rarities from CSV |
+| DELETE | `/api/v1/core/rarities/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/rarities/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/rarities/{item_id}` | `ref.update` | Update Item |
+
+### region-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/region-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/region-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/region-types/upload-csv` | `ref.create` | Import region-types from CSV |
+| DELETE | `/api/v1/core/region-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/region-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/region-types/{item_id}` | `ref.update` | Update Item |
 
 ### resource-types
 
@@ -63,6 +182,83 @@ Differences: `difficulty-sports` has the extra list filter `sport_type_id`; `com
 | DELETE | `/api/v1/core/resource-types/{item_id}` | `administrator` | Delete Resource Type |
 | GET | `/api/v1/core/resource-types/{item_id}` | `administrator` | Get Resource Type |
 | PATCH | `/api/v1/core/resource-types/{item_id}` | `administrator` | Update Resource Type |
+
+### schedule-statuses
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/schedule-statuses` | `ref.read` | List Items |
+| POST | `/api/v1/core/schedule-statuses` | `ref.create` | Create Item |
+| POST | `/api/v1/core/schedule-statuses/upload-csv` | `ref.create` | Import schedule-statuses from CSV |
+| DELETE | `/api/v1/core/schedule-statuses/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/schedule-statuses/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/schedule-statuses/{item_id}` | `ref.update` | Update Item |
+
+### snow-conditions
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/snow-conditions` | `ref.read` | List Items |
+| POST | `/api/v1/core/snow-conditions` | `ref.create` | Create Item |
+| POST | `/api/v1/core/snow-conditions/upload-csv` | `ref.create` | Import snow-conditions from CSV |
+| DELETE | `/api/v1/core/snow-conditions/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/snow-conditions/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/snow-conditions/{item_id}` | `ref.update` | Update Item |
+
+### sport-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/sport-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/sport-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/sport-types/upload-csv` | `ref.create` | Import sport-types from CSV |
+| DELETE | `/api/v1/core/sport-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/sport-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/sport-types/{item_id}` | `ref.update` | Update Item |
+
+### trail-conditions
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/trail-conditions` | `ref.read` | List Items |
+| POST | `/api/v1/core/trail-conditions` | `ref.create` | Create Item |
+| POST | `/api/v1/core/trail-conditions/upload-csv` | `ref.create` | Import trail-conditions from CSV |
+| DELETE | `/api/v1/core/trail-conditions/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/trail-conditions/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/trail-conditions/{item_id}` | `ref.update` | Update Item |
+
+### visibilities
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/visibilities` | `ref.read` | List Items |
+| POST | `/api/v1/core/visibilities` | `ref.create` | Create Item |
+| POST | `/api/v1/core/visibilities/upload-csv` | `ref.create` | Import visibilities from CSV |
+| DELETE | `/api/v1/core/visibilities/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/visibilities/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/visibilities/{item_id}` | `ref.update` | Update Item |
+
+### waypoint-types
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/waypoint-types` | `ref.read` | List Items |
+| POST | `/api/v1/core/waypoint-types` | `ref.create` | Create Item |
+| POST | `/api/v1/core/waypoint-types/upload-csv` | `ref.create` | Import waypoint-types from CSV |
+| DELETE | `/api/v1/core/waypoint-types/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/waypoint-types/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/waypoint-types/{item_id}` | `ref.update` | Update Item |
+
+### weather-conditions
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/core/weather-conditions` | `ref.read` | List Items |
+| POST | `/api/v1/core/weather-conditions` | `ref.create` | Create Item |
+| POST | `/api/v1/core/weather-conditions/upload-csv` | `ref.create` | Import weather-conditions from CSV |
+| DELETE | `/api/v1/core/weather-conditions/{item_id}` | `ref.delete` | Delete Item |
+| GET | `/api/v1/core/weather-conditions/{item_id}` | `ref.read` | Get Item |
+| PATCH | `/api/v1/core/weather-conditions/{item_id}` | `ref.update` | Update Item |
 
 ## compendium
 
@@ -76,6 +272,8 @@ Differences: `difficulty-sports` has the extra list filter `sport_type_id`; `com
 | DELETE | `/api/v1/compendium/cards/{card_id}` | `card.delete` | Delete Card |
 | GET | `/api/v1/compendium/cards/{card_id}` | `card.read` | Get Card |
 | PATCH | `/api/v1/compendium/cards/{card_id}` | `card.update` | Update Card |
+| GET | `/api/v1/compendium/cards/{card_id}/render` | `card.read` | Card graphic (JSON, SVG, PNG, JPG or PDF) |
+| POST | `/api/v1/compendium/cards/{card_id}/render` | `card.update` | Render the card files again |
 | POST | `/api/v1/compendium/cards/{card_id}/rescan` | `card.update` | Rescan Card |
 
 ### countries
@@ -187,6 +385,44 @@ Differences: `difficulty-sports` has the extra list filter `sport_type_id`; `com
 | GET | `/api/v1/explorer/tracks/{track_id}/performance` | `track.read` | Get Track Performance |
 | POST | `/api/v1/explorer/tracks/{track_id}/reprocess` | `track.update` | Reprocess Track |
 | POST | `/api/v1/explorer/tracks/{track_id}/restore` | `track.update` | Restore Track |
+
+## assets
+
+### gpx
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/assets/gpx` | `gpx.read` | List Gpx |
+| DELETE | `/api/v1/assets/gpx/{gpx_id}` | `gpx.delete` | Delete Gpx |
+| GET | `/api/v1/assets/gpx/{gpx_id}` | `gpx.read` | Get Gpx |
+| PATCH | `/api/v1/assets/gpx/{gpx_id}` | `gpx.update` | Update Gpx |
+| GET | `/api/v1/assets/gpx/{gpx_id}/file` | `gpx.read` | Download the GPX file |
+
+### icons
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/assets/icons` | `icon.read` | List Icons |
+| POST | `/api/v1/assets/icons` | `icon.create` | Upload an icon |
+| GET | `/api/v1/assets/icons/by-key/{key}/file` | `icon.read` | The picture of an icon, found by its key |
+| POST | `/api/v1/assets/icons/link` | `ref.update` | Link rows to their icons by key |
+| POST | `/api/v1/assets/icons/upload-csv` | `icon.create` | Create many icons from one CSV file |
+| DELETE | `/api/v1/assets/icons/{icon_id}` | `icon.delete` | Delete Icon |
+| GET | `/api/v1/assets/icons/{icon_id}` | `icon.read` | Get Icon |
+| PATCH | `/api/v1/assets/icons/{icon_id}` | `icon.update` | Update Icon |
+| GET | `/api/v1/assets/icons/{icon_id}/file` | `icon.read` | The picture of an icon |
+| PUT | `/api/v1/assets/icons/{icon_id}/file` | `icon.update` | Replace the SVG of an icon |
+
+### photos
+
+| Method | URL | Access | What |
+|---|---|---|---|
+| GET | `/api/v1/assets/photos` | `photo.read` | List Photos |
+| POST | `/api/v1/assets/photos` | `photo.create` | Upload a photo |
+| DELETE | `/api/v1/assets/photos/{photo_id}` | `photo.delete` | Delete Photo |
+| GET | `/api/v1/assets/photos/{photo_id}` | `photo.read` | Get Photo |
+| PATCH | `/api/v1/assets/photos/{photo_id}` | `photo.update` | Update Photo |
+| GET | `/api/v1/assets/photos/{photo_id}/file` | `photo.read` | The image file |
 
 ## management
 

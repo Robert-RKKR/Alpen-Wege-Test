@@ -52,6 +52,8 @@ Swagger UI is available at **http://localhost:8000/docs**.
 | `PHOTO_STORAGE_DIR`    | `/data/photos`                 | `asset_agg_photo.path` is relative to it |
 | `CARD_FOOTER`          | `Alpen Wege`                   | small text at the bottom of every card |
 | `PHOTO_MAX_UPLOAD_MB`  | `25`                           | largest photo upload           |
+| `ICON_MAX_UPLOAD_KB`   | `300`                          | largest SVG icon upload (the biggest flag is 184 KB) |
+| `ICON_CSV_MAX_UPLOAD_MB` / `ICON_CSV_MAX_ROWS` | `5` / `2000`   | the CSV that creates many icons at once |
 
 ---
 
@@ -174,6 +176,8 @@ Limits (settings): `SEGMENT_DRAW_MAX_POINTS` 5000 points per drawn segment, `ROU
 ### Reference data (core_ref)
 
 19 lookup tables, all under `/core/`. Shared data (no ownership filter).
+
+Every value has the text `icon` (as before) and an optional `icon_id`: the id of an icon in `/assets/icons`, the SVG picture of the value (see "Icons and flags" below). Create and update accept `icon_id`, `null` removes the link, an unknown id answers `422`. The same `icon_id` is on countries (their flag), regions (flag or coat of arms) and resource types.
 
 | Slug                    | Path                                 |
 |-------------------------|--------------------------------------|
@@ -301,7 +305,7 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
 }
 ```
 
-### Assets (photos and GPX files)
+### Assets (photos, GPX files and icons)
 
 | Method | Path | Description |
 |---|---|---|
@@ -316,8 +320,18 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
 | GET | `/assets/gpx/{id}/file` | Download the file |
 | PATCH | `/assets/gpx/{id}` | Change name, summary, `is_public` |
 | DELETE | `/assets/gpx/{id}` | Delete a file no track uses (`409` otherwise) |
+| GET | `/assets/icons` | List icons without the SVG text (filters: `q`, `key`, `key_prefix`, `created_by`, `created_from/to`; sort: `key`, `name`, `created_at`, `updated_at`) |
+| POST | `/assets/icons` | Upload an SVG (multipart, `201`; `409` when the key exists) |
+| GET | `/assets/icons/{id}` | Get one (`?expand=created_by`) |
+| GET | `/assets/icons/{id}/file` | The picture (`image/svg+xml`; `?format=png&size=64` for a PNG) |
+| GET | `/assets/icons/by-key/{key}/file` | The same, found by key (`flag_at`, `sport_hiking`) |
+| PUT | `/assets/icons/{id}/file` | Replace the SVG (id, key and every link stay) |
+| POST | `/assets/icons/upload-csv` | **Create many icons from one CSV** (`key`, `svg`, optional names; options `dry_run`, `update`, `link`; admin) |
+| POST | `/assets/icons/link` | Set `icon_id` on every row whose icon text or ISO code matches the key of an icon (`dry_run`; admin) |
+| PATCH | `/assets/icons/{id}` | Change names, summaries, key |
+| DELETE | `/assets/icons/{id}` | Delete an icon nothing uses (`409` lists the users otherwise) |
 
-A GPX file is created by `POST /explorer/tracks`, not here. Access follows the `photo` and `gpx` policies (own, public, all).
+A GPX file is created by `POST /explorer/tracks`, not here. Access follows the `photo` and `gpx` policies (own, public, all). Icons follow the `icon` policy: everybody reads, only the administrator writes (like the reference data).
 
 **Upload a photo** (form fields besides `file` are optional; `name` defaults to the file name):
 
@@ -344,6 +358,80 @@ import of cards, POIs and posts accept only a photo the caller may read (own, or
 photos); anything else answers `422` on `main_photo_id`, so a private photo of somebody else cannot be published
 through a card. `null` removes the photo.
 
+### Icons and flags
+
+An icon is an SVG picture stored as text in `asset_agg_icon` (no file on disk). Reference values, resource types, countries and
+regions point to an icon with the optional `icon_id` (22 tables). The old text column `icon` is unchanged; step 2 (later) fills every
+link, makes `icon_id` required and drops the text.
+
+```bash
+# upload (key: lower-case letters, digits and _ . - ; default: the file name, "Flag AT.svg" -> flag_at)
+curl -X POST http://localhost:8000/api/v1/assets/icons \
+  -H "Authorization: Bearer $TOKEN" -F "file=@hiking.svg" -F "key=sport_hiking" -F "name=Hiking"
+# use it
+curl -X PATCH http://localhost:8000/api/v1/core/sport-types/<id> -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"icon_id": "<icon-uuid>"}'
+# the picture: SVG, or a PNG 64 px wide (ETag and If-None-Match work: 304)
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/assets/icons/by-key/sport_hiking/file
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/api/v1/assets/icons/<icon-uuid>/file?format=png&size=64" -o hiking.png
+```
+
+| Topic | Rule |
+|---|---|
+| Cleaning | Every SVG is cleaned before it is stored: `<script>`, `<style>`, `<foreignObject>`, animation, event handlers, links to other files and foreign namespaces (Inkscape metadata) are removed; the answer lists what (`response_details.removed`). A file that is not an SVG, has a DOCTYPE or entities, has no `viewBox` (or numeric width and height) or is too large answers `400` / `413` |
+| Limit | `ICON_MAX_UPLOAD_KB` (default 300) |
+| Serving | `image/svg+xml` with `ETag` (SHA-256 of the text), `X-Content-Type-Options: nosniff` and a `Content-Security-Policy` that stops a script from running when the URL is opened directly |
+| Delete | `409` with the number of countries, regions and reference values that use the icon |
+| Wrong `icon_id` | `422` (`icon_not_found`) on create, update and CSV import (the CSV row is named) |
+| Event log | Create, update and delete are logged without the SVG text; a replaced picture shows as a new `sha256` |
+
+**Flags.** The 270 flag files of the card graphics (`app/compendium/cards/flags`, flag-icons, MIT) are loaded as icons with the key
+`flag_<iso code>` (`flag_at`, `flag_gb_eng`); countries and cantons are linked by that key.
+
+```bash
+sudo docker exec alpen-api python /app/scripts/seed_icons.py --dir /app/app/compendium/cards/flags \
+  --prefix flag_ --dash-to-underscore --name-template "Flag {STEM}"            # add --dry-run first
+sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_link.sql
+```
+
+`seed_icons.py` takes any folder of SVG files (file name = key) and gives each seeded icon an id computed from its key, so seed
+files can name an icon by id on every database. `icons_link.sql` sets `icon_id` where an icon with the matching key exists
+(reference tables: the old `icon` text in lower case; countries: `flag_` + ISO code; regions: `flag_` + ISO 3166-2 code with `_`);
+it only fills empty links and can be run again after every load. Existing database: run `scripts/sql/icons_preflight.sql` (read
+only), then `icons_ddl.sql` **before** the new code starts, then `init_seed.py` (the resource type `icon`). `icons_rollback.sql`
+undoes the step.
+
+**The icon set (graphics for all reference values).** `scripts/icon_sources/icon_map.csv` has one row per icon key (the icon texts of the
+reference tables and the resource types): names in English, German and Polish and the graphic. `scripts/make_icon_set.py` (Python
+standard library only) draws every graphic and writes a CSV that carries the SVG text; `seed_icons.py --csv` loads it. Most
+glyphs are Lucide icons (ISC licence, the used files and the licence text are in `scripts/icon_sources/lucide/`); the difficulty grades
+(SAC T3, UIAA IV, WI4, ...) are generated badges in the colour of the value, the difficulty and visibility levels are generated bars, the
+rarities are the gem in the colour of the value. Keys that share one glyph inside a table are marked `redraw` in the column `quality`.
+
+```bash
+python scripts/make_icon_set.py --out icons_import.csv --preview icon_preview.html      # the CSV with the graphics, and a page to look at them
+sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/icons_import.csv --dry-run
+sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/icons_import.csv            # add --update to replace icons that exist
+sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_link.sql      # icon_id on every row whose icon text matches
+sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_list_keys.sql # every icon_exists = t, rows_linked = rows_using
+```
+
+**The same through the API (Postman, curl).** `icons_import.csv` can be sent to the server in one call; nothing has to be copied into a container:
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/assets/icons/upload-csv?dry_run=true" -H "Authorization: Bearer $TOKEN" -F "file=@icons_import.csv"   # checks and counts, saves nothing
+curl -X POST "http://localhost:8000/api/v1/assets/icons/upload-csv" -H "Authorization: Bearer $TOKEN" -F "file=@icons_import.csv"                  # creates the icons and links the rows
+```
+
+The answer: `inserted`, `updated`, `unchanged`, `rejected` with `errors` (one text per wrong row, by row number), `notes` (what the cleaner removed from an SVG),
+and with `link=true` (the default) `linked` and `still_without_icon` per table. A key that exists is left alone unless `update=true` (then its SVG and names are
+replaced; needs the update permission on icons); `link=true` needs the update permission on reference data (administrator by default). The file is UTF-8, at most
+`ICON_CSV_MAX_UPLOAD_MB` (5) and `ICON_CSV_MAX_ROWS` (2000) rows. `POST /assets/icons/link` does only the linking and can be run after every import.
+
+Change a graphic: edit `icon_map.csv` (Excel: save as CSV UTF-8) or put your own SVG next to the Lucide files and write its name in
+`value`, run the first command again, and load with `--update`. Or replace one icon in the API: `PUT /assets/icons/{id}/file`.
+`scripts/sql/icons_list_keys.sql` lists every distinct icon text with the number of rows that use it and whether its icon exists.
+
 ### Collectible cards (graphics)
 
 A card is the printable picture of a POI, by default 63×88 mm (trading-card size), with a dark 3 mm bleed. The front shows the
@@ -353,7 +441,7 @@ when set) and the description; the rarity sets the colour of the frame (Legendar
 
 | Card shows | Taken from |
 |---|---|
-| `No 013` | `card.card_number`: unique, assigned automatically; can be given on create, update or CSV to keep the number of an old printed card |
+| `No 00013` | `card.card_number`: unique, printed with 5 digits, assigned automatically (next value of a database sequence); can be given on create, update or CSV to keep the number of an old printed card |
 | Name | `card.name` → `poi.name` |
 | Description | `card.description` → `card.summary` → `poi.description` → `poi.summary` |
 | Country | `country.name_common` → `country.name` (flags: main region, then `compendium/poi-regions` by `slot_position`) |
@@ -373,13 +461,36 @@ name written on the card. Empty or whitespace-only text counts as missing. Germa
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/compendium/cards/{id}/render?format=svg&lang=en&ratio=63:88` | The card. `format`: `json` (the render model: every value on the card, translated, for your own front end), `svg`, `png` (300 dpi), `jpg` (300 dpi), `pdf` (print). `lang`: `en`, `de`, `pl`. `ratio`: shape as width:height (see below). `download=true` saves instead of showing |
+| GET | `/compendium/cards/{id}/render?format=svg&lang=en&ratio=63:88&style=standard` | The card. `format`: `json` (the render model: every value on the card, translated, for your own front end), `svg`, `png` (300 dpi by default), `jpg` (300 dpi by default), `pdf` (print). `lang`: `en`, `de`, `pl`. `ratio`: shape as width:height (see below). `style`: look of the card, `standard` (default) or `3d` (see below). `dpi`: sharpness of a `png` / `jpg`, 72 to 2000, default 300 (see below). `download=true` saves instead of showing |
 | POST | `/compendium/cards/{id}/render` | Render the stored files again (job, `202` with `job_id`; `409` when one is already queued or running) |
 
 **Shape.** `ratio` is width:height with whole numbers 1 to 100, between 2:5 and 5:2 (so `100:1` answers `422`):
 `63:88` (default, trading card), `1:1`, `4:5`, `9:16`, `3:2`, `16:9`, ... The shorter side is always 63 mm, so text keeps its
 size on every shape; the photo grows with the longer side. From 13:10 on (wide cards) the photo sits on the left and the
 type, altitude, difficulty and description on the right.
+
+**Style.** `style` picks the template the card is drawn with: `standard` (default, flat) or `3d` (raised metal frame,
+glass panels, holographic sheen on the photo). Both use the same data, layout and every `ratio`; a name that is not in the
+list answers `422`. The render job stores only the `standard` style at 63:88; every other style is drawn on request. A file
+made with another style than `standard` is named `card-00013-en-3d.svg`. A new style is a new file
+`app/compendium/cards/templates/{name}.svg.j2` plus its name in `STYLES` in `render.py`; no other code changes. Parts every style
+shares (the icons of the type, altitude and difficulty chips, the map pin) are macros in `templates/_parts.j2`. In both styles each chip
+shows a plain outline icon in the colour of the text before its label (centred on the label, the left edge in line with the value
+below); the value has its own row and each chip is at least as wide as its label needs (German "Schwierigkeit"), so no text covers an icon.
+
+**Spacing.** One system for the whole card, set in `render.py` (`EDGE`, `PAD`, `RADIUS`) and used by both templates: 18 between the card
+edge, the photo and every box (also between the chips), 22 inside every box and from the photo edge to the number, flags, name and
+location, one corner radius (18) for the photo window and every box. The first line of the description sits one `PAD` plus its cap
+height below the top of the box, so the space above the text equals the space at its left; the footer is centred between the
+description and the frame and starts where the description text starts. A change of these values changes every style at once; raise
+`TEMPLATE_VERSION` afterwards.
+
+**Picture size.** `dpi` is the sharpness of a `png` or `jpg`: pixels per inch of the printed card, 3 mm bleed included, from 72 to
+2000 (default 300). On 63:88 `dpi=300` gives 815 × 1110 px, `dpi=600` 1630 × 2220 px, `dpi=1800` about 4900 × 6700 px. The `jpg`
+records the dpi in its metadata, so a print program knows the size. A wide or tall shape has more pixels at the same dpi, so
+the picture may not exceed 50 million pixels (a 5000 px wide card takes a few seconds and a few hundred MB of memory); above
+that the request answers `422` and names the highest dpi that fits that ratio. `svg`, `pdf` and `json` ignore `dpi`. Only 300 dpi is
+stored by the render job; other values are drawn on request and the file name ends with them: `card-00013-en-600dpi.jpg`.
 
 **Colours.** The card body is a soft gradient of the rarity colour, the 3 mm bleed is dark navy and a ring of the two
 mixed sits between them (holographic from Legendary). Every text on the body is dark or white, whichever has more contrast
@@ -388,7 +499,7 @@ made just strong enough for 4.5 : 1. The colour of the sport difficulty only app
 number, on the dark number pill with a white outline, so it reads on every rarity. A new rarity colour needs no code change.
 
 **Postman variables.** `card_lang` and `card_ratio` are Postman environment variables that fill the API parameters `lang`
-and `ratio` in the saved requests. The API itself only knows `format`, `lang`, `ratio` and `download`; any other parameter
+and `ratio` in the saved requests. The API itself only knows `format`, `lang`, `ratio`, `style`, `dpi` and `download`; any other parameter
 (such as `card_ratio=1:1` typed into the URL) answers `422`.
 
 Creating or changing a card queues a `card.render` job automatically (follow it like any job, see below). It writes
@@ -399,14 +510,15 @@ template is newer), the card is drawn on the spot, so the answer is always curre
 The list takes `sort=card_number` and the filters `difficulty_level_id`, `difficulty_sport_id` and `render_status`.
 
 ```bash
-# print-ready PDF of card 013 in German
-curl -H "Authorization: Bearer $TOKEN" -o card-013.pdf \
+# print-ready PDF of card 00013 in German
+curl -H "Authorization: Bearer $TOKEN" -o card-00013.pdf \
   "http://localhost:8000/api/v1/compendium/cards/<card-uuid>/render?format=pdf&lang=de"
 ```
 
-The design is one Jinja2 SVG template, `app/compendium/cards/templates/card.svg.j2`; text is wrapped and sized in
-`app/compendium/cards/render.py` with the metrics of the bundled Inter font. After changing the template or the
-layout, raise `TEMPLATE_VERSION` in `render.py`: every card then counts as stale and is drawn fresh until it is rendered again.
+The designs are Jinja2 SVG templates, one per style: `app/compendium/cards/templates/standard.svg.j2` and `3d.svg.j2`; text is
+wrapped and sized in `app/compendium/cards/render.py` with the metrics of the bundled Inter font. After changing the
+`standard` template or the layout, raise `TEMPLATE_VERSION` in `render.py`: every card then counts as stale and is drawn fresh
+until it is rendered again (other styles are never stored, so changing them needs no new version).
 Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT), font: [Inter](https://rsms.me/inter/) (SIL OFL), both in `app/compendium/cards/`.
 
 Database changes: `scripts/sql/card_render_ddl.sql`, `scripts/sql/country_names_l18n.sql`.
@@ -618,10 +730,10 @@ app/
 │   ├── routes/            # /management/* (event-log, settings, jobs, my-jobs, ws, celery, broadcast)
 │   ├── schemas/
 │   └── utils/             # event_logger.py, seed_entity_types.py
-├── assets/                # Uploaded files: photos (upload, EXIF, resize) and GPX files
+├── assets/                # Photos (upload, EXIF, resize), GPX files and SVG icons / flags (icon_svg.py cleans every upload)
 │   ├── models/  routes/ (photo/, gpx/)  schemas/  services/photo_storage.py
 ├── compendium/            # Geographic / editorial catalog
-│   ├── cards/             # card graphics: render.py, service.py, templates/card.svg.j2, fonts/, flags/
+│   ├── cards/             # card graphics: render.py, service.py, templates/{standard,3d}.svg.j2, fonts/, flags/
 │   ├── models/
 │   │   ├── models_cat/    # Country, Region, POI, Card, Post
 │   │   └── models_m2m/    # PoiRegion

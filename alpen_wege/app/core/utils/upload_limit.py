@@ -3,7 +3,7 @@ import json
 
 # Local application
 from app.config import get_settings
-from app.core.utils.api_paths import PHOTO_UPLOAD_PATH, SEGMENT_UPLOAD_PATH, TRACK_UPLOAD_PATH
+from app.core.utils.api_paths import ICON_CSV_UPLOAD_PATH, ICON_UPLOAD_PATH, PHOTO_UPLOAD_PATH, SEGMENT_UPLOAD_PATH, TRACK_UPLOAD_PATH
 
 
 class UploadSizeLimitMiddleware:
@@ -12,11 +12,14 @@ class UploadSizeLimitMiddleware:
         settings = get_settings()
         self.max_bytes = (settings.GPX_MAX_UPLOAD_MB + 1) * 1024 * 1024
         self.path = TRACK_UPLOAD_PATH
-        # path -> (largest body in bytes, limit in MB for the message); a request bigger than the file limit plus 1 MB of form is refused
+        # path -> (largest body in bytes, limit as a number, its unit for the message); a request bigger than the file limit
+        # plus the form (1 MB; 64 KB for an icon) is refused
         self.limits = {
-            TRACK_UPLOAD_PATH: (self.max_bytes, settings.GPX_MAX_UPLOAD_MB),
-            SEGMENT_UPLOAD_PATH: ((settings.SEGMENT_GPX_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.SEGMENT_GPX_MAX_UPLOAD_MB),
-            PHOTO_UPLOAD_PATH: ((settings.PHOTO_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.PHOTO_MAX_UPLOAD_MB),
+            TRACK_UPLOAD_PATH: (self.max_bytes, settings.GPX_MAX_UPLOAD_MB, "MB"),
+            SEGMENT_UPLOAD_PATH: ((settings.SEGMENT_GPX_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.SEGMENT_GPX_MAX_UPLOAD_MB, "MB"),
+            PHOTO_UPLOAD_PATH: ((settings.PHOTO_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.PHOTO_MAX_UPLOAD_MB, "MB"),
+            ICON_UPLOAD_PATH: ((settings.ICON_MAX_UPLOAD_KB + 64) * 1024, settings.ICON_MAX_UPLOAD_KB, "KB"),
+            ICON_CSV_UPLOAD_PATH: ((settings.ICON_CSV_MAX_UPLOAD_MB + 1) * 1024 * 1024, settings.ICON_CSV_MAX_UPLOAD_MB, "MB"),
         }
 
     async def __call__(self, scope, receive, send):
@@ -25,14 +28,14 @@ class UploadSizeLimitMiddleware:
             and scope["method"] == "POST"
             and scope["path"] in self.limits
         ):
-            max_bytes, max_mb = self.limits[scope["path"]]
+            max_bytes, limit, unit = self.limits[scope["path"]]
             headers = dict(scope.get("headers", []))
             cl = headers.get(b"content-length")
             if cl and cl.isdigit() and int(cl) > max_bytes:
                 body = json.dumps({
                     "code": 413,
                     "status": "error",
-                    "message": f"File too large (maximum {max_mb} MB).",
+                    "message": f"File too large (maximum {limit} {unit}).",
                     "data": None,
                 }).encode()
                 await send({

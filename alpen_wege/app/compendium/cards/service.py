@@ -175,9 +175,10 @@ def photo_data_uri(model: dict) -> str | None:
     return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode()
 
 
-def render_card(model: dict, fmt: str, ratio: tuple[int, int] = render.DEFAULT_RATIO) -> bytes:
-    svg = render.render_svg(model, photo_data_uri(model), ratio)
-    return render.svg_to(svg, fmt)
+def render_card(model: dict, fmt: str, ratio: tuple[int, int] = render.DEFAULT_RATIO, style: str = render.DEFAULT_STYLE,
+                dpi: int = render.DEFAULT_DPI) -> bytes:
+    svg = render.render_svg(model, photo_data_uri(model), ratio, style)
+    return render.svg_to(svg, fmt, dpi)
 
 
 # ------------------------------------------------------------------ stored files

@@ -3,7 +3,7 @@
 \set ON_ERROR_STOP on
 BEGIN;
 
--- 1. card_number: unique order number printed as "No 013" -------------------------------------------
+-- 1. card_number: unique order number printed as "No 00013" (5 digits) -------------------------------------------
 -- Existing rows get numbers in creation order. BY DEFAULT (not ALWAYS) so cards printed earlier can keep
 -- their old number; after setting numbers by hand, move the sequence past the largest one:
 --   SELECT setval(pg_get_serial_sequence('compendium_cat_card', 'card_number'), max(card_number)) FROM compendium_cat_card;
@@ -28,7 +28,7 @@ BEGIN
     END IF;
 END $$;
 
-COMMENT ON COLUMN compendium_cat_card.card_number IS 'Unique order number of the card, printed on it as No 013. Assigned from an identity sequence; may be set explicitly (create, update, CSV) to keep the number of a card printed earlier.';
+COMMENT ON COLUMN compendium_cat_card.card_number IS 'Unique order number of the card, printed on it as No 00013 (5 digits). Assigned from an identity sequence; may be set explicitly (create, update, CSV) to keep the number of a card printed earlier.';
 
 -- 2. difficulty: same pair of references as segment and route -----------------------------------------
 ALTER TABLE compendium_cat_card ADD COLUMN IF NOT EXISTS difficulty_level_id uuid;

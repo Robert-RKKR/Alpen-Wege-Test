@@ -1,0 +1,439 @@
+key,name,name_de,name_pl,kind,value,color,tag,used_by,rows_using,quality
+ach_cat_collection,Collection,Sammlung,Kolekcja,lucide,library,,,achievement_category,1,mapped to Lucide
+ach_cat_consistency,Consistency,Beständigkeit,Regularność,lucide,calendar-check,,,achievement_category,1,mapped to Lucide
+ach_cat_distance,Distance,Distanz,Dystans,lucide,ruler,,,achievement_category,1,mapped to Lucide
+ach_cat_elevation,Elevation,Höhenmeter,Przewyższenie,lucide,mountain,,,achievement_category,1,mapped to Lucide
+ach_cat_endurance,Endurance,Ausdauer,Wytrzymałość,lucide,battery-full,,,achievement_category,1,mapped to Lucide
+ach_cat_exploration,Exploration,Erkundung,Eksploracja,lucide,compass,,,achievement_category,1,mapped to Lucide
+ach_cat_navigation,Navigation,Navigation,Nawigacja,lucide,navigation,,,achievement_category,1,mapped to Lucide
+ach_cat_nocturnal,Nocturnal,Nächtlich,Nocne,lucide,moon,,,achievement_category,1,mapped to Lucide
+ach_cat_peaks,Peaks,Gipfel,Szczyty,lucide,mountain-snow,,,achievement_category,1,mapped to Lucide
+ach_cat_photography,Photography,Fotografie,Fotografia,lucide,camera,,,achievement_category,1,mapped to Lucide
+ach_cat_seasonal,Seasonal,Saisonal,Sezonowe,lucide,leaf,,,achievement_category,1,mapped to Lucide
+ach_cat_social,Social,Sozial,Społeczność,lucide,users,,,achievement_category,1,mapped to Lucide
+ach_cat_speed,Speed,Geschwindigkeit,Prędkość,lucide,gauge,,,achievement_category,1,mapped to Lucide
+ach_cat_weather,Weather,Wetter,Pogoda,lucide,cloud-sun,,,achievement_category,1,mapped to Lucide
+ach_scope_continental,Continental,Kontinental,Kontynentalny,lucide,earth,,,achievement_scope,1,mapped to Lucide
+ach_scope_daily,Daily,Täglich,Dzienny,lucide,calendar-1,,,achievement_scope,1,mapped to Lucide
+ach_scope_event,Event,Event,Wydarzenie,lucide,party-popper,,,achievement_scope,1,mapped to Lucide
+ach_scope_global,Global,Global,Globalny,lucide,globe,,,achievement_scope,1,mapped to Lucide
+ach_scope_group,Group,Gruppe,Grupowy,lucide,users,,,achievement_scope,1,mapped to Lucide
+ach_scope_lifetime,Lifetime,Lebenszeit,Dożywotni,lucide,infinity,,,achievement_scope,1,mapped to Lucide
+ach_scope_local,Local,Lokal,Lokalny,lucide,map-pin,,,achievement_scope,1,mapped to Lucide
+ach_scope_monthly,Monthly,Monatlich,Miesięczny,lucide,calendar-range,,,achievement_scope,1,mapped to Lucide
+ach_scope_national,National,National,Krajowy,lucide,flag,,,achievement_scope,1,mapped to Lucide
+ach_scope_personal,Personal,Persönlich,Osobisty,lucide,user,,,achievement_scope,1,mapped to Lucide
+ach_scope_regional,Regional,Regional,Regionalny,lucide,map,,,achievement_scope,1,mapped to Lucide
+ach_scope_weekly,Weekly,Wöchentlich,Tygodniowy,lucide,calendar-days,,,achievement_scope,1,mapped to Lucide
+ach_scope_yearly,Yearly,Jährlich,Roczny,lucide,calendar-sync,,,achievement_scope,1,mapped to Lucide
+ach_type_challenge,Challenge,Herausforderung,Wyzwanie,lucide,swords,,,achievement_type,1,mapped to Lucide
+ach_type_collaborative,Collaborative,Kollaborativ,Wspólny,lucide,handshake,,,achievement_type,1,mapped to Lucide
+ach_type_cumulative,Cumulative,Kumulativ,Kumulacyjny,lucide,sigma,,,achievement_type,1,mapped to Lucide
+ach_type_hidden,Hidden,Versteckt,Ukryty,lucide,eye-off,,,achievement_type,1,mapped to Lucide
+ach_type_milestone,Milestone,Meilenstein,Kamień milowy,lucide,milestone,,,achievement_type,1,mapped to Lucide
+ach_type_progressive,Progressive,Progressiv,Progresywny,lucide,trending-up,,,achievement_type,1,mapped to Lucide
+ach_type_repeatable,Repeatable,Wiederholbar,Powtarzalny,lucide,repeat,,,achievement_type,1,mapped to Lucide
+ach_type_seasonal,Seasonal,Saisonal,Sezonowy,lucide,snowflake,,,achievement_type,1,mapped to Lucide
+ach_type_single,Single Activity,Einzelaktivität,Pojedyncza aktywność,lucide,circle-dot,,,achievement_type,1,mapped to Lucide
+ach_type_streak,Streak,Serie,Seria,lucide,flame,,,achievement_type,1,mapped to Lucide
+ach_type_tiered,Tiered,Gestaffelt,Stopniowany,lucide,layers,,,achievement_type,1,mapped to Lucide
+ach_type_time_limited,Time-Limited,Zeitlich begrenzt,Ograniczony czasowo,lucide,hourglass,,,achievement_type,1,mapped to Lucide
+anchor,Boat Dock,Bootssteg,Przystań łodzi,lucide,anchor,,,compendium_type,1,exact Lucide name
+apple,Orchard,Obstgarten,Sad,lucide,apple,,,compendium_type,1,exact Lucide name
+armchair,Rest Bench,Rastbank,Ławka odpoczynkowa,lucide,armchair,,,compendium_type,1,exact Lucide name
+arrow-down-to-line,Sledging Run,Schlittelweg,Tor saneczkowy,lucide,arrow-down-to-line,,,compendium_type,1,exact Lucide name
+article,Post,,,lucide,newspaper,,,resource_type,1,mapped to Lucide
+backpack,Gear,,,lucide,backpack,,,resource_type,1,exact Lucide name
+barn,Farm Stay,Ferien auf dem Bauernhof,Agroturystyka,lucide,warehouse,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+bat,Bat Cave,Fledermaushöhle,Jaskinia nietoperzy,lucide,bird,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+bed,Bed,,,lucide,bed,,,compendium_type,2,exact Lucide name
+beer,Brewery,Brauerei,Browar,lucide,beer,,,compendium_type,1,exact Lucide name
+bike,Bike,,,lucide,bike,,,compendium_type,3,exact Lucide name
+binoculars,Binoculars,,,lucide,binoculars,,,compendium_type,2,exact Lucide name
+bird,Bird Watching Spot,Vogelbeobachtungsplatz,Miejsce obserwacji ptaków,lucide,bird,,,compendium_type,1,exact Lucide name
+bone,Bone,,,lucide,bone,,,compendium_type,2,exact Lucide name
+book-open,Library,Bibliothek,Biblioteka,lucide,book-open,,,compendium_type,1,exact Lucide name
+bridge,Bridge,,,lucide,bridge,,,compendium_type,3,exact Lucide name
+bridge-suspension,Mountain Suspension Bridge,Bergseilbrücke,Górski most wiszący,lucide,bridge,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+building,Old Town,Altstadt,Stare miasto,lucide,building,,,compendium_type,1,exact Lucide name
+building-2,Tower,Turm,Wieża,lucide,building-2,,,compendium_type,1,exact Lucide name
+building-library,Museum,Museum,Muzeum,lucide,landmark,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+bus,Bus Stop,Bushaltestelle,Przystanek autobusowy,lucide,bus,,,compendium_type,1,exact Lucide name
+cable-car,Cable car,,,lucide,cable-car,,,compendium_type,2,exact Lucide name
+camera,Photography Spot,Fotostelle,Miejsce na zdjęcia,lucide,camera,,,compendium_type,1,exact Lucide name
+carabiner,Via Ferrata Start,Klettersteig-Einstieg,Początek via ferraty,lucide,link,,,compendium_type,1,mapped to Lucide
+castle,Castle,Schloss,Zamek,lucide,castle,,,compendium_type,1,exact Lucide name
+cave,Cave,Höhle,Jaskinia,lucide,pickaxe,,,compendium_type,1,mapped to Lucide
+chair,Chair Lift,Sessellift,Wyciąg krzesełkowy,lucide,cable-car,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+cheese,Cheese Dairy,Käserei,Serowarnia,lucide,milk,,,compendium_type,1,mapped to Lucide
+chevron-up,Col,Joch,Przełęcz,lucide,chevron-up,,,compendium_type,1,exact Lucide name
+church,Church,,,lucide,church,,,compendium_type,4,exact Lucide name
+circle,Circle,,,lucide,circle,,,compendium_type,2,exact Lucide name
+circle-dot,Circle dot,,,lucide,circle-dot,,,compendium_type,2,exact Lucide name
+city,Historic Village,Historisches Dorf,Zabytkowa wieś,lucide,building-2,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+clapperboard,Cinema,Kino,Kino,lucide,clapperboard,,,compendium_type,1,exact Lucide name
+cloud-sun,Weather Station,Wetterstation,Stacja meteorologiczna,lucide,cloud-sun,,,compendium_type,1,exact Lucide name
+coffee,Café,Café,Kawiarnia,lucide,coffee,,,compendium_type,1,exact Lucide name
+cog,Historic Mill,Historische Mühle,Zabytkowy młyn,lucide,cog,,,compendium_type,1,exact Lucide name
+columns,Roman Ruins,Römische Ruinen,Ruiny rzymskie,lucide,columns,,,compendium_type,1,exact Lucide name
+company,Company,,,lucide,building-2,,,company,50,mapped to Lucide
+croissant,Bakery,Bäckerei,Piekarnia,lucide,croissant,,,compendium_type,1,exact Lucide name
+cross,Cross,,,lucide,cross,,,compendium_type,3,exact Lucide name
+crosshair,Shooting Range,Schießstand,Strzelnica,lucide,crosshair,,,compendium_type,1,exact Lucide name
+cube,Bouldering Area,Boulderplatz,Rejon boulderowy,lucide,box,,,compendium_type,1,mapped to Lucide
+dam,Dam,,,lucide,dam,,,compendium_type,2,exact Lucide name
+deer,Deer Park,Wildgehege,Park jeleni,lucide,paw-print,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+difficulty_alp_abo,Alpine ABO – Abominable,Alpin ABO – Abscheulich,Alpejska ABO – Skrajnie trudna,grade,ABO,#4A235A,,difficulty_sport,1,generated
+difficulty_alp_ad,Alpine AD – Fairly Difficult,Alpin AD – Ziemlich schwierig,Alpejska AD – Dość trudna,grade,AD,#F1C40F,,difficulty_sport,1,generated
+difficulty_alp_d,Alpine D – Difficult,Alpin D – Schwierig,Alpejska D – Trudna,grade,D,#E67E22,,difficulty_sport,1,generated
+difficulty_alp_ed,Alpine ED – Extremely Difficult,Alpin ED – Extrem schwierig,Alpejska ED – Ekstremalnie trudna,grade,ED,#8E44AD,,difficulty_sport,1,generated
+difficulty_alp_f,Alpine F – Easy,Alpin F – Leicht,Alpejska F – Łatwa,grade,F,#58D68D,,difficulty_sport,1,generated
+difficulty_alp_pd,Alpine PD – Slightly Difficult,Alpin PD – Wenig schwierig,Alpejska PD – Mało trudna,grade,PD,#2ECC71,,difficulty_sport,1,generated
+difficulty_alp_td,Alpine TD – Very Difficult,Alpin TD – Sehr schwierig,Alpejska TD – Bardzo trudna,grade,TD,#E74C3C,,difficulty_sport,1,generated
+difficulty_difficult,Difficult,Schwer,Trudny,bars,4/7,#E67E22,,difficulty_level,1,generated
+difficulty_easy,Easy,Leicht,Łatwy,bars,2/7,#2ECC71,,difficulty_level,1,generated
+difficulty_expert,Expert,Experte,Ekspert,bars,6/7,#8E44AD,,difficulty_level,1,generated
+difficulty_extreme,Extreme,Extrem,Ekstremalny,bars,7/7,#4A235A,,difficulty_level,1,generated
+difficulty_font_4,Font 4 – Easy Boulder,Font 4 – Leichter Boulder,Font 4 – Łatwy bulder,grade,4,#2ECC71,,difficulty_sport,1,generated
+difficulty_font_5,Font 5 – Moderate Boulder,Font 5 – Mäßiger Boulder,Font 5 – Umiarkowany bulder,grade,5,#F1C40F,,difficulty_sport,1,generated
+difficulty_font_6a,Font 6A – Hard Boulder,Font 6A – Schwerer Boulder,Font 6A – Trudny bulder,grade,6A,#E67E22,,difficulty_sport,1,generated
+difficulty_font_7a,Font 7A – Very Hard Boulder,Font 7A – Sehr schwerer Boulder,Font 7A – Bardzo trudny bulder,grade,7A,#E74C3C,,difficulty_sport,1,generated
+difficulty_font_8a,Font 8A – Elite Boulder,Font 8A – Elite-Boulder,Font 8A – Elitarny bulder,grade,8A,#7D3C98,,difficulty_sport,1,generated
+difficulty_fr_4,French 4 – Beginner,Französisch 4 – Anfänger,Francuska 4 – Początkująca,grade,4,#58D68D,,difficulty_sport,1,generated
+difficulty_fr_5,French 5 – Novice,Französisch 5 – Fortgeschritten,Francuska 5 – Nowicjusz,grade,5,#2ECC71,,difficulty_sport,1,generated
+difficulty_fr_6a,French 6a – Intermediate,Französisch 6a – Mittelstufe,Francuska 6a – Średnia,grade,6a,#F1C40F,,difficulty_sport,1,generated
+difficulty_fr_6c,French 6c – Advanced,Französisch 6c – Fortgeschritten,Francuska 6c – Zaawansowana,grade,6c,#E67E22,,difficulty_sport,1,generated
+difficulty_fr_7a,French 7a – Expert,Französisch 7a – Experte,Francuska 7a – Ekspercka,grade,7a,#E74C3C,,difficulty_sport,1,generated
+difficulty_fr_7c,French 7c – Elite,Französisch 7c – Elite,Francuska 7c – Elitarna,grade,7c,#CB4335,,difficulty_sport,1,generated
+difficulty_fr_8a,French 8a+ – World Class,Französisch 8a+ – Weltklasse,Francuska 8a+ – Światowa klasa,grade,8a+,#7D3C98,,difficulty_sport,1,generated
+difficulty_moderate,Moderate,Mittel,Umiarkowany,bars,3/7,#F1C40F,,difficulty_level,1,generated
+difficulty_mtb_s0,MTB S0 – Easiest,MTB S0 – Am leichtesten,MTB S0 – Najłatwiejszy,grade,S0,#58D68D,,difficulty_sport,1,generated
+difficulty_mtb_s1,MTB S1 – Easy,MTB S1 – Leicht,MTB S1 – Łatwy,grade,S1,#2ECC71,,difficulty_sport,1,generated
+difficulty_mtb_s2,MTB S2 – Moderate,MTB S2 – Mittel,MTB S2 – Umiarkowany,grade,S2,#F1C40F,,difficulty_sport,1,generated
+difficulty_mtb_s3,MTB S3 – Difficult,MTB S3 – Schwer,MTB S3 – Trudny,grade,S3,#E67E22,,difficulty_sport,1,generated
+difficulty_mtb_s4,MTB S4 – Very Difficult,MTB S4 – Sehr schwer,MTB S4 – Bardzo trudny,grade,S4,#E74C3C,,difficulty_sport,1,generated
+difficulty_mtb_s5,MTB S5 – Extreme,MTB S5 – Extrem,MTB S5 – Ekstremalny,grade,S5,#8E44AD,,difficulty_sport,1,generated
+difficulty_sac_t1,SAC T1 – Hiking,SAC T1 – Wandern,SAC T1 – Turystyka,grade,T1,#58D68D,,difficulty_sport,1,generated
+difficulty_sac_t2,SAC T2 – Mountain Hiking,SAC T2 – Bergwandern,SAC T2 – Wędrówka górska,grade,T2,#2ECC71,,difficulty_sport,1,generated
+difficulty_sac_t3,SAC T3 – Demanding Mountain Hiking,SAC T3 – Anspruchsvolles Bergwandern,SAC T3 – Wymagająca wędrówka górska,grade,T3,#F1C40F,,difficulty_sport,1,generated
+difficulty_sac_t4,SAC T4 – Alpine Hiking,SAC T4 – Alpinwandern,SAC T4 – Wędrówka alpejska,grade,T4,#E67E22,,difficulty_sport,1,generated
+difficulty_sac_t5,SAC T5 – Demanding Alpine Hiking,SAC T5 – Anspruchsvolles Alpinwandern,SAC T5 – Wymagająca wędrówka alpejska,grade,T5,#E74C3C,,difficulty_sport,1,generated
+difficulty_sac_t6,SAC T6 – Difficult Alpine Hiking,SAC T6 – Schwieriges Alpinwandern,SAC T6 – Trudna wędrówka alpejska,grade,T6,#8E44AD,,difficulty_sport,1,generated
+difficulty_ski_as,Ski AS – Exceptionally Difficult,Ski AS – Außerordentlich schwierig,Ski AS – Wyjątkowo trudna,grade,AS,#CB4335,,difficulty_sport,1,generated
+difficulty_ski_ex,Ski EX – Extreme,Ski EX – Extrem schwierig,Ski EX – Ekstremalna,grade,EX,#8E44AD,,difficulty_sport,1,generated
+difficulty_ski_l,Ski L – Easy,Ski L – Leicht,Ski L – Łatwa,grade,L,#58D68D,,difficulty_sport,1,generated
+difficulty_ski_s,Ski S – Difficult,Ski S – Schwierig,Ski S – Trudna,grade,S,#E67E22,,difficulty_sport,1,generated
+difficulty_ski_ss,Ski SS – Very Difficult,Ski SS – Sehr schwierig,Ski SS – Bardzo trudna,grade,SS,#E74C3C,,difficulty_sport,1,generated
+difficulty_ski_ws,Ski WS – Moderately Difficult,Ski WS – Wenig schwierig,Ski WS – Mało trudna,grade,WS,#2ECC71,,difficulty_sport,1,generated
+difficulty_ski_zs,Ski ZS – Rather Difficult,Ski ZS – Ziemlich schwierig,Ski ZS – Dość trudna,grade,ZS,#F1C40F,,difficulty_sport,1,generated
+difficulty_uiaa_1,UIAA I – Easy,UIAA I – Leicht,UIAA I – Łatwa,grade,I,#58D68D,,difficulty_sport,1,generated
+difficulty_uiaa_10,UIAA X,UIAA X,UIAA X,grade,X,#7D3C98,,difficulty_sport,1,generated
+difficulty_uiaa_2,UIAA II – Moderate,UIAA II – Mäßig,UIAA II – Umiarkowana,grade,II,#2ECC71,,difficulty_sport,1,generated
+difficulty_uiaa_3,UIAA III – Fairly Difficult,UIAA III – Ziemlich schwierig,UIAA III – Dość trudna,grade,III,#A3CB38,,difficulty_sport,1,generated
+difficulty_uiaa_4,UIAA IV – Difficult,UIAA IV – Schwierig,UIAA IV – Trudna,grade,IV,#F1C40F,,difficulty_sport,1,generated
+difficulty_uiaa_5,UIAA V – Very Difficult,UIAA V – Sehr schwierig,UIAA V – Bardzo trudna,grade,V,#F39C12,,difficulty_sport,1,generated
+difficulty_uiaa_6,UIAA VI – Extremely Difficult,UIAA VI – Äußerst schwierig,UIAA VI – Nadzwyczaj trudna,grade,VI,#E67E22,,difficulty_sport,1,generated
+difficulty_uiaa_7,UIAA VII – Exceptionally Difficult,UIAA VII – Außergewöhnlich schwierig,UIAA VII – Wyjątkowo trudna,grade,VII,#E74C3C,,difficulty_sport,1,generated
+difficulty_uiaa_8,UIAA VIII,UIAA VIII,UIAA VIII,grade,VIII,#CB4335,,difficulty_sport,1,generated
+difficulty_uiaa_9,UIAA IX,UIAA IX,UIAA IX,grade,IX,#9B59B6,,difficulty_sport,1,generated
+difficulty_very_difficult,Very Difficult,Sehr schwer,Bardzo trudny,bars,5/7,#E74C3C,,difficulty_level,1,generated
+difficulty_very_easy,Very Easy,Sehr leicht,Bardzo łatwy,bars,1/7,#58D68D,,difficulty_level,1,generated
+difficulty_vf_k1,Via Ferrata K1 (A) – Easy,Klettersteig K1 (A) – Leicht,Via ferrata K1 (A) – Łatwa,grade,K1,#58D68D,,difficulty_sport,1,generated
+difficulty_vf_k2,Via Ferrata K2 (B) – Moderate,Klettersteig K2 (B) – Mäßig schwierig,Via ferrata K2 (B) – Umiarkowana,grade,K2,#2ECC71,,difficulty_sport,1,generated
+difficulty_vf_k3,Via Ferrata K3 (C) – Difficult,Klettersteig K3 (C) – Schwierig,Via ferrata K3 (C) – Trudna,grade,K3,#F1C40F,,difficulty_sport,1,generated
+difficulty_vf_k4,Via Ferrata K4 (D) – Very Difficult,Klettersteig K4 (D) – Sehr schwierig,Via ferrata K4 (D) – Bardzo trudna,grade,K4,#E67E22,,difficulty_sport,1,generated
+difficulty_vf_k5,Via Ferrata K5 (E) – Extremely Difficult,Klettersteig K5 (E) – Extrem schwierig,Via ferrata K5 (E) – Ekstremalnie trudna,grade,K5,#E74C3C,,difficulty_sport,1,generated
+difficulty_vf_k6,Via Ferrata K6 (F) – Exceptionally Difficult,Klettersteig K6 (F) – Außergewöhnlich schwierig,Via ferrata K6 (F) – Wyjątkowo trudna,grade,K6,#8E44AD,,difficulty_sport,1,generated
+difficulty_wi1,WI1 – Low-Angle Ice,WI1 – Flaches Eis,WI1 – Łagodny lód,grade,WI1,#D6EAF8,,difficulty_sport,1,generated
+difficulty_wi2,WI2 – Consistent 60° Ice,WI2 – Gleichmäßiges 60°-Eis,WI2 – Jednolity lód 60°,grade,WI2,#AED6F1,,difficulty_sport,1,generated
+difficulty_wi3,WI3 – Sustained 70° Ice,WI3 – Anhaltendes 70°-Eis,WI3 – Ciągły lód 70°,grade,WI3,#85C1E9,,difficulty_sport,1,generated
+difficulty_wi4,WI4 – Vertical Sections,WI4 – Vertikale Abschnitte,WI4 – Odcinki pionowe,grade,WI4,#5DADE2,,difficulty_sport,1,generated
+difficulty_wi5,WI5 – Sustained Vertical,WI5 – Anhaltend vertikal,WI5 – Ciągły pion,grade,WI5,#3498DB,,difficulty_sport,1,generated
+difficulty_wi6,WI6 – Overhanging / Thin,WI6 – Überhängend / Dünn,WI6 – Przewieszony / cienki,grade,WI6,#2874A6,,difficulty_sport,1,generated
+difficulty_wi7,WI7 – Extreme Ice,WI7 – Extremes Eis,WI7 – Ekstremalny lód,grade,WI7,#1B4F72,,difficulty_sport,1,generated
+difficulty_wt1,WT1 – Easy Snowshoe Hike,WT1 – Leichte Schneeschuhwanderung,WT1 – Łatwa wędrówka na rakietach,grade,WT1,#58D68D,,difficulty_sport,1,generated
+difficulty_wt2,WT2 – Snowshoe Hike,WT2 – Schneeschuhwanderung,WT2 – Wędrówka na rakietach,grade,WT2,#2ECC71,,difficulty_sport,1,generated
+difficulty_wt3,WT3 – Demanding Snowshoe Hike,WT3 – Anspruchsvolle Schneeschuhwanderung,WT3 – Wymagająca wędrówka na rakietach,grade,WT3,#F1C40F,,difficulty_sport,1,generated
+difficulty_wt4,WT4 – Snowshoe Tour,WT4 – Schneeschuhtour,WT4 – Trasa na rakietach,grade,WT4,#E67E22,,difficulty_sport,1,generated
+difficulty_wt5,WT5 – Alpine Snowshoe Tour,WT5 – Alpine Schneeschuhtour,WT5 – Alpejska trasa na rakietach,grade,WT5,#E74C3C,,difficulty_sport,1,generated
+difficulty_wt6,WT6 – Difficult Alpine Snowshoe Tour,WT6 – Schwierige alpine Schneeschuhtour,WT6 – Trudna alpejska trasa na rakietach,grade,WT6,#8E44AD,,difficulty_sport,1,generated
+droplet,Spring,Quelle,Źródło,lucide,droplet,,,compendium_type,1,exact Lucide name
+droplets,Waterfall,Wasserfall,Wodospad,lucide,droplets,,,compendium_type,1,exact Lucide name
+dumbbell,Outdoor Gym,Outdoor-Fitnessplatz,Siłownia plenerowa,lucide,dumbbell,,,compendium_type,1,exact Lucide name
+emoji_events,Achievement,,,lucide,trophy,,,resource_type,1,mapped to Lucide
+eye,Eye,,,lucide,eye,,,compendium_type,2,exact Lucide name
+ferris-wheel,Ferris wheel,,,lucide,ferris-wheel,,,compendium_type,2,exact Lucide name
+fire,Fire,,,lucide,flame,,,compendium_type,2,same glyph 2 times in compendium_type: redraw
+fish,Fish,,,lucide,fish,,,compendium_type,2,exact Lucide name
+flag,Flag,,,lucide,flag,,,"compendium_type, resource_type",2,exact Lucide name
+flame,Flame,,,lucide,flame,,,compendium_type,2,exact Lucide name
+flask-conical,Flask conical,,,lucide,flask-conical,,,compendium_type,2,exact Lucide name
+flight,Trip,,,lucide,plane,,,resource_type,1,mapped to Lucide
+flower,Flower,,,lucide,flower,,,compendium_type,2,exact Lucide name
+flower-2,Botanical Garden,Botanischer Garten,Ogród botaniczny,lucide,flower-2,,,compendium_type,1,exact Lucide name
+footprints,Footprints,,,lucide,footprints,,,compendium_type,3,exact Lucide name
+fountain,Fountain,Brunnen,Fontanna,lucide,droplets,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+gallery-vertical,Exhibition Centre,Ausstellungszentrum,Centrum wystawowe,lucide,gallery-vertical,,,compendium_type,1,exact Lucide name
+gear_type,Gear type,,,lucide,backpack,,,gear_type,107,mapped to Lucide
+glass,Bar,Bar,Bar,lucide,martini,,,compendium_type,1,mapped to Lucide
+glass-water,Drinking Water,Trinkwasser,Woda pitna,lucide,glass-water,,,compendium_type,1,exact Lucide name
+golf,Golf,,,lucide,flag-triangle-right,,,compendium_type,2,mapped to Lucide
+gps_fixed,GPX,,,lucide,locate-fixed,,,resource_type,1,mapped to Lucide
+graduation-cap,University,Universität,Uniwersytet,lucide,graduation-cap,,,compendium_type,1,exact Lucide name
+grass,Grass,,,lucide,wheat,,,compendium_type,2,mapped to Lucide
+grip,Via Ferrata Section,Klettersteigabschnitt,Odcinek via ferraty,lucide,grip,,,compendium_type,1,exact Lucide name
+gun,Paintball,Paintball,Paintball,lucide,crosshair,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+heart,Pilgrimage Site,Wallfahrtsort,Miejsce pielgrzymkowe,lucide,heart,,,compendium_type,1,exact Lucide name
+helicopter,Helipad,Hubschrauberlandeplatz,Lądowisko dla helikopterów,lucide,helicopter,,,compendium_type,1,exact Lucide name
+hexagon,Beehive / Apiary,Bienenstock / Imkerei,Ul / Pasieka,lucide,hexagon,,,compendium_type,1,exact Lucide name
+horse,Equestrian Trail,Reitweg,Szlak konny,lucide,paw-print,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+hotel,Hotel,Hotel,Hotel,lucide,hotel,,,compendium_type,1,exact Lucide name
+house,Guesthouse,Gasthaus,Pensjonat,lucide,house,,,compendium_type,1,exact Lucide name
+house-chimney,Mountain Hut,Berghütte,Schronisko górskie,lucide,house,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+house-chimney-user,Alpine Club Hut,Alpenvereinshütte,Schronisko klubu alpejskiego,lucide,house-plus,,,compendium_type,1,mapped to Lucide
+house-flag,SAC Hut,SAC-Hütte,Schronisko SAC,lucide,flag,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+house-heart,Refuge,Schutzhütte,Schronienie,lucide,house-heart,,,compendium_type,1,exact Lucide name
+image,Icon,Symbol,Ikona,lucide,image,,,resource_type,1,exact Lucide name
+info,Information Board,Informationstafel,Tablica informacyjna,lucide,info,,,compendium_type,1,exact Lucide name
+lake,Alpine Lake,Bergsee,Jezioro alpejskie,lucide,waves,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+land-layers,Rocky Outcrop,Felsvorsprung,Wychodnia skalna,lucide,layers,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+landmark,Landmark,,,lucide,landmark,,,compendium_type,2,exact Lucide name
+layers,Geological Formation,Geologische Formation,Formacja geologiczna,lucide,layers,,,compendium_type,1,exact Lucide name
+leaf,Nature Reserve,Naturschutzgebiet,Rezerwat przyrody,lucide,leaf,,,compendium_type,1,exact Lucide name
+lighthouse,Lighthouse,Leuchtturm,Latarnia morska,lucide,lighthouse,,,compendium_type,1,exact Lucide name
+link,POI Region,,,lucide,link,,,resource_type,1,exact Lucide name
+list,Reference Data,,,lucide,list,,,resource_type,1,exact Lucide name
+lock,Escape Room,Escape Room,Escape room,lucide,lock,,,compendium_type,1,exact Lucide name
+map,Journey,,,lucide,map,,,resource_type,1,exact Lucide name
+map-pin,Trailhead,Wanderparkplatz,Początek szlaku,lucide,map-pin,,,compendium_type,1,exact Lucide name
+masks-theater,Masks theater,,,lucide,drama,,,compendium_type,2,mapped to Lucide
+microscope,Microscope,,,lucide,microscope,,,compendium_type,2,exact Lucide name
+monument,Monument,,,lucide,landmark,,,compendium_type,3,same glyph 3 times in compendium_type: redraw
+moon,Meditation Spot,Meditationsplatz,Miejsce medytacji,lucide,moon,,,compendium_type,1,exact Lucide name
+mountain,Mountain,,,lucide,mountain,,,compendium_type,3,exact Lucide name
+mountain-pass,Pass,Pass,Przełęcz,lucide,mountain,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+mountain-snow,Alpine Summit,Alpengipfel,Szczyt alpejski,lucide,mountain-snow,,,compendium_type,1,exact Lucide name
+music,Music,,,lucide,music,,,compendium_type,2,exact Lucide name
+none,Multi transport station,Umsteigebahnhof,Węzeł przesiadkowy,lucide,train-front,,,compendium_type,1,mapped to Lucide
+palette,Mural / Street Art,Wandbild / Street Art,Mural / Sztuka uliczna,lucide,palette,,,compendium_type,1,exact Lucide name
+paw-print,Paw print,,,lucide,paw-print,,,compendium_type,4,exact Lucide name
+person-jumping,Trampoline Park,Trampolinpark,Park trampolin,lucide,zap,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+person-standing,Person standing,,,lucide,person-standing,,,compendium_type,2,exact Lucide name
+photo_camera,Photo,,,lucide,camera,,,resource_type,1,mapped to Lucide
+picnic,Picnic Area,Picknickplatz,Miejsce piknikowe,lucide,sandwich,,,compendium_type,1,mapped to Lucide
+picture-in-picture-2,Open Air Museum,Freilichtmuseum,Skansen,lucide,picture-in-picture-2,,,compendium_type,1,exact Lucide name
+place,Point of Interest,,,lucide,map-pin,,,resource_type,1,mapped to Lucide
+plane-landing,Paragliding Landing,Gleitschirm-Landeplatz,Lądowisko paralotni,lucide,plane-landing,,,compendium_type,1,exact Lucide name
+plant,Wetland,Feuchtgebiet,Mokradło,lucide,sprout,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+point_achievement,Achievement Unlocked,Erfolg freigeschaltet,Odblokowane osiągnięcie,lucide,award,,,point_reason,1,mapped to Lucide
+point_activity,Activity Completed,Aktivität abgeschlossen,Ukończona aktywność,lucide,activity,,,point_reason,1,mapped to Lucide
+point_card,Card Collected,Karte gesammelt,Zebrana karta,lucide,id-card,,,point_reason,1,mapped to Lucide
+point_challenge,Challenge Won,Herausforderung gewonnen,Wygrane wyzwanie,lucide,swords,,,point_reason,1,mapped to Lucide
+point_comment,Comment Posted,Kommentar veröffentlicht,Dodany komentarz,lucide,message-circle,,,point_reason,1,mapped to Lucide
+point_community,Community Contribution,Community-Beitrag,Wkład społeczności,lucide,users-round,,,point_reason,1,mapped to Lucide
+point_daily_bonus,Daily Bonus,Täglicher Bonus,Dzienny bonus,lucide,gift,,,point_reason,1,mapped to Lucide
+point_distance_milestone,Distance Milestone,Distanz-Meilenstein,Kamień milowy dystansu,lucide,ruler,,,point_reason,1,mapped to Lucide
+point_elevation_milestone,Elevation Milestone,Höhen-Meilenstein,Kamień milowy przewyższenia,lucide,mountain,,,point_reason,1,mapped to Lucide
+point_first_ascent,First Ascent,Erstbegehung,Pierwsze wejście,lucide,flag-triangle-right,,,point_reason,1,mapped to Lucide
+point_level_up,Level Up,Levelaufstieg,Awans poziomu,lucide,chevrons-up,,,point_reason,1,mapped to Lucide
+point_photo,Photo Uploaded,Foto hochgeladen,Przesłane zdjęcie,lucide,camera,,,point_reason,1,mapped to Lucide
+point_poi,POI Discovered,POI entdeckt,Odkryty POI,lucide,map-pin,,,point_reason,1,mapped to Lucide
+point_rating,Rating Given,Bewertung abgegeben,Wystawiona ocena,lucide,star,,,point_reason,1,mapped to Lucide
+point_referral,Referral,Empfehlung,Polecenie,lucide,user-plus,,,point_reason,1,mapped to Lucide
+point_region_completed,Region Completed,Region abgeschlossen,Ukończony region,lucide,map-pinned,,,point_reason,1,mapped to Lucide
+point_route_created,Route Created,Route erstellt,Utworzona trasa,lucide,route,,,point_reason,1,mapped to Lucide
+point_streak,Streak Bonus,Serien-Bonus,Bonus za serię,lucide,flame,,,point_reason,1,mapped to Lucide
+point_summit,Summit Reached,Gipfel erreicht,Zdobyty szczyt,lucide,mountain-snow,,,point_reason,1,mapped to Lucide
+point_weekly_goal,Weekly Goal,Wochenziel,Cel tygodniowy,lucide,target,,,point_reason,1,mapped to Lucide
+post_announcement,Announcement,Ankündigung,Ogłoszenie,lucide,megaphone,,,post_type,1,mapped to Lucide
+post_condition,Condition Update,Zustandsmeldung,Aktualizacja warunków,lucide,info,,,post_type,1,mapped to Lucide
+post_event,Event,Veranstaltung,Wydarzenie,lucide,calendar,,,post_type,1,mapped to Lucide
+post_gear_review,Gear Review,Ausrüstungstest,Recenzja sprzętu,lucide,backpack,,,post_type,1,mapped to Lucide
+post_live,Live Update,Live-Update,Relacja na żywo,lucide,radio,,,post_type,1,mapped to Lucide
+post_lost_found,Lost & Found,Fundsachen,Rzeczy znalezione,lucide,search,,,post_type,1,mapped to Lucide
+post_meetup,Meetup,Treffen,Spotkanie,lucide,users,,,post_type,1,mapped to Lucide
+post_photo,Photo,Foto,Zdjęcie,lucide,image,,,post_type,1,mapped to Lucide
+post_poll,Poll,Umfrage,Ankieta,lucide,chart-bar,,,post_type,1,mapped to Lucide
+post_question,Question,Frage,Pytanie,lucide,circle-help,,,post_type,1,mapped to Lucide
+post_route_share,Route Share,Route geteilt,Udostępniona trasa,lucide,share-2,,,post_type,1,mapped to Lucide
+post_tip,Tip,Tipp,Wskazówka,lucide,lightbulb,,,post_type,1,mapped to Lucide
+post_trip_report,Trip Report,Tourenbericht,Relacja z wycieczki,lucide,notebook-pen,,,post_type,1,mapped to Lucide
+post_video,Video,Video,Wideo,lucide,video,,,post_type,1,mapped to Lucide
+post_warning,Warning,Warnung,Ostrzeżenie,lucide,triangle-alert,,,post_type,1,mapped to Lucide
+rarity_common,Common,Gewöhnlich,Pospolity,lucide,gem,#95A5A6,,rarity,1,generated colour
+rarity_epic,Epic,Episch,Epicki,lucide,gem,#9B59B6,,rarity,1,generated colour
+rarity_legendary,Legendary,Legendär,Legendarny,lucide,gem,#F1C40F,,rarity,1,generated colour
+rarity_mythic,Mythic,Mythisch,Mityczny,lucide,gem,#C0392B,,rarity,1,generated colour
+rarity_rare,Rare,Selten,Rzadki,lucide,gem,#3498DB,,rarity,1,generated colour
+rarity_uncommon,Uncommon,Ungewöhnlich,Niezbyt pospolity,lucide,gem,#2ECC71,,rarity,1,generated colour
+region_type_canton,Canton,,,lucide,landmark,,,region_type,1,mapped to Lucide
+region_type_district,District,,,lucide,map,,,region_type,1,mapped to Lucide
+region_type_municipality,Municipality,,,lucide,building-2,,,region_type,1,mapped to Lucide
+rope,High Ropes Course,Hochseilgarten,Park linowy,lucide,cable,,,compendium_type,1,mapped to Lucide
+route,Route,,,lucide,route,,,"compendium_type, resource_type",3,exact Lucide name
+satellite,Track,,,lucide,satellite,,,resource_type,1,exact Lucide name
+schedule_aborted,Aborted,Abgebrochen,Przerwany,lucide,octagon-x,,,schedule_status,1,mapped to Lucide
+schedule_cancelled,Cancelled,Abgesagt,Anulowany,lucide,ban,,,schedule_status,1,mapped to Lucide
+schedule_completed,Completed,Abgeschlossen,Ukończony,lucide,circle-check,,,schedule_status,1,mapped to Lucide
+schedule_confirmed,Confirmed,Bestätigt,Potwierdzony,lucide,calendar-check,,,schedule_status,1,mapped to Lucide
+schedule_draft,Draft,Entwurf,Szkic,lucide,file-pen,,,schedule_status,1,mapped to Lucide
+schedule_failed,Failed,Fehlgeschlagen,Nieudany,lucide,circle-x,,,schedule_status,1,mapped to Lucide
+schedule_in_progress,In Progress,In Bearbeitung,W trakcie,lucide,loader,,,schedule_status,1,mapped to Lucide
+schedule_on_hold,On Hold,Pausiert,Wstrzymany,lucide,circle-pause,,,schedule_status,1,mapped to Lucide
+schedule_planned,Planned,Geplant,Zaplanowany,lucide,calendar-clock,,,schedule_status,1,mapped to Lucide
+schedule_postponed,Postponed,Verschoben,Przełożony,lucide,clock-arrow-down,,,schedule_status,1,mapped to Lucide
+school,School,Schule,Szkoła,lucide,school,,,compendium_type,1,exact Lucide name
+search,Archaeological Site,Archäologische Stätte,Stanowisko archeologiczne,lucide,search,,,compendium_type,1,exact Lucide name
+shield,Customs Post,Zollstelle,Posterunek celny,lucide,shield,,,compendium_type,1,exact Lucide name
+ship,Ship,,,lucide,ship,,,compendium_type,2,exact Lucide name
+shopping-bag,Farm Shop,Hofladen,Sklep gospodarski,lucide,shopping-bag,,,compendium_type,1,exact Lucide name
+ski,Ski,,,lucide,snowflake,,,compendium_type,2,same glyph 3 times in compendium_type: redraw
+ski-nordic,Cross-Country Ski Trail,Langlaufloipe,Trasa biegowa,lucide,snowflake,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+snow_corn,Corn,Firnschnee,Firn,lucide,wheat,,,snow_condition,1,mapped to Lucide
+snow_crusty,Crusty,Bruchharsch,Zlodowaciały,lucide,layers,,,snow_condition,1,same glyph 3 times in snow_condition: redraw
+snow_firn,Firn,Firn,Firn stary,lucide,mountain-snow,,,snow_condition,1,mapped to Lucide
+snow_fresh,Fresh,Neuschnee,Świeży,lucide,snowflake,,,snow_condition,1,same glyph 2 times in snow_condition: redraw
+snow_icy,Icy,Vereist,Oblodzony,lucide,thermometer-snowflake,,,snow_condition,1,mapped to Lucide
+snow_none,No Snow,Kein Schnee,Brak śniegu,lucide,ban,,,snow_condition,1,mapped to Lucide
+snow_packed,Packed,Festgefahren,Ubity,lucide,layers,,,snow_condition,1,same glyph 3 times in snow_condition: redraw
+snow_packed_powder,Packed Powder,Gepresster Pulverschnee,Ubity puch,lucide,layers,,,snow_condition,1,same glyph 3 times in snow_condition: redraw
+snow_powder,Powder,Pulverschnee,Puch,lucide,snowflake,,,snow_condition,1,same glyph 2 times in snow_condition: redraw
+snow_sastrugi,Sastrugi,Sastrugi,Zastrugi,lucide,waves,,,snow_condition,1,mapped to Lucide
+snow_slushy,Slushy,Sulzschnee,Rozmokły,lucide,cloud-drizzle,,,snow_condition,1,mapped to Lucide
+snow_wet,Wet,Nass,Mokry,lucide,droplet,,,snow_condition,1,mapped to Lucide
+snow_wind_blown,Wind-Blown,Windverfrachtet,Nawiany,lucide,wind,,,snow_condition,1,mapped to Lucide
+snowflake,Glacier,Gletscher,Lodowiec,lucide,snowflake,,,compendium_type,1,exact Lucide name
+sparkles,Sparkles,,,lucide,sparkles,,,compendium_type,2,exact Lucide name
+sport_alpine,Alpine Mountaineering,Hochtouren,Alpinizm,lucide,mountain-snow,,,sport_type,1,same glyph 2 times in sport_type: redraw
+sport_backcountry_ski,Backcountry Skiing,Freeride-Skifahren,Narciarstwo pozatrasowe,lucide,snowflake,,BC,sport_type,1,"mapped to Lucide, with a tag"
+sport_bouldering,Bouldering,Bouldern,Bouldering,lucide,box,,,sport_type,1,mapped to Lucide
+sport_canyoning,Canyoning,Canyoning,Kanioning,lucide,waves,,,sport_type,1,mapped to Lucide
+sport_cycling,Cycling,Radfahren,Kolarstwo,lucide,bike,,,sport_type,1,same glyph 6 times in sport_type: redraw
+sport_downhill,Downhill MTB,Downhill MTB,Downhill MTB,lucide,bike,,DH,sport_type,1,"mapped to Lucide, with a tag"
+sport_enduro,Enduro MTB,Enduro MTB,Enduro MTB,lucide,bike,,EN,sport_type,1,"mapped to Lucide, with a tag"
+sport_fastpacking,Fastpacking,Fastpacking,Fastpacking,lucide,backpack,,,sport_type,1,mapped to Lucide
+sport_gravel,Gravel Cycling,Gravelbiken,Kolarstwo gravelowe,lucide,bike,,GR,sport_type,1,"mapped to Lucide, with a tag"
+sport_hiking,Hiking,Wandern,Piesze wędrówki,lucide,footprints,,,sport_type,1,same glyph 3 times in sport_type: redraw
+sport_ice_climbing,Ice Climbing,Eisklettern,Wspinaczka lodowa,lucide,snowflake,,IC,sport_type,1,"mapped to Lucide, with a tag"
+sport_mtb,Mountain Biking,Mountainbiken,Kolarstwo górskie,lucide,bike,,MT,sport_type,1,"mapped to Lucide, with a tag"
+sport_road_cycling,Road Cycling,Rennradfahren,Kolarstwo szosowe,lucide,bike,,RD,sport_type,1,"mapped to Lucide, with a tag"
+sport_rock_climbing,Rock Climbing,Klettern,Wspinaczka skalna,lucide,mountain,,,sport_type,1,same glyph 2 times in sport_type: redraw
+sport_scrambling,Scrambling,Kraxeln,Wspinaczka łatwa,lucide,mountain,,SC,sport_type,1,"mapped to Lucide, with a tag"
+sport_ski_mountaineering,Ski Mountaineering,Skihochtouren,Skialpinizm,lucide,mountain-snow,,SM,sport_type,1,"mapped to Lucide, with a tag"
+sport_ski_touring,Ski Touring,Skitouren,Skitury,lucide,snowflake,,ST,sport_type,1,"mapped to Lucide, with a tag"
+sport_snowshoeing,Snowshoeing,Schneeschuhwandern,Rakiety śnieżne,lucide,footprints,,SS,sport_type,1,"mapped to Lucide, with a tag"
+sport_splitboard,Splitboarding,Splitboarden,Splitboarding,lucide,snowflake,,SB,sport_type,1,"mapped to Lucide, with a tag"
+sport_trail_running,Trail Running,Trailrunning,Bieganie górskie,lucide,timer,,,sport_type,1,mapped to Lucide
+sport_via_ferrata,Via Ferrata,Klettersteig,Via ferrata,lucide,cable,,,sport_type,1,mapped to Lucide
+sport_winter_hiking,Winter Hiking,Winterwandern,Zimowe wędrówki,lucide,footprints,,WH,sport_type,1,"mapped to Lucide, with a tag"
+sport_xc_ski,Cross-Country Skiing,Langlauf,Narciarstwo biegowe,lucide,snowflake,,XC,sport_type,1,"mapped to Lucide, with a tag"
+sprout,Community Garden,Gemeinschaftsgarten,Ogród społecznościowy,lucide,sprout,,,compendium_type,1,exact Lucide name
+square-parking,Square parking,,,lucide,square-parking,,,compendium_type,2,exact Lucide name
+star,Star,,,lucide,star,,,compendium_type,2,exact Lucide name
+star-badge,UNESCO Site,UNESCO-Stätte,Obiekt UNESCO,lucide,badge-check,,,compendium_type,1,mapped to Lucide
+stars,Star Gazing Spot,Sternbeobachtungsplatz,Miejsce obserwacji gwiazd,lucide,stars,,,compendium_type,1,exact Lucide name
+store,Store,,,lucide,store,,,compendium_type,2,exact Lucide name
+style,Card,,,lucide,gallery-vertical-end,,,resource_type,1,mapped to Lucide
+sun,Solar Farm,Solarpark,Farma słoneczna,lucide,sun,,,compendium_type,1,exact Lucide name
+sunrise,Sunrise Point,Sonnenaufgangspunkt,Punkt wschodu słońca,lucide,sunrise,,,compendium_type,1,exact Lucide name
+sunset,Sunset Point,Sonnenuntergangspunkt,Punkt zachodu słońca,lucide,sunset,,,compendium_type,1,exact Lucide name
+swim,Swimming Spot,Badestelle,Miejsce do kąpieli,lucide,waves,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+sword,Historic Battlefield,Historisches Schlachtfeld,Historyczne pole bitwy,lucide,sword,,,compendium_type,1,exact Lucide name
+table,Picnic Table,Picknicktisch,Stół piknikowy,lucide,table,,,compendium_type,1,exact Lucide name
+target,Target,,,lucide,target,,,compendium_type,2,exact Lucide name
+telescope,Observatory,Sternwarte,Obserwatorium,lucide,telescope,,,compendium_type,1,exact Lucide name
+tent,Tent,,,lucide,tent,,,compendium_type,3,exact Lucide name
+terrain,Terrain,,,lucide,mountain,,,"compendium_type, resource_type",2,same glyph 3 times in compendium_type: redraw
+thermometer-hot,Hot Spring,Heiße Quelle,Gorące źródło,lucide,thermometer-sun,,,compendium_type,1,mapped to Lucide
+timeline,Segment,,,lucide,timeline,,,resource_type,1,exact Lucide name
+tower,Wildlife Observation Tower,Wildbeobachtungsturm,Wieża obserwacji zwierząt,lucide,radio-tower,,,compendium_type,1,mapped to Lucide
+tractor,Children's Farm,Kinderbauernhof,Gospodarstwo dla dzieci,lucide,tractor,,,compendium_type,1,exact Lucide name
+trail_boggy,Boggy,Sumpfig,Bagnisty,lucide,droplets,,,trail_condition,1,same glyph 2 times in trail_condition: redraw
+trail_closed,Closed,Gesperrt,Zamknięty,lucide,ban,,,trail_condition,1,mapped to Lucide
+trail_dry,Dry,Trocken,Suchy,lucide,sun,,,trail_condition,1,mapped to Lucide
+trail_fallen_trees,Fallen Trees,Umgestürzte Bäume,Powalone drzewa,lucide,tree-pine,,,trail_condition,1,mapped to Lucide
+trail_flooded,Flooded,Überflutet,Zalany,lucide,waves,,,trail_condition,1,mapped to Lucide
+trail_icy,Icy,Vereist,Oblodzony,lucide,snowflake,,,trail_condition,1,same glyph 2 times in trail_condition: redraw
+trail_loose_gravel,Loose Gravel,Lockerer Schotter,Luźny żwir,lucide,grip,,,trail_condition,1,mapped to Lucide
+trail_muddy,Muddy,Schlammig,Błotnisty,lucide,droplets,,,trail_condition,1,same glyph 2 times in trail_condition: redraw
+trail_overgrown,Overgrown,Überwachsen,Zarośnięty,lucide,sprout,,,trail_condition,1,mapped to Lucide
+trail_rocky,Rocky,Felsig,Kamienisty,lucide,mountain,,,trail_condition,1,mapped to Lucide
+trail_rooty,Rooty,Wurzelig,Korzenisty,lucide,tree-deciduous,,,trail_condition,1,mapped to Lucide
+trail_snow,Snow Covered,Schneebedeckt,Pokryty śniegiem,lucide,snowflake,,,trail_condition,1,same glyph 2 times in trail_condition: redraw
+trail_washed_out,Washed Out,Ausgewaschen,Rozmyty,lucide,cloud-rain,,,trail_condition,1,mapped to Lucide
+trail_well_maintained,Well-Maintained,Gut gepflegt,Dobrze utrzymany,lucide,badge-check,,,trail_condition,1,mapped to Lucide
+trail_wet,Wet,Nass,Mokry,lucide,droplet,,,trail_condition,1,mapped to Lucide
+train,Train,,,lucide,train,,,compendium_type,3,exact Lucide name
+train-track,Mountain Railway,Bergbahn,Kolej górska,lucide,train-track,,,compendium_type,1,exact Lucide name
+tram,Tram,,,lucide,tram-front,,,compendium_type,3,mapped to Lucide
+tree,National Park,Nationalpark,Park narodowy,lucide,trees,,,compendium_type,1,same glyph 2 times in compendium_type: redraw
+tree-deciduous,City Park,Stadtpark,Park miejski,lucide,tree-deciduous,,,compendium_type,1,exact Lucide name
+tree-pine,Arboretum,Arboretum,Arboretum,lucide,tree-pine,,,compendium_type,1,exact Lucide name
+trees,Trees,,,lucide,trees,,,compendium_type,3,exact Lucide name
+triangle-alert,Triangle alert,,,lucide,triangle-alert,,,compendium_type,2,exact Lucide name
+trophy,Sports Stadium,Sportstadion,Stadion sportowy,lucide,trophy,,,compendium_type,1,exact Lucide name
+umbrella-beach,Lido / Beach,Strandbad / Strand,Kąpielisko / Plaża,lucide,umbrella,,,compendium_type,1,mapped to Lucide
+users,Landsgemeinde Square,Landsgemeindeplatz,Plac Landsgemeinde,lucide,users,,,compendium_type,1,exact Lucide name
+utensils,Utensils,,,lucide,utensils,,,compendium_type,2,exact Lucide name
+visibility_excellent,Excellent,Ausgezeichnet,Doskonała,bars,8/8,#1E8449,,visibility,1,generated
+visibility_good,Good,Gut,Dobra,bars,6/8,#58D68D,,visibility,1,generated
+visibility_low,Low,Gering,Niska,bars,3/8,#E74C3C,,visibility,1,generated
+visibility_moderate,Moderate,Mäßig,Umiarkowana,bars,5/8,#F1C40F,,visibility,1,generated
+visibility_poor,Poor,Schlecht,Słaba,bars,4/8,#E67E22,,visibility,1,generated
+visibility_very_good,Very Good,Sehr gut,Bardzo dobra,bars,7/8,#2ECC71,,visibility,1,generated
+visibility_very_low,Very Low,Sehr gering,Bardzo niska,bars,2/8,#C0392B,,visibility,1,generated
+visibility_whiteout,Whiteout,Whiteout,Whiteout,bars,1/8,#7F8C8D,,visibility,1,generated
+warehouse,Historic Farm,Historischer Bauernhof,Zabytkowe gospodarstwo,lucide,warehouse,,,compendium_type,1,exact Lucide name
+water,Lake,See,Jezioro,lucide,droplets,,,compendium_type,1,same glyph 3 times in compendium_type: redraw
+waves,Waves,,,lucide,waves,,,compendium_type,4,exact Lucide name
+waves-ladder,Gorge,Schlucht,Wąwóz,lucide,waves-ladder,,,compendium_type,1,exact Lucide name
+waypoint_border,Border,Grenze,Granica,lucide,flag,,,waypoint_type,1,mapped to Lucide
+waypoint_bridge,Bridge,Brücke,Most,lucide,bridge,,,waypoint_type,1,mapped to Lucide
+waypoint_bus_stop,Bus Stop,Bushaltestelle,Przystanek autobusowy,lucide,bus,,,waypoint_type,1,mapped to Lucide
+waypoint_cable_car,Cable Car,Seilbahn,Kolej linowa,lucide,cable-car,,,waypoint_type,1,mapped to Lucide
+waypoint_campsite,Campsite,Zeltplatz,Pole namiotowe,lucide,tent,,,waypoint_type,1,mapped to Lucide
+waypoint_cave,Cave,Höhle,Jaskinia,lucide,pickaxe,,,waypoint_type,1,mapped to Lucide
+waypoint_chapel,Chapel,Kapelle,Kaplica,lucide,church,,,waypoint_type,1,mapped to Lucide
+waypoint_danger,Danger,Gefahr,Niebezpieczeństwo,lucide,triangle-alert,,,waypoint_type,1,mapped to Lucide
+waypoint_first_aid,First Aid,Erste Hilfe,Pierwsza pomoc,lucide,briefcase-medical,,,waypoint_type,1,mapped to Lucide
+waypoint_ford,Ford,Furt,Bród,lucide,waves,,,waypoint_type,1,same glyph 3 times in waypoint_type: redraw
+waypoint_gate,Gate,Tor,Brama,lucide,fence,,,waypoint_type,1,mapped to Lucide
+waypoint_hut,Hut,Hütte,Schronisko,lucide,house,,,waypoint_type,1,mapped to Lucide
+waypoint_junction,Junction,Kreuzung,Skrzyżowanie,lucide,split,,,waypoint_type,1,mapped to Lucide
+waypoint_ladder,Ladder,Leiter,Drabina,lucide,arrow-up-from-line,,,waypoint_type,1,mapped to Lucide
+waypoint_lake,Lake,See,Jezioro,lucide,waves,,,waypoint_type,1,same glyph 3 times in waypoint_type: redraw
+waypoint_parking,Parking,Parkplatz,Parking,lucide,square-parking,,,waypoint_type,1,mapped to Lucide
+waypoint_pass,Pass,Pass,Przełęcz,lucide,mountain,,,waypoint_type,1,mapped to Lucide
+waypoint_photo_spot,Photo Spot,Fotostelle,Miejsce na zdjęcia,lucide,camera,,,waypoint_type,1,mapped to Lucide
+waypoint_rest_area,Rest Area,Rastplatz,Miejsce odpoczynku,lucide,armchair,,,waypoint_type,1,mapped to Lucide
+waypoint_restaurant,Restaurant,Restaurant,Restauracja,lucide,utensils,,,waypoint_type,1,mapped to Lucide
+waypoint_ruins,Ruins,Ruine,Ruiny,lucide,landmark,,,waypoint_type,1,mapped to Lucide
+waypoint_shelter,Shelter,Unterstand,Wiata,lucide,tent-tree,,,waypoint_type,1,mapped to Lucide
+waypoint_spring,Spring,Quelle,Źródło,lucide,droplet,,,waypoint_type,1,same glyph 2 times in waypoint_type: redraw
+waypoint_summit,Summit,Gipfel,Szczyt,lucide,mountain-snow,,,waypoint_type,1,mapped to Lucide
+waypoint_toilet,Toilet,Toilette,Toaleta,lucide,toilet,,,waypoint_type,1,mapped to Lucide
+waypoint_trailhead,Trailhead,Ausgangspunkt,Początek szlaku,lucide,signpost,,,waypoint_type,1,mapped to Lucide
+waypoint_train_station,Train Station,Bahnhof,Stacja kolejowa,lucide,train-front,,,waypoint_type,1,mapped to Lucide
+waypoint_viewpoint,Viewpoint,Aussichtspunkt,Punkt widokowy,lucide,binoculars,,,waypoint_type,1,mapped to Lucide
+waypoint_water,Water Source,Wasserquelle,Źródło wody,lucide,droplet,,,waypoint_type,1,same glyph 2 times in waypoint_type: redraw
+waypoint_waterfall,Waterfall,Wasserfall,Wodospad,lucide,waves,,,waypoint_type,1,same glyph 3 times in waypoint_type: redraw
+weather_clear_night,Clear Night,Klare Nacht,Bezchmurna noc,lucide,moon,,,weather_condition,1,mapped to Lucide
+weather_cloudy,Cloudy,Bewölkt,Pochmurno,lucide,cloud,,,weather_condition,1,mapped to Lucide
+weather_drizzle,Drizzle,Nieselregen,Mżawka,lucide,cloud-drizzle,,,weather_condition,1,mapped to Lucide
+weather_foggy,Foggy,Neblig,Mgliście,lucide,cloud-fog,,,weather_condition,1,same glyph 2 times in weather_condition: redraw
+weather_hail,Hail,Hagel,Grad,lucide,cloud-hail,,,weather_condition,1,mapped to Lucide
+weather_hazy,Hazy,Dunstig,Zamglenie,lucide,haze,,,weather_condition,1,mapped to Lucide
+weather_misty,Misty,Diesig,Mglisto,lucide,cloud-fog,,,weather_condition,1,same glyph 2 times in weather_condition: redraw
+weather_overcast,Overcast,Bedeckt,Całkowite zachmurzenie,lucide,cloudy,,,weather_condition,1,mapped to Lucide
+weather_partly_cloudy,Partly Cloudy,Teilweise bewölkt,Częściowe zachmurzenie,lucide,cloud-sun,,,weather_condition,1,mapped to Lucide
+weather_rainy,Rainy,Regnerisch,Deszczowo,lucide,cloud-rain,,,weather_condition,1,mapped to Lucide
+weather_sleet,Sleet,Schneeregen,Deszcz ze śniegiem,lucide,cloud-snow,,,weather_condition,1,mapped to Lucide
+weather_snowy,Snowy,Schneereich,Śnieżnie,lucide,snowflake,,,weather_condition,1,mapped to Lucide
+weather_stormy,Stormy,Stürmisch,Burzowo,lucide,cloud-lightning,,,weather_condition,1,same glyph 2 times in weather_condition: redraw
+weather_sunny,Sunny,Sonnig,Słonecznie,lucide,sun,,,weather_condition,1,mapped to Lucide
+weather_thunderstorm,Thunderstorm,Gewitter,Burza,lucide,cloud-lightning,,,weather_condition,1,same glyph 2 times in weather_condition: redraw
+weather_windy,Windy,Windig,Wietrznie,lucide,wind,,,weather_condition,1,mapped to Lucide
+wind,Wind,,,lucide,wind,,,compendium_type,3,exact Lucide name
+wind-turbine,Watermill,Wassermühle,Młyn wodny,lucide,fan,,,compendium_type,1,mapped to Lucide
+wine,Wine,,,lucide,wine,,,compendium_type,2,exact Lucide name
+zap,Zap,,,lucide,zap,,,compendium_type,2,exact Lucide name

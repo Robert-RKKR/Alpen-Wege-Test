@@ -199,6 +199,21 @@ class ReferenceBaseMixin(TimestampMixin, CreatorMixin, NameL18nMixin):
         ),
     )
 
+    @declared_attr
+    def icon_id(cls) -> Mapped[uuid.UUID | None]:
+        # Step 1 of the move from the icon text to a real picture: optional link to asset_agg_icon (an SVG).
+        # RESTRICT: an icon that is still used cannot be deleted. The text column icon stays until step 2.
+        return mapped_column(
+            ForeignKey("asset_agg_icon.id", ondelete="RESTRICT"),
+            nullable=True,
+            index=True,
+            comment=(
+                "FK to asset_agg_icon with RESTRICT delete. The picture of "
+                "this reference value (an SVG). NULL until one is linked; "
+                "the text column icon is still used until then."
+            ),
+        )
+
 
 class ReferenceWithFactorMixin(ReferenceBaseMixin):
     """Extends ReferenceBaseMixin with point_factor."""

@@ -45,12 +45,14 @@ def _serialize_value(val):
     return str(val)
 
 
-def _snapshot_fields(instance) -> dict:
+def _snapshot_fields(instance, ignore: frozenset[str] = frozenset()) -> dict:
+    # ignore: the entity type's ignore_fields; such a field is not read at all (asset_agg_icon.svg is a deferred column
+    # of up to 300 KB that must neither be loaded for the log nor copied into it)
     mapper = inspect(type(instance))
     data = {}
     for col in mapper.columns:
         key = col.key
-        if key in SKIP_FIELDS:
+        if key in SKIP_FIELDS or key in ignore:
             continue
         data[key] = _serialize_value(getattr(instance, key, None))
     return data
@@ -102,7 +104,7 @@ def log_created(db, instance, user_id: uuid.UUID) -> None:
         entity_type_id=meta.entity_type_id,
         entity_id=entity_id,
         action="created",
-        snapshot=_snapshot_fields(instance),
+        snapshot=_snapshot_fields(instance, meta.ignore_fields),
         changed_by=user_id,
         request_id=request_id_ctx.get("") or None,
     ))
@@ -147,7 +149,7 @@ def log_deleted(db, instance, user_id: uuid.UUID) -> None:
         entity_type_id=meta.entity_type_id,
         entity_id=entity_id,
         action="deleted",
-        snapshot=_snapshot_fields(instance),
+        snapshot=_snapshot_fields(instance, meta.ignore_fields),
         changed_by=user_id,
         request_id=request_id_ctx.get("") or None,
     ))
