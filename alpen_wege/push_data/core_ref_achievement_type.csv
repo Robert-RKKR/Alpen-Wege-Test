@@ -1,13 +1,13 @@
-id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon,point_factor
-fd9b937a-e4bd-47fd-8744-06085488db8d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Milestone,Meilenstein,Kamień milowy,#F1C40F,ach_type_milestone,1
-bfa5fb3f-306b-4695-95b5-43723d402c5b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Streak,Serie,Seria,#E74C3C,ach_type_streak,1.2
-74a635b2-e9ee-4bef-9b9a-195f4ab8f3b6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cumulative,Kumulativ,Kumulacyjny,#3498DB,ach_type_cumulative,1
-8b8a635b-9bc1-42cb-b5f4-3de39943bb9b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Single Activity,Einzelaktivität,Pojedyncza aktywność,#2ECC71,ach_type_single,1
-f8f428e3-7927-4263-9e71-ed54f9676afd,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Progressive,Progressiv,Progresywny,#E67E22,ach_type_progressive,1.1
-4906ef28-16ce-40d7-bc23-0a08bad28f19,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Time-Limited,Zeitlich begrenzt,Ograniczony czasowo,#D35400,ach_type_time_limited,1.3
-287e1ef1-f7c9-41bd-ba75-76491ea9e124,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hidden,Versteckt,Ukryty,#2C3E50,ach_type_hidden,1.5
-4c16466b-01a0-4171-9dc0-a9a984342b14,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Repeatable,Wiederholbar,Powtarzalny,#16A085,ach_type_repeatable,1
-62ead4da-958e-42cf-93a2-925dd798d26a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tiered,Gestaffelt,Stopniowany,#9B59B6,ach_type_tiered,1.2
-1f3f6b24-610f-41ee-b508-e138a4836c44,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Seasonal,Saisonal,Sezonowy,#F39C12,ach_type_seasonal,1
-fca15574-3ecb-47e7-bc1a-37eb6b4a98b6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Collaborative,Kollaborativ,Wspólny,#2980B9,ach_type_collaborative,1.2
-796188af-9ab6-4bd4-9b9d-d69154c1c187,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Challenge,Herausforderung,Wyzwanie,#C0392B,ach_type_challenge,1.5
+id,created_at,updated_at,created_by,name,name_de,name_pl,color,icon_id,point_factor
+fd9b937a-e4bd-47fd-8744-06085488db8d,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Milestone,Meilenstein,Kamień milowy,#F1C40F,ea4b3a4a-8d43-5ba5-8fee-23054cc37be1,1
+bfa5fb3f-306b-4695-95b5-43723d402c5b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Streak,Serie,Seria,#E74C3C,df376545-74bd-560a-b368-d34fd220ddf4,1.2
+74a635b2-e9ee-4bef-9b9a-195f4ab8f3b6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Cumulative,Kumulativ,Kumulacyjny,#3498DB,dd2ed366-9e4d-551d-b8ef-5033875b89fc,1
+8b8a635b-9bc1-42cb-b5f4-3de39943bb9b,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Single Activity,Einzelaktivität,Pojedyncza aktywność,#2ECC71,2e468c4c-d74e-5e7f-8d00-0ce166316069,1
+f8f428e3-7927-4263-9e71-ed54f9676afd,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Progressive,Progressiv,Progresywny,#E67E22,9b5ff547-2588-5e95-b224-979688a14ccf,1.1
+4906ef28-16ce-40d7-bc23-0a08bad28f19,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Time-Limited,Zeitlich begrenzt,Ograniczony czasowo,#D35400,bd299e85-cfec-5ac0-a3d1-6b35c02c91a1,1.3
+287e1ef1-f7c9-41bd-ba75-76491ea9e124,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Hidden,Versteckt,Ukryty,#2C3E50,275a75a9-6d96-5419-b4ed-689c3e94052a,1.5
+4c16466b-01a0-4171-9dc0-a9a984342b14,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Repeatable,Wiederholbar,Powtarzalny,#16A085,ac9a87ed-2501-574a-88d9-c22e59e3853b,1
+62ead4da-958e-42cf-93a2-925dd798d26a,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Tiered,Gestaffelt,Stopniowany,#9B59B6,4883fcc4-5376-536b-9ab6-be1b953d40a4,1.2
+1f3f6b24-610f-41ee-b508-e138a4836c44,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Seasonal,Saisonal,Sezonowy,#F39C12,f70be590-b50a-5f7c-a6de-7ea5b52250c9,1
+fca15574-3ecb-47e7-bc1a-37eb6b4a98b6,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Collaborative,Kollaborativ,Wspólny,#2980B9,5c6a12e7-aa16-5eac-b517-49c0779ee460,1.2
+796188af-9ab6-4bd4-9b9d-d69154c1c187,2026-05-06 19:10:18.18347+00,2026-05-06 19:10:18.18347+00,3cd01bcd-4b7a-43dc-9cf6-e709815783cc,Challenge,Herausforderung,Wyzwanie,#C0392B,11018adb-613e-578f-b068-ef685a0bde71,1.5

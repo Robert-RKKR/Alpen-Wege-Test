@@ -13,7 +13,6 @@ from sqlalchemy.dialects import postgresql
 # Local application
 from app.assets.models.models_agg.icon import AssetAggIcon
 from app.assets.services import icon_csv, icon_link
-from app.assets.services.icon_usage import ICON_USERS
 from app.main import app
 from app.management.utils import event_logger
 
@@ -170,36 +169,34 @@ def test_only_a_text_change_is_an_update_too(log):
 
 # ---------------------------------------------------------------- the link by key
 def _sql(what):
-    model = ICON_USERS[what]
+    model = icon_link.LINKED_BY_CODE[what]
     statement = icon_link.update(model).where(model.icon_id.is_(None), icon_link._matches(what, model)).values(icon_id=AssetAggIcon.id)
     return " ".join(str(statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})).split())
 
 
-def test_the_link_matches_by_the_right_text_for_every_kind_of_table():
-    assert "asset_agg_icon.key = lower(core_ref_sport_type.icon)" in _sql("sport type")
-    assert "asset_agg_icon.key = lower(core_ref_resource_type.icon)" in _sql("resource type")
+def test_the_link_matches_countries_and_regions_by_their_code_and_nothing_else():
+    assert set(icon_link.LINKED_BY_CODE) == {"country", "region"}          # the reference tables always have an icon
     assert "asset_agg_icon.key = concat('flag_', lower(compendium_cat_country.iso_code))" in _sql("country")
     region = _sql("region")
     assert "compendium_cat_region.iso_code IS NOT NULL" in region and "concat('flag_', lower(replace(compendium_cat_region.iso_code, '-', '_')))" in region
-    for what in ICON_USERS:
+    for what in icon_link.LINKED_BY_CODE:
         sql = _sql(what)
         assert "icon_id IS NULL" in sql and "SET icon_id=asset_agg_icon.id" in sql and "FROM asset_agg_icon" in sql, what     # only empty links are filled
 
 
-def test_link_icons_visits_all_22_tables_and_reports_only_what_changed():
+def test_link_icons_visits_countries_and_regions_and_reports_only_what_changed():
     calls = []
 
     class Db:
         async def execute(self, statement):
             calls.append(statement)
             if len(calls) % 2 == 1:                                   # the UPDATE of a table
-                return SimpleNamespace(rowcount=3 if len(calls) in (1, 5) else 0)
-            return SimpleNamespace(scalar_one=lambda: 2 if len(calls) == 2 else 0)     # the count of rows without icon
+                return SimpleNamespace(rowcount=3 if len(calls) == 1 else 0)
+            return SimpleNamespace(scalar_one=lambda: 2 if len(calls) == 4 else 0)     # the count of rows without icon
 
     linked, empty = asyncio.run(icon_link.link_icons(Db()))
-    assert len(calls) == 2 * len(ICON_USERS) == 44
-    assert list(linked.values()) == [3, 3] and len(linked) == 2 and list(empty.values()) == [2]
-    assert set(linked) <= set(ICON_USERS) and set(empty) <= set(ICON_USERS)
+    assert len(calls) == 4
+    assert linked == {"country": 3} and empty == {"region": 2}
 
 
 # ---------------------------------------------------------------- the routes

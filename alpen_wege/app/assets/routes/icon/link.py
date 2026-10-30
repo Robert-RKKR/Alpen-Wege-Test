@@ -13,10 +13,11 @@ from ._router import router
 @router.post(
     "/link",
     response_model=ApiResponse[IconLinkResult],
-    summary="Link rows to their icons by key",
+    summary="Link countries and regions to their flags by key",
     description=(
-        "Sets `icon_id` on every row that has none yet and whose icon text (the 19 reference tables and the resource types: the old `icon` column in lower case), "
+        "Sets `icon_id` on every country and region that has none yet and whose "
         "ISO code (countries: the icon `flag_<iso code>`, for example `flag_at`) or ISO 3166-2 code (regions: `flag_ch_zh`) matches the **key** of an icon. "
+        "Reference values and resource types always have an icon (`icon_id` is required there), so they are not part of this. "
         "The API version of `scripts/sql/icons_link.sql`. A link that is already set is never changed, so it can be run again after every import. "
         "The answer says how many rows were linked per table and how many still have no icon (no icon with their key exists yet). "
         "`dry_run=true` counts without saving. Needs the update permission on reference data (administrator by default). "

@@ -177,7 +177,7 @@ Limits (settings): `SEGMENT_DRAW_MAX_POINTS` 5000 points per drawn segment, `ROU
 
 19 lookup tables, all under `/core/`. Shared data (no ownership filter).
 
-Every value has the text `icon` (as before) and an optional `icon_id`: the id of an icon in `/assets/icons`, the SVG picture of the value (see "Icons and flags" below). Create and update accept `icon_id`, `null` removes the link, an unknown id answers `422`. The same `icon_id` is on countries (their flag), regions (flag or coat of arms) and resource types.
+Every value has a required `icon_id`: the id of an icon in `/assets/icons`, the SVG picture of the value (see "Icons and flags" below). Create needs it, update can change it but not remove it (`null` answers `422`), an unknown id answers `422`. Resource types work the same way; countries (their flag) and regions (flag or coat of arms) have an optional `icon_id`.
 
 | Slug                    | Path                                 |
 |-------------------------|--------------------------------------|
@@ -225,7 +225,7 @@ curl -X POST http://localhost:8000/api/v1/core/sport-types \
     "name_de": "Wandern",
     "name_pl": "Piesze wędrówki",
     "color": "#4CAF50",
-    "icon": "hiking",
+    "icon_id": "<icon-uuid>",
     "point_factor": 1.0
   }'
 ```
@@ -295,7 +295,7 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
     "id": "...",
     "name": "Mountain range",
     "color": "#795548",
-    "icon": "mountains",
+    "icon_id": "...",
     "point_factor": 1.0,
     "..."
   },
@@ -327,7 +327,7 @@ curl -X POST http://localhost:8000/api/v1/compendium/regions \
 | GET | `/assets/icons/by-key/{key}/file` | The same, found by key (`flag_at`, `sport_hiking`) |
 | PUT | `/assets/icons/{id}/file` | Replace the SVG (id, key and every link stay) |
 | POST | `/assets/icons/upload-csv` | **Create many icons from one CSV** (`key`, `svg`, optional names; options `dry_run`, `update`, `link`; admin) |
-| POST | `/assets/icons/link` | Set `icon_id` on every row whose icon text or ISO code matches the key of an icon (`dry_run`; admin) |
+| POST | `/assets/icons/link` | Give every country and region without a flag the icon whose key matches its ISO code (`dry_run`; admin) |
 | PATCH | `/assets/icons/{id}` | Change names, summaries, key |
 | DELETE | `/assets/icons/{id}` | Delete an icon nothing uses (`409` lists the users otherwise) |
 
@@ -361,8 +361,8 @@ through a card. `null` removes the photo.
 ### Icons and flags
 
 An icon is an SVG picture stored as text in `asset_agg_icon` (no file on disk). Reference values, resource types, countries and
-regions point to an icon with the optional `icon_id` (22 tables). The old text column `icon` is unchanged; step 2 (later) fills every
-link, makes `icon_id` required and drops the text.
+regions point to an icon with `icon_id` (22 tables): required on the 19 reference tables and resource types, optional on countries
+and regions. The old text column `icon` is gone (step 2, `scripts/sql/icons_drop_text.sql`).
 
 ```bash
 # upload (key: lower-case letters, digits and _ . - ; default: the file name, "Flag AT.svg" -> flag_at)
@@ -395,14 +395,22 @@ sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/
 ```
 
 `seed_icons.py` takes any folder of SVG files (file name = key) and gives each seeded icon an id computed from its key, so seed
-files can name an icon by id on every database. `icons_link.sql` sets `icon_id` where an icon with the matching key exists
-(reference tables: the old `icon` text in lower case; countries: `flag_` + ISO code; regions: `flag_` + ISO 3166-2 code with `_`);
-it only fills empty links and can be run again after every load. Existing database: run `scripts/sql/icons_preflight.sql` (read
-only), then `icons_ddl.sql` **before** the new code starts, then `init_seed.py` (the resource type `icon`). `icons_rollback.sql`
-undoes the step.
+files can name an icon by id on every database (the `push_data/core_ref_*.csv` files do: their `icon_id` column). `icons_link.sql`
+gives countries (`flag_` + ISO code) and regions (`flag_` + ISO 3166-2 code with `_`) their flag where an icon with the matching key
+exists; it only fills empty links and can be run again after every load.
 
-**The icon set (graphics for all reference values).** `scripts/icon_sources/icon_map.csv` has one row per icon key (the icon texts of the
-reference tables and the resource types): names in English, German and Polish and the graphic. `scripts/make_icon_set.py` (Python
+**Fresh database.** Icons come before the reference data: `init_seed.py` (users; it stops at the resource types because their icons
+are missing), `seed_icons.py --csv Routing/icons_import/icons_import.csv`, `init_seed.py` again (resource types and policies), then
+`push_data/seed.py`, the flags and `icons_link.sql`.
+
+**Existing database, step 1** (adds the table and the optional links): `scripts/sql/icons_preflight.sql` (read only), then
+`icons_ddl.sql` **before** the new code starts, then `icons_policy.sql`. `icons_rollback.sql` undoes it.
+**Step 2** (drops the text): every reference row must have its icon first (load the icon CSV, run `icons_link.sql` of step 1).
+Take a `pg_dump`, stop api and celery, run `scripts/sql/icons_drop_text.sql` (it refuses and changes nothing while a row has no
+`icon_id`), then start the new code. `icons_rollback_text.sql` brings the column back, filled with the key of the linked icon.
+
+**The icon set (graphics for all reference values).** `scripts/icon_sources/icon_map.csv` has one row per icon key (the icons the
+reference tables and the resource types use): names in English, German and Polish and the graphic. `scripts/make_icon_set.py` (Python
 standard library only) draws every graphic and writes a CSV that carries the SVG text; `seed_icons.py --csv` loads it. Most
 glyphs are Lucide icons (ISC licence, the used files and the licence text are in `scripts/icon_sources/lucide/`); the difficulty grades
 (SAC T3, UIAA IV, WI4, ...) are generated badges in the colour of the value, the difficulty and visibility levels are generated bars, the
@@ -410,17 +418,15 @@ rarities are the gem in the colour of the value. Keys that share one glyph insid
 
 ```bash
 python scripts/make_icon_set.py --out icons_import.csv --preview icon_preview.html      # the CSV with the graphics, and a page to look at them
-sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/icons_import.csv --dry-run
-sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/icons_import.csv            # add --update to replace icons that exist
-sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_link.sql      # icon_id on every row whose icon text matches
-sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_list_keys.sql # every icon_exists = t, rows_linked = rows_using
+sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/Routing/icons_import/icons_import.csv --dry-run
+sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/Routing/icons_import/icons_import.csv   # add --update to replace icons that exist
 ```
 
 **The same through the API (Postman, curl).** `icons_import.csv` can be sent to the server in one call; nothing has to be copied into a container:
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/assets/icons/upload-csv?dry_run=true" -H "Authorization: Bearer $TOKEN" -F "file=@icons_import.csv"   # checks and counts, saves nothing
-curl -X POST "http://localhost:8000/api/v1/assets/icons/upload-csv" -H "Authorization: Bearer $TOKEN" -F "file=@icons_import.csv"                  # creates the icons and links the rows
+curl -X POST "http://localhost:8000/api/v1/assets/icons/upload-csv" -H "Authorization: Bearer $TOKEN" -F "file=@icons_import.csv"                  # creates the icons and links countries and regions
 ```
 
 The answer: `inserted`, `updated`, `unchanged`, `rejected` with `errors` (one text per wrong row, by row number), `notes` (what the cleaner removed from an SVG),
@@ -430,7 +436,6 @@ replaced; needs the update permission on icons); `link=true` needs the update pe
 
 Change a graphic: edit `icon_map.csv` (Excel: save as CSV UTF-8) or put your own SVG next to the Lucide files and write its name in
 `value`, run the first command again, and load with `--update`. Or replace one icon in the API: `PUT /assets/icons/{id}/file`.
-`scripts/sql/icons_list_keys.sql` lists every distinct icon text with the number of rows that use it and whether its icon exists.
 
 ### Collectible cards (graphics)
 
@@ -519,6 +524,8 @@ The designs are Jinja2 SVG templates, one per style: `app/compendium/cards/templ
 wrapped and sized in `app/compendium/cards/render.py` with the metrics of the bundled Inter font. After changing the
 `standard` template or the layout, raise `TEMPLATE_VERSION` in `render.py`: every card then counts as stale and is drawn fresh
 until it is rendered again (other styles are never stored, so changing them needs no new version).
+The flag of each country is its icon (`compendium_cat_country.icon_id`, see "Icons and flags"); replace the icon and the card files
+count as stale. A country without an icon falls back to the bundled file in `app/compendium/cards/flags/`.
 Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT), font: [Inter](https://rsms.me/inter/) (SIL OFL), both in `app/compendium/cards/`.
 
 Database changes: `scripts/sql/card_render_ddl.sql`, `scripts/sql/country_names_l18n.sql`.

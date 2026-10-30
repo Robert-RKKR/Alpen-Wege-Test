@@ -36,7 +36,7 @@ RANKED = {
     "core_ref_rarity": CoreRefRarity,
     "core_ref_visibility": CoreRefVisibility,
 }
-NEW = {"name": "x", "color": "#000000", "icon": "x", "point_factor": 1.0}
+NEW = {"name": "x", "color": "#000000", "icon_id": "00000000-0000-0000-0000-000000000001", "point_factor": 1.0}
 
 
 # ------------------------------------------------------------------ rank (decision D2, C1)
@@ -78,8 +78,8 @@ def test_rank_is_optional_on_update_and_not_sent_means_not_changed():
 
 
 @pytest.mark.parametrize("schema,field", [
-    (RefRankedUpdate, "rank"), (RefRankedUpdate, "point_factor"), (RefRankedUpdate, "color"), (RefRankedUpdate, "icon"),
-    (DifficultySportUpdate, "rank"), (RefWithFactorUpdate, "point_factor"), (RefBaseUpdate, "color"), (RefBaseUpdate, "icon"),
+    (RefRankedUpdate, "rank"), (RefRankedUpdate, "point_factor"), (RefRankedUpdate, "color"), (RefRankedUpdate, "icon_id"),
+    (DifficultySportUpdate, "rank"), (RefWithFactorUpdate, "point_factor"), (RefBaseUpdate, "color"), (RefBaseUpdate, "icon_id"),
 ])
 def test_a_required_column_cannot_be_set_to_null_by_an_update(schema, field):
     # explicit null used to reach the database and end in a 500; now it is a 422, and a name may still be emptied
@@ -119,8 +119,8 @@ def test_rank_follows_point_factor_inside_a_scale():
 
 
 def test_the_visibility_scale_goes_from_best_to_worst():
-    rows = {r["icon"]: int(r["rank"]) for r in _csv("visibility")}
-    assert rows["visibility_excellent"] == 1 and rows["visibility_whiteout"] == max(rows.values()) == 8
+    rows = {r["name"]: int(r["rank"]) for r in _csv("visibility")}
+    assert rows["Excellent"] == 1 and rows["Whiteout"] == max(rows.values()) == 8
     assert len(set(rows.values())) == len(rows)
 
 

@@ -376,31 +376,51 @@ def palette(color: str) -> dict:
     }
 
 
-@lru_cache(maxsize=512)
-def flag_href(iso: str) -> str | None:
+def _png_href(svg: bytes) -> str | None:
     # The flag is drawn to a PNG once and embedded as a PNG data URI. An SVG inside an <image> (what this used to be) is
     # shown by browsers but dropped by many viewers and editors (Office, Illustrator, image viewers): the flag
     # circles stayed empty in a downloaded file. A PNG in an <image> works everywhere.
-    if not iso.isalpha() or len(iso) != 2:
-        return None
-    path = FLAG_DIR / f"{iso.lower()}.svg"
-    if not path.is_file():
-        return None
     try:
         import cairosvg
 
-        png = cairosvg.svg2png(bytestring=path.read_bytes(), output_width=FLAG_PX, output_height=FLAG_PX)
+        png = cairosvg.svg2png(bytestring=svg, output_width=FLAG_PX, output_height=FLAG_PX)
     except Exception:
         return None                                  # the card then prints the country code instead of the flag
     return "data:image/png;base64," + base64.b64encode(png).decode()
 
 
+@lru_cache(maxsize=512)
+def flag_href(iso: str) -> str | None:
+    # the bundled file: only for a country that has no flag icon
+    if not iso.isalpha() or len(iso) != 2:
+        return None
+    path = FLAG_DIR / f"{iso.lower()}.svg"
+    return _png_href(path.read_bytes()) if path.is_file() else None
+
+
+@lru_cache(maxsize=512)
+def _icon_png_href(sha256: str, svg: str) -> str | None:
+    return _png_href(svg.encode())
+
+
+def icon_flag_href(sha256: str, svg: str) -> str | None:
+    # the country's flag icon (asset_agg_icon); the sha256 keys the cache, so a replaced picture is drawn again
+    return _icon_png_href(sha256, svg)
+
+
+def _flag(f: dict, flag_svgs: dict[str, str]) -> dict:
+    sha = f.get("icon_sha256")
+    href = icon_flag_href(sha, flag_svgs[sha]) if sha and sha in flag_svgs else None
+    return {"iso": f["iso"], "href": href or flag_href(f["iso"])}
+
+
 # ------------------------------------------------------------------ public API
 
 def render_svg(model: dict, photo_href: str | None = None, ratio: tuple[int, int] = DEFAULT_RATIO,
-               style: str = DEFAULT_STYLE) -> str:
+               style: str = DEFAULT_STYLE, flag_svgs: dict[str, str] | None = None) -> str:
     # model: the render model (see services.build_render_model); photo_href: a data: URI of the main photo;
-    # ratio: (width, height) from parse_ratio; style: a name from STYLES (the template templates/{style}.svg.j2)
+    # ratio: (width, height) from parse_ratio; style: a name from STYLES (the template templates/{style}.svg.j2);
+    # flag_svgs: {sha256: svg} of the flag icons named in model["flags"] (service.flag_svgs)
     style = parse_style(style)
     rarity = {**FALLBACK_RARITY, **(model.get("rarity") or {})}
     rarity["color"] = _safe_color(rarity.get("color"), FALLBACK_RARITY["color"])
@@ -409,7 +429,7 @@ def render_svg(model: dict, photo_href: str | None = None, ratio: tuple[int, int
     return _env.get_template(f"{style}.svg.j2").render(
         font=f"{FONT_FAMILY}, 'Helvetica Neue', Arial, sans-serif",
         number_label=L["number_label"], name=model["name"] or "",
-        flags=[{"iso": f["iso"], "href": flag_href(f["iso"])} for f in model.get("flags", [])][:4],
+        flags=[_flag(f, flag_svgs or {}) for f in model.get("flags", [])][:4],
         rarity=rarity, photo_href=photo_href, L=L, P=palette(rarity["color"]),
     )
 

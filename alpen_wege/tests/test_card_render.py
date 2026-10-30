@@ -1,3 +1,5 @@
+import re
+import uuid
 from types import SimpleNamespace as NS
 from xml.etree import ElementTree
 
@@ -12,8 +14,8 @@ def ref(name, rank=1, color="#3498DB", **kw):
     return NS(name=name, name_de=kw.pop("name_de", None), name_pl=None, rank=rank, color=color, point_factor=2.0, **kw)
 
 
-def country(iso, name):
-    return NS(iso_code=iso, name=name, name_de=None, name_pl=None, name_common=name, name_common_de=None, name_common_pl=None)
+def country(iso, name, icon_id=None):
+    return NS(iso_code=iso, name=name, name_de=None, name_pl=None, name_common=name, name_common_de=None, name_common_pl=None, icon_id=icon_id)
 
 
 def make_card(**over):
@@ -45,7 +47,7 @@ def test_model_falls_back_to_poi_and_shortens_grade():
     assert m["number"] == 13
     assert m["name"] == "Pfannenstock"
     assert m["country"] == "Switzerland" and m["region"] == "Schwyz"
-    assert m["flags"] == [{"iso": "CH", "name": "Switzerland"}]
+    assert m["flags"] == [{"iso": "CH", "name": "Switzerland", "icon_sha256": None}]
     assert m["difficulty_sport"]["short"] == "SAC T3"
     assert m["difficulty_level"] is None
     assert m["rarity"]["color"] == "#3498DB"
@@ -112,6 +114,52 @@ def test_flag_lookup_rejects_paths():
     assert render.flag_href("CH").startswith("data:image/png;base64,")
     assert render.flag_href("../") is None
     assert render.flag_href("ZZ") is None
+
+
+RED = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#ff0000"/></svg>'
+
+
+def _flag_pixel(svg_text):
+    import base64
+    from io import BytesIO
+    from PIL import Image
+    href = re.search(r'clip-path="url\(#flag\)"[^>]*xlink:href="(data:image/png;base64,[^"]+)"', svg_text).group(1)
+    return Image.open(BytesIO(base64.b64decode(href.split(",", 1)[1]))).convert("RGB").getpixel((render.FLAG_PX // 2, render.FLAG_PX // 2))
+
+
+def test_the_flag_comes_from_the_country_icon():
+    card = make_card()
+    card.poi.main_region.country.icon_id = "icon-ch"
+    icons = {"icon-ch": ("a" * 64, RED)}
+    m = service.build_render_model(card, [], "en", None, icons)
+    assert m["flags"][0]["icon_sha256"] == "a" * 64 and "svg" not in str(m["flags"])      # the model stays small: no SVG text
+    assert _flag_pixel(render.render_svg(m, flag_svgs=service.flag_svgs(icons))) == (255, 0, 0)
+    assert _flag_pixel(render.render_svg(model())) != (255, 0, 0)                          # without an icon: the bundled Swiss flag
+
+
+def test_a_country_without_icon_or_with_an_unloaded_icon_keeps_the_bundled_flag():
+    card = make_card()
+    card.poi.main_region.country.icon_id = "icon-missing"
+    m = service.build_render_model(card, [], "en", None, {})
+    assert m["flags"][0]["icon_sha256"] is None
+    assert render.render_svg(m) == render.render_svg(model())
+
+
+def test_a_new_flag_picture_makes_the_stored_files_stale():
+    card = make_card()
+    card.poi.main_region.country.icon_id = "icon-ch"
+    first = {lang: service.build_render_model(card, [], lang, None, {"icon-ch": ("a" * 64, RED)}) for lang in service.LANGS}
+    second = {lang: service.build_render_model(card, [], lang, None, {"icon-ch": ("b" * 64, RED)}) for lang in service.LANGS}
+    assert service.models_hash(first) != service.models_hash(second)
+
+
+def test_flag_icons_query_asks_only_for_the_linked_icons():
+    card = make_card()
+    assert service.flag_icons_query(card, []) is None                                      # no country has an icon: no query
+    card.poi.main_region.country.icon_id = uuid.uuid4()
+    at = NS(region=NS(country=country("AT", "Austria", icon_id=uuid.uuid4())))
+    sql = str(service.flag_icons_query(card, [at]))
+    assert "asset_agg_icon.svg" in sql and "asset_agg_icon.sha256" in sql and " IN " in sql
 
 
 def test_flags_are_png_not_nested_svg():

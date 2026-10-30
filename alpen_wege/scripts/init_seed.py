@@ -10,6 +10,10 @@ Or locally (requires psycopg2 and bcrypt):
 
 Idempotent: safe to re-run. Existing users are skipped, resource types use
 ON CONFLICT, and access policies are rebuilt from scratch each run.
+
+On a fresh database run it twice around the icons: first to create the users
+(it stops at the resource types because their icons are missing), then
+scripts/seed_icons.py --csv Routing/icons_import/icons_import.csv, then again.
 """
 import os
 import sys
@@ -58,6 +62,9 @@ USERS = [
     },
 ]
 
+ICON_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "https://alpenwege.dev/asset_agg_icon")
+
+# key, name, colour, key of the icon (seed_icons.py --csv loads it)
 RESOURCE_TYPES = [
     ("gear", "Gear", "#4CAF50", "backpack"),
     ("journey", "Journey", "#2196F3", "map"),
@@ -154,15 +161,28 @@ def ensure_user(cur, email, username, first_name, last_name, group, pw_hash):
     return user_id
 
 
+def icon_id(key: str) -> str:
+    # the id seed_icons.py gives the icon with this key (app.assets.services.icon_csv.icon_id); kept here so the script needs no app import
+    return str(uuid.uuid5(ICON_NAMESPACE, key))
+
+
 def seed_resource_types(cur, admin_id):
     """Insert resource types, skipping existing keys."""
+    wanted = {icon_key: icon_id(icon_key) for *_, icon_key in RESOURCE_TYPES}
+    cur.execute("SELECT id::text FROM asset_agg_icon WHERE id::text = ANY(%s)", (list(wanted.values()),))
+    have = {row[0] for row in cur.fetchall()}
+    missing = sorted(k for k, i in wanted.items() if i not in have)
+    if missing:
+        print(f"  ERROR: icons missing for the resource types: {', '.join(missing)}")
+        print("  Load them first: python scripts/seed_icons.py --csv Routing/icons_import/icons_import.csv")
+        sys.exit(1)
     inserted = 0
-    for key, name, color, icon in RESOURCE_TYPES:
+    for key, name, color, icon_key in RESOURCE_TYPES:
         cur.execute(
-            "INSERT INTO core_ref_resource_type (id, key, name, color, icon, created_by) "
+            "INSERT INTO core_ref_resource_type (id, key, name, color, icon_id, created_by) "
             "VALUES (%s, %s, %s, %s, %s, %s) "
             "ON CONFLICT (key) DO NOTHING",
-            (str(uuid.uuid4()), key, name, color, icon, admin_id),
+            (str(uuid.uuid4()), key, name, color, wanted[icon_key], admin_id),
         )
         if cur.rowcount > 0:
             inserted += 1

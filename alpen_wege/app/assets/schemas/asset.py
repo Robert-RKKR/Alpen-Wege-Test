@@ -101,7 +101,7 @@ class IconImportResult(BaseModel):
 class IconLinkResult(BaseModel):
     dry_run: bool
     linked: dict[str, int] = Field(description="rows that got icon_id now, per table; tables with nothing new are left out")
-    still_without_icon: dict[str, int] = Field(description="rows that still have no icon, per table (no icon with their key exists yet)")
+    still_without_icon: dict[str, int] = Field(description="countries and regions that still have no icon (no icon with their key exists yet)")
 
 
 class GpxUpdate(BaseModel):

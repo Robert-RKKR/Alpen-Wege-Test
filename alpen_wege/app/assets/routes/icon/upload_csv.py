@@ -32,7 +32,7 @@ def _listed(items: list[str]) -> list[str]:
         "(what was taken out is in `notes`); a wrong row (bad key, key twice, not an SVG) is skipped and named in `errors`, the other rows are used.\n\n"
         "- `dry_run=true`: everything is checked and counted, nothing is saved. Use it first.\n"
         "- `update=true`: an icon whose key exists is replaced (SVG and names) when it differs; without it, existing icons are left alone (`unchanged`). Needs the update permission on icons.\n"
-        "- `link=true` (default): afterwards every row whose icon text (reference tables, resource types), ISO code (countries, flag_xx) or ISO 3166-2 code "
+        "- `link=true` (default): afterwards every country and region without a flag whose ISO code (countries, flag_xx) or ISO 3166-2 code "
         "(regions) matches the key of an icon gets its `icon_id`, as `POST /assets/icons/link` does. Needs the update permission on reference data; use `link=false` to skip it.\n\n"
         "Administrator only by default. The answer says how many icons were created, replaced, left alone and rejected, and what was linked."
     ),
@@ -41,7 +41,7 @@ async def upload_icons_csv(
     file: UploadFile = File(..., description="CSV file with the columns key, svg and optional name, name_de, name_pl, summary, summary_de, summary_pl"),
     dry_run: bool = Query(False, description="Check and count everything but save nothing."),
     update: bool = Query(False, description="Replace icons whose key exists (SVG and names) when they differ."),
-    link: bool = Query(True, description="Afterwards set icon_id on the rows whose icon text, ISO code or region code matches the key of an icon."),
+    link: bool = Query(True, description="Afterwards set icon_id on the countries and regions whose ISO code matches the key of an icon."),
     access: AccessContext = Depends(resource_access("icon", "create")),
     db: AsyncSession = Depends(get_db),
 ):

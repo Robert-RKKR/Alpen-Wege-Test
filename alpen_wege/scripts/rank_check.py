@@ -96,7 +96,8 @@ check("snow-conditions?rank_min=1: the unknown parameter is ignored, 200", r.sta
 
 # ---------------------------------------------------------------- create, update, delete
 unique = uuid.uuid4().hex[:8]
-new = {"name": f"RankCheck {unique}", "color": "#112233", "icon": f"rank_check_{unique}", "point_factor": 1.0}
+ICON = data(call("GET", "/assets/icons", params={"limit": 1}))[0]["id"]          # any icon: icon_id is required
+new = {"name": f"RankCheck {unique}", "color": "#112233", "icon_id": ICON, "point_factor": 1.0}
 r = call("POST", "/core/rarities", json=new)
 check("POST /core/rarities without rank: 422", r.status_code == 422, r.text[:200])
 for bad in (-1, 1001, 70000, "x", 2.5, None):
@@ -119,7 +120,7 @@ if row:
     for bad in (-1, 1001):
         r = call("PATCH", f"/core/rarities/{rid}", json={"rank": bad})
         check(f"PATCH rank {bad}: 422", r.status_code == 422, str(r.status_code))
-    for field in ("rank", "point_factor", "color", "icon"):
+    for field in ("rank", "point_factor", "color", "icon_id"):
         r = call("PATCH", f"/core/rarities/{rid}", json={field: None})
         check(f"PATCH {field} null: 422 (a required column, not a database error)", r.status_code == 422, f"{r.status_code} {r.text[:120]}")
     r = call("GET", f"/core/rarities/{rid}")
@@ -128,7 +129,7 @@ if row:
     check("viewer cannot create a rarity: 403", r.status_code == 403, str(r.status_code))
 
 # ---------------------------------------------------------------- CSV import carries the rank
-csv_body = f"name,color,icon,point_factor,rank\nCsv A {unique},#000000,csv_a_{unique},1,2\nCsv B {unique},#000000,csv_b_{unique},1,4\n"
+csv_body = f"name,color,icon_id,point_factor,rank\nCsv A {unique},#000000,{ICON},1,2\nCsv B {unique},#000000,{ICON},1,4\n"
 r = call("POST", "/core/rarities/upload-csv", files={"file": ("r.csv", io.BytesIO(csv_body.encode()), "text/csv")})
 check("POST /core/rarities/upload-csv with a rank column: 201, 2 inserted", r.status_code in (200, 201) and data(r)["inserted"] == 2 and not data(r)["errors"], r.text[:200])
 r = call("GET", "/core/rarities", params={"q": unique, "sort": "rank"})
@@ -136,12 +137,12 @@ rows = [x for x in data(r) if x["name"].startswith("Csv ")]
 check("the imported rows have ranks 2 and 4", [x["rank"] for x in rows] == [2, 4], r.text[:200])
 for x in rows:
     created.append(f"/core/rarities/{x['id']}")
-bad_csv = f"name,color,icon,point_factor\nCsv C {unique},#000000,csv_c_{unique},1\n"
+bad_csv = f"name,color,icon_id,point_factor\nCsv C {unique},#000000,{ICON},1\n"
 r = call("POST", "/core/rarities/upload-csv", files={"file": ("r.csv", io.BytesIO(bad_csv.encode()), "text/csv")})
 r2 = call("GET", "/core/rarities", params={"q": f"Csv C {unique}"})
 check("CSV without the rank column: nothing inserted, one clear error naming rank (no 500)",
       r.status_code in (200, 201) and data(r)["inserted"] == 0 and len(data(r)["errors"]) == 1 and "rank" in data(r)["errors"][0] and data(r2) == [], r.text[:200])
-bad_csv = f"name,color,icon,point_factor,rank\nCsv D {unique},#000000,csv_d_{unique},1,\nCsv E {unique},#000000,csv_e_{unique},1,6\n"
+bad_csv = f"name,color,icon_id,point_factor,rank\nCsv D {unique},#000000,{ICON},1,\nCsv E {unique},#000000,{ICON},1,6\n"
 r = call("POST", "/core/rarities/upload-csv", files={"file": ("r.csv", io.BytesIO(bad_csv.encode()), "text/csv")})
 rows = data(call("GET", "/core/rarities", params={"q": f"Csv E {unique}"}))
 check("CSV with an empty rank in one row: that row is reported, the other row is imported",

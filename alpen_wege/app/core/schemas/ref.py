@@ -7,12 +7,9 @@ from app.core.utils.expand import Link
 from app.profile.schemas.user_read import ExpandedUser
 
 
-ICON_ID_WRITE = (
-    "Link to the picture of this value: the id of an icon (`GET /assets/icons`, an SVG). Optional. An unknown id answers 422. "
-    "The text in `icon` stays as it is."
-)
-ICON_ID_CLEAR = " `null` removes the link; leave the field out to keep it."
-ICON_ID_READ = "Id of the icon (an SVG) of this value, or null. The picture: `GET /assets/icons/{icon_id}/file`. The text `icon` is still used until every value has an icon."
+ICON_ID_WRITE = "The picture of this value: the id of an icon (`GET /assets/icons`, an SVG). An unknown id answers 422."
+ICON_ID_KEEP = " Leave the field out to keep the icon; it cannot be removed (`null` answers 422)."
+ICON_ID_READ = "Id of the icon (an SVG) of this value. The picture: `GET /assets/icons/{icon_id}/file`."
 
 
 class RefBaseCreate(BaseModel):
@@ -20,8 +17,7 @@ class RefBaseCreate(BaseModel):
     name_de: str | None = None
     name_pl: str | None = None
     color: str
-    icon: str
-    icon_id: UUID | None = Field(None, description=ICON_ID_WRITE)
+    icon_id: UUID = Field(description=ICON_ID_WRITE)
 
 
 class RefBaseUpdate(BaseModel):
@@ -29,13 +25,12 @@ class RefBaseUpdate(BaseModel):
     name_de: str | None = None
     name_pl: str | None = None
     color: str | None = None
-    icon: str | None = None
-    icon_id: UUID | None = Field(None, description=ICON_ID_WRITE + ICON_ID_CLEAR)
+    icon_id: UUID | None = Field(None, description=ICON_ID_WRITE + ICON_ID_KEEP)
 
     @model_validator(mode="after")
     def _required_columns_cannot_be_set_to_null(self):
         # "not sent" means "unchanged"; an explicit null on a NOT NULL column used to end in a database error (500)
-        for field in ("color", "icon", "point_factor", "rank"):
+        for field in ("color", "icon_id", "point_factor", "rank"):
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null; leave it out to keep the value")
         return self
@@ -49,8 +44,7 @@ class RefBaseRead(BaseModel):
     name_de: str | None
     name_pl: str | None
     color: str
-    icon: str
-    icon_id: UUID | None = Field(description=ICON_ID_READ)
+    icon_id: UUID = Field(description=ICON_ID_READ)
     created_by: UUID
     created_at: datetime
     updated_at: datetime

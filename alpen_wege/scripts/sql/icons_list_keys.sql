@@ -1,5 +1,6 @@
 -- Every distinct icon text (the old approach) of the 20 reference tables, one row per icon KEY (the text in lower case, which is
--- what asset_agg_icon.key and icons_link.sql use). Read only; run it as often as you like.
+-- what asset_agg_icon.key uses). Read only; run it as often as you like.
+-- Step 1 only: it reads the old text column icon, so after icons_drop_text.sql it stops with "column icon does not exist".
 --   sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_list_keys.sql
 -- Columns: key (create an icon with exactly this key), written_as (the spellings found, "Ship | ship" = two rows share one
 -- icon), rows_using (reference rows with this text), used_by (tables), icon_exists (an icon with this key is already in

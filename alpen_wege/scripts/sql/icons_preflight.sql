@@ -1,4 +1,5 @@
 -- Icons step 1, PRE-FLIGHT: read-only checks to run BEFORE icons_ddl.sql. Changes nothing.
+-- Step 1 only: it reads the old text column icon, so after icons_drop_text.sql it stops with "column icon does not exist".
 --   sudo docker exec -i alpen-postgres psql -U alpenwege -d alpenwege < scripts/sql/icons_preflight.sql
 -- Every line says OK or PROBLEM. Fix every PROBLEM first.
 \set ON_ERROR_STOP on

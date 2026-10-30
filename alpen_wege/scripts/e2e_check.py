@@ -77,10 +77,11 @@ check("no token: GET /compendium/pois -> 401", client.get(f"{API}/compendium/poi
 check("no token: GET /management/settings -> 401", client.get(f"{API}/management/settings").status_code == 401)
 for p in ("/management/settings", "/core/resource-types", "/profile/access-policies", "/profile/users/", "/management/jobs/stats"):
     check(f"viewer: GET {p} -> 403", client.get(API + p, headers=H(viewer)).status_code == 403)
-check("viewer: POST /core/companies -> 403", client.post(f"{API}/core/companies", headers=H(viewer), json={"name": "x", "color": "#1", "icon": "i"}).status_code == 403)
+ICON = client.get(f"{API}/assets/icons", headers=H(admin), params={"limit": 1}).json()["response_data"][0]["id"]   # icon_id is required
+check("viewer: POST /core/companies -> 403", client.post(f"{API}/core/companies", headers=H(viewer), json={"name": "x", "color": "#1", "icon_id": ICON}).status_code == 403)
 
 # ---- 4. create, read, update, delete through the factory-built ref router
-r = client.post(f"{API}/core/companies", headers=H(admin), json={"name": "E2E Co", "color": "#112233", "icon": "building"})
+r = client.post(f"{API}/core/companies", headers=H(admin), json={"name": "E2E Co", "color": "#112233", "icon_id": ICON})
 cid = r.json().get("response_data", {}).get("id") if r.status_code == 201 else None
 check("POST /core/companies -> 201", r.status_code == 201, r.text[:200])
 if cid:

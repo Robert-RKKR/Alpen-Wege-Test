@@ -85,7 +85,8 @@ resource types, countries and regions point to one with `icon_id`; countries use
 `GET /assets/icons/{id}/file`, or `/assets/icons/by-key/{key}/file`; add `?format=png&size=64` for a PNG. Everybody who is logged in
 reads icons, only the administrator writes them. An uploaded SVG is cleaned (script, style, external links are removed and listed in
 `response_details.removed`). `POST /assets/icons/upload-csv` creates many icons from one CSV (try `dry_run=true` first) and `POST /assets/icons/link`
-sets `icon_id` on the rows whose icon text or code matches an icon key. An unknown `icon_id` answers 422. The text column `icon` still exists and is unchanged.
+gives countries and regions the flag whose key matches their ISO code. Reference values and resource types must name an icon on create.
+An unknown `icon_id` answers 422.
 
 **Jobs.** Uploading a track and the rescan / reprocess endpoints answer 202 with a `job_id` (and a `Location` header);
 follow it with `management/my-jobs/{job_id}` or the WebSocket `management/ws`.

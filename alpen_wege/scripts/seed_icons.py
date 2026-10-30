@@ -7,14 +7,14 @@ a file as it came. The key of an icon is the file name without .svg (folder) or 
 
 Folder (flags: the 270 files of the card renderer):
     python scripts/seed_icons.py --dir app/compendium/cards/flags --prefix flag_ --dash-to-underscore --name-template "Flag {STEM}"
-CSV (the icons of the reference tables, made by scripts/make_icon_set.py):
-    python scripts/seed_icons.py --csv icons_import.csv
+CSV (the icons of the reference tables, made by scripts/make_icon_set.py; the seed CSVs in push_data name them by id):
+    python scripts/seed_icons.py --csv Routing/icons_import/icons_import.csv
     columns: key, svg (required); name, name_de, name_pl, summary, summary_de, summary_pl (optional; name defaults to the key)
 
 Idempotent: an existing key is left alone unless --update is given (then the svg is replaced when the cleaned text differs; in CSV mode
 the names and summaries are replaced too). --dry-run checks and cleans every row and prints the result without touching the database.
-Run inside the API container:  sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/icons_import.csv
-Afterwards run scripts/sql/icons_link.sql: it sets icon_id on every row whose old icon text matches an icon key.
+Run inside the API container:  sudo docker exec alpen-api python /app/scripts/seed_icons.py --csv /app/Routing/icons_import/icons_import.csv
+Afterwards run scripts/sql/icons_link.sql: it gives countries and regions the flag whose key matches their ISO code.
 Exit code 0 = every row was accepted, 1 = at least one was rejected (the others are still loaded).
 """
 import argparse

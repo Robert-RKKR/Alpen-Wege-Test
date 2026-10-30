@@ -31,19 +31,30 @@ seed = _load("seed_icons_for_test", ROOT / "scripts" / "seed_icons.py")
 ROWS = make.read_map(SOURCES / "icon_map.csv")
 
 
-# ---------------------------------------------------------------- the map covers every icon text of the seed data
-def _seed_icon_texts():
-    texts = set()
+# ---------------------------------------------------------------- the map covers every icon the seed data names
+def _seed_icon_ids():
+    ids = set()
     for path in glob.glob(str(ROOT / "push_data" / "core_ref_*.csv")):
         with open(path, encoding="utf-8-sig") as fh:
-            texts |= {r["icon"].lower() for r in csv.DictReader(fh)}
+            ids |= {r["icon_id"] for r in csv.DictReader(fh)}
+    return ids
+
+
+def test_the_map_has_an_icon_for_every_icon_id_of_the_seed_data_and_the_resource_types():
+    from app.assets.services.icon_csv import icon_id
+
+    by_id = {str(icon_id(r["key"])): r["key"] for r in ROWS}
+    missing = _seed_icon_ids() - set(by_id)
+    assert not missing, f"push_data names icons that icon_map.csv does not make: {sorted(missing)[:10]}"
     init_seed = _load("init_seed_for_icon_set_test", ROOT / "scripts" / "init_seed.py")
-    return texts | {icon.lower() for _, _, _, icon in init_seed.RESOURCE_TYPES}
+    keys = {r["key"] for r in ROWS}
+    assert not [k for *_, k in init_seed.RESOURCE_TYPES if k not in keys]
+    assert all(init_seed.icon_id(k) == str(icon_id(k)) for k in keys), "init_seed.py and the app compute the icon id differently"
 
 
-def test_the_map_has_an_icon_for_every_icon_text_of_the_seed_data_and_the_resource_types():
-    missing = _seed_icon_texts() - {r["key"] for r in ROWS}
-    assert not missing, f"no row in icon_map.csv for: {sorted(missing)}"
+def test_the_shipped_icons_import_csv_has_every_key_of_the_map():
+    shipped = {r["key"] for r in seed.read_csv_rows(ROOT / "Routing" / "icons_import" / "icons_import.csv")}
+    assert {r["key"] for r in ROWS} <= shipped
 
 
 def test_the_map_is_valid_and_has_no_key_twice():

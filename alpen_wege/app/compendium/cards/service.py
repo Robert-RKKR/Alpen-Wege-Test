@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from app.assets.models.models_agg.icon import AssetAggIcon
 from app.assets.models.models_agg.photo import AssetAggPhoto
 from app.compendium.cards import render
 from app.compendium.models.models_cat.card import CompendiumCatCard
@@ -55,27 +56,52 @@ def extra_regions_query(poi_id: UUID):
     )
 
 
+def _countries(card, links) -> list:
+    region = card.poi.main_region
+    return [c for c in [region.country if region else None] + [link.region.country for link in links if link.region] if c is not None]
+
+
+def _difficulties(card) -> list:
+    return [d for d in (card.difficulty_sport, card.difficulty_level) if d is not None]
+
+
+def flag_icons_query(card, links):
+    # the icons the card draws: the flags of its countries and the difficulty icons; the svg column is deferred, so it is named here
+    ids = {c.icon_id for c in _countries(card, links) if c.icon_id is not None}
+    ids |= {d.icon_id for d in _difficulties(card) if getattr(d, "icon_id", None) is not None}
+    return select(AssetAggIcon.id, AssetAggIcon.sha256, AssetAggIcon.svg).where(AssetAggIcon.id.in_(ids)) if ids else None
+
+
 async def load_async(db, card_id: UUID):
-    # (card, extra region links, POI photo) or None when the card does not exist
+    # (card, extra region links, POI photo, icons {icon_id: (sha256, svg)}) or None when the card does not exist
     card = (await db.execute(card_query(card_id))).scalar_one_or_none()
     if card is None:
         return None
-    links = (await db.execute(extra_regions_query(card.poi_id))).scalars().all()
+    links = list((await db.execute(extra_regions_query(card.poi_id))).scalars().all())
     poi_photo = None
     if card.main_photo_id is None and card.poi.main_photo_id is not None:
         poi_photo = await db.get(AssetAggPhoto, card.poi.main_photo_id)
-    return card, list(links), poi_photo
+    query = flag_icons_query(card, links)
+    icons = {i: (sha, svg) for i, sha, svg in (await db.execute(query)).all()} if query is not None else {}
+    return card, links, poi_photo, icons
 
 
 def load_sync(session, card_id: UUID):
     card = session.execute(card_query(card_id)).scalar_one_or_none()
     if card is None:
         return None
-    links = session.execute(extra_regions_query(card.poi_id)).scalars().all()
+    links = list(session.execute(extra_regions_query(card.poi_id)).scalars().all())
     poi_photo = None
     if card.main_photo_id is None and card.poi.main_photo_id is not None:
         poi_photo = session.get(AssetAggPhoto, card.poi.main_photo_id)
-    return card, list(links), poi_photo
+    query = flag_icons_query(card, links)
+    icons = {i: (sha, svg) for i, sha, svg in session.execute(query).all()} if query is not None else {}
+    return card, links, poi_photo, icons
+
+
+def flag_svgs(flag_icons: dict) -> dict[str, str]:
+    # {sha256: svg} of the flag and difficulty icons for render_svg: the model carries only the sha256 (it is hashed and returned as JSON)
+    return {sha: svg for sha, svg in flag_icons.values()}
 
 
 def _col(field: str, lang: str) -> str:
@@ -112,17 +138,21 @@ def _short_grade(name: str | None) -> str | None:
     return name
 
 
-def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, poi_photo=None) -> dict:
+def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, poi_photo=None, flag_icons: dict | None = None) -> dict:
     # Everything printed on the card, already translated. The same model is returned by ?format=json.
+    # flag_icons: {icon_id: (sha256, svg)} from load_*; a country's flag is its icon, the bundled file only when it has none;
+    # the difficulty icons (sport grade first, then the level) are drawn in the footer.
     poi = card.poi
     region = poi.main_region
-    country = region.country if region else None
+    flag_icons = flag_icons or {}
 
     flags, seen = [], set()
-    for c in [country] + [link.region.country for link in extra_links if link.region]:
-        if c is not None and c.iso_code and c.iso_code.upper() not in seen:
+    for c in _countries(card, extra_links):
+        if c.iso_code and c.iso_code.upper() not in seen:
             seen.add(c.iso_code.upper())
-            flags.append({"iso": c.iso_code.upper(), "name": _text(lang, (c, "name_common"), (c, "name"))})
+            icon = flag_icons.get(getattr(c, "icon_id", None))
+            flags.append({"iso": c.iso_code.upper(), "name": _text(lang, (c, "name_common"), (c, "name")),
+                          "icon_sha256": icon[0] if icon else None})
 
     ctype = card.compendium_type or poi.compendium_type
     # sport grade (SAC T3): text chip, with its colour as a diamond before the card number; general level (Easy): after the rarity
@@ -133,6 +163,11 @@ def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, po
     if card.difficulty_level is not None:
         d = card.difficulty_level
         difficulty_level = {"name": _t(d, "name", lang), "rank": d.rank, "color": d.color}
+    difficulty_icons = []
+    for d in _difficulties(card):
+        icon = flag_icons.get(getattr(d, "icon_id", None))
+        if icon and icon[0] not in difficulty_icons:
+            difficulty_icons.append(icon[0])
 
     rarity = None
     if card.rarity is not None:
@@ -154,6 +189,7 @@ def build_render_model(card: CompendiumCatCard, extra_links: list, lang: str, po
         "rarity": rarity,
         "difficulty_sport": difficulty_sport,
         "difficulty_level": difficulty_level,
+        "difficulty_icons": difficulty_icons,
         "photo": {"id": str(photo.id), "path": photo.path} if photo is not None else None,
         "description": _text(lang, (card, "description"), (card, "summary"), (poi, "description"), (poi, "summary")),
         "labels": LABELS[lang],
@@ -176,8 +212,8 @@ def photo_data_uri(model: dict) -> str | None:
 
 
 def render_card(model: dict, fmt: str, ratio: tuple[int, int] = render.DEFAULT_RATIO, style: str = render.DEFAULT_STYLE,
-                dpi: int = render.DEFAULT_DPI) -> bytes:
-    svg = render.render_svg(model, photo_data_uri(model), ratio, style)
+                dpi: int = render.DEFAULT_DPI, flag_svgs: dict[str, str] | None = None) -> bytes:
+    svg = render.render_svg(model, photo_data_uri(model), ratio, style, flag_svgs)
     return render.svg_to(svg, fmt, dpi)
 
 

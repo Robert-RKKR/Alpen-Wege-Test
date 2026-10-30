@@ -55,10 +55,9 @@ class AssetAggIcon(
         nullable=False,
         comment=(
             "Unique machine-readable name, lower-case letters, digits and "
-            "_ . - only (for example flag_at, flag_ch_zh, sport_hiking). The "
-            "same text that the reference tables hold in their old icon "
-            "column (compared in lower case); icons_link.sql uses it to set "
-            "icon_id."
+            "_ . - only (for example flag_at, flag_ch_zh, sport_hiking). A "
+            "seeded icon's id is computed from it, and icons_link.sql uses it "
+            "to give countries and regions their flag."
         ),
     )
     svg: Mapped[str] = mapped_column(

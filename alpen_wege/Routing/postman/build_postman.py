@@ -270,7 +270,8 @@ def uses_photo_test(field="main_photo_id"):
 def icon_link_pre(field="icon_id"):
     """Pre-request lines for a request whose body has `"icon_id": "{{icon_id}}"` as its FIRST member: when icon_id is empty the
     first icon of assets / icons is taken (the flags, when they are loaded); when there is no icon at all the field is cut out of
-    the body, so the request still works (without an icon). Same idea as photo_link_pre."""
+    the body (fine for countries and regions; reference values and resource types then answer 422, their icon is required).
+    Same idea as photo_link_pre."""
     return [
         "// Icon link: this body uses {{icon_id}}, the icon made by assets / icons / Upload icon.",
         '// Empty? The first icon of assets / icons is taken. No icon at all? The field is left out of the body.',
@@ -310,7 +311,8 @@ def icon_link():
     return dict(create_pre=icon_link_pre(), update_pre=icon_link_pre(), create_test=uses_icon_test(), update_test=uses_icon_test(),
                 update_desc=("Only the fields in the body change. `icon_id` is `{{icon_id}}`, the icon made by assets / icons / Upload icon "
                              "(the first icon of the list when it is empty; the field is left out when there is no icon at all). "
-                             "An unknown icon answers 422 (`icon_not_found`); `null` removes the link."))
+                             "An unknown icon answers 422 (`icon_not_found`). On reference values and resource types the icon is required "
+                             "(`null` answers 422); on countries and regions `null` removes the link."))
 
 
 def crud_folder(app, slug, label, var, create_body, update_body, *, needs="", extras=None, csv=True,
@@ -356,7 +358,7 @@ RANKED_TABLES = {"difficulty-levels", "difficulty-sports", "rarities", "visibili
 
 
 def ref_folder(slug, label, var, *, factor=True, extra_fields=None, name_required=False):
-    body = {"icon_id": "{{icon_id}}", "name": "{{random_name}}", "name_de": "{{random_name}}", "color": "#2196F3", "icon": "star"}
+    body = {"icon_id": "{{icon_id}}", "name": "{{random_name}}", "name_de": "{{random_name}}", "color": "#2196F3"}
     if factor:
         body["point_factor"] = 1.0
     if slug in RANKED_TABLES:
@@ -397,7 +399,7 @@ def core_folder():
     items = [ref_folder(slug, label, var, factor=f, extra_fields=extra) for slug, label, var, f, extra in refs]
     items.append(crud_folder(
         "core", "resource-types", "resource type", "resource_type_id",
-        {"icon_id": "{{icon_id}}", "key": "{{random_key}}", "name": "{{random_name}}", "color": "#9C27B0", "icon": "lock"},
+        {"icon_id": "{{icon_id}}", "key": "{{random_key}}", "name": "{{random_name}}", "color": "#9C27B0"},
         {"icon_id": "{{icon_id}}", "name": "{{random_name}} renamed"},
         extras=None, **icon_link(),
     ))
@@ -522,16 +524,16 @@ def assets_folder():
                       'pm.test("import: no row was rejected", function () { var r = jsonData.response_data; pm.expect(r.dry_run).to.eql(false); pm.expect(r.rejected).to.eql(0); pm.expect(r.errors).to.be.empty; });',
                       'pm.test("a second run creates nothing new (the keys exist)", function () { var r = jsonData.response_data; pm.expect(r.inserted + r.updated + r.unchanged).to.be.above(0); });'],
                 desc=(f"**Creates every icon of the CSV `{SAMPLE_ICONS_CSV}` in one call** (admin only): the 438 icons of the reference tables and resource types, each cleaned like an upload and with its names in English, German and Polish. "
-                      "An icon whose key exists is left alone (`unchanged`), so the call can be run again. With `link=true` (the default) every reference row, resource type, country (`flag_at`) and region whose icon text or code matches "
+                      "An icon whose key exists is left alone (`unchanged`), so the call can be run again. With `link=true` (the default) every country (`flag_at`) and region without a flag whose ISO code matches "
                       "the key of an icon then gets its `icon_id` (the answer lists how many per table). Switched-off parameters to try: `update=true` replaces icons that exist (SVG and names) when they differ; "
                       "`dry_run=true` only counts; `link=false` skips the linking. Run `Upload icons CSV (dry run)` before the first real import.")),
         request("Link rows to icons by key", "POST", "assets/icons/link", status=200,
                 query_values={"dry_run": "true"},
                 test=['var jsonData = pm.response.json();',
                       'pm.test("the answer lists what was linked and what still has no icon", function () { var r = jsonData.response_data; pm.expect(r.linked).to.be.an("object"); pm.expect(r.still_without_icon).to.be.an("object"); });'],
-                desc="Admin only. Sets `icon_id` on every row that has none and whose icon text (reference tables, resource types: the old `icon` column in lower case), ISO code (countries: `flag_<iso code>`) or "
+                desc="Admin only. Sets `icon_id` on every country and region that has none and whose ISO code (countries: `flag_<iso code>`) or "
                      "ISO 3166-2 code (regions: `flag_ch_zh`) matches the **key** of an icon: the API version of `scripts/sql/icons_link.sql`. A link that is set is never changed, so it can be run again after every import. "
-                     "`dry_run=true` (switched off here) counts without saving. `still_without_icon` shows which tables have rows whose key has no icon yet."),
+                     "`dry_run=true` (switched off here) counts without saving. `still_without_icon` shows how many countries and regions have no flag yet."),
         request("Get one icon", "GET", "assets/icons/{{icon_id}}", pre=icon_first,
                 desc="Uses `{{icon_id}}` (when empty the first icon of the list). The JSON has no SVG text: see \"Icon file\". Add `?expand=created_by` for the owner."),
         request("Icon file (the SVG)", "GET", "assets/icons/{{icon_id}}/file", pre=icon_first,
@@ -1205,7 +1207,7 @@ def build_collection():
 
 **Photos and GPX files (assets):** run **assets / photos / Upload photo** once. It saves `photo_id`, and from then on the Create and Update calls of cards, POIs and posts send `"main_photo_id": "{{{{photo_id}}}}"`, so they all use that photo (an empty `photo_id` is filled with the first photo of the list; when there is no photo at all the field is left out). **explorer / tracks / Upload track** saves `gpx_id`, the stored file shown in assets / gpx. The upload requests point at `{SAMPLE_PHOTO}` and `{SAMPLE_GPX}`: put both files in the Postman working directory (Settings, General, Working directory) or choose a file in the body once.
 
-**Icons and flags (assets):** run **assets / icons / Upload icon** once (admin). It saves `icon_id` and `icon_key`, and from then on the Create and Update calls of the 19 reference tables, resource types, countries and regions send `"icon_id": "{{{{icon_id}}}}"`, so they all use that icon (an empty `icon_id` is filled with the first icon of the list, for example a flag; when there is no icon at all the field is left out). `assets / icons / Icon file ...` shows the picture (SVG, PNG, by id or by key). **All icons at once:** `Upload icons CSV (dry run)`, then `Upload icons CSV (import all)` (the CSV `{SAMPLE_ICONS_CSV}` carries the graphics of all 438 icons; with `link=true` the reference rows get their `icon_id` too), and `Link rows to icons by key` for later. The upload requests point at `{SAMPLE_ICON}` and `{SAMPLE_ICONS_CSV}`: put both in the Postman working directory too.
+**Icons and flags (assets):** run **assets / icons / Upload icon** once (admin). It saves `icon_id` and `icon_key`, and from then on the Create and Update calls of the 19 reference tables, resource types, countries and regions send `"icon_id": "{{{{icon_id}}}}"`, so they all use that icon (an empty `icon_id` is filled with the first icon of the list, for example a flag; when there is no icon at all the field is left out). `assets / icons / Icon file ...` shows the picture (SVG, PNG, by id or by key). **All icons at once:** `Upload icons CSV (dry run)`, then `Upload icons CSV (import all)` (the CSV `{SAMPLE_ICONS_CSV}` carries the graphics of all 438 icons; with `link=true` countries and regions get their flag), and `Link rows to icons by key` for later. Reference values and resource types need an icon: on an empty database upload one before the core folder. The upload requests point at `{SAMPLE_ICON}` and `{SAMPLE_ICONS_CSV}`: put both in the Postman working directory too.
 
 **Variables:** `{ARGS.host_var}`, `{ARGS.port_var}`, `{ARGS.api_var}` (= `api/v1`), `<who>_email` / `<who>_password` for admin, editor, viewer, guest, `new_user_password`, and `{ARGS.token_var}`. Create calls save ids in variables such as `country_id`, `region_id`, `poi_id`; the next calls use them. **Run a single request alone:** run **Collect first IDs (optional) / Collect first IDs (all lists)** once (after a login), or any List request: they save the id of the first row in the variable of each model. Get one, Update and Delete requests also fill an empty variable themselves from the first row of their list. Careful: a Delete request with such an id deletes a real row. For a full run with the Collection Runner: set `skip_deletes` to `true` (the Delete calls of the model folders are skipped), run the app folders in the order shown, then run the folder **Cleanup (optional)**, which deletes everything in the right order. The Upload CSV and Upload track calls need a file chosen in their body.
 

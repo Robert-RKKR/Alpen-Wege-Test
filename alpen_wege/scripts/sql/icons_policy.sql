@@ -6,12 +6,27 @@
 \set ON_ERROR_STOP on
 BEGIN;
 
-INSERT INTO core_ref_resource_type (id, key, name, color, icon, created_by)
-SELECT gen_random_uuid(), 'icon', 'Icon', '#607D8B', 'image', u.id
-  FROM (SELECT p.id FROM profile_usr_user p
-          JOIN profile_user_credentials c ON c.user_id = p.id
-         WHERE c.user_group = 'administrator' ORDER BY p.created_at LIMIT 1) u
-ON CONFLICT (key) DO NOTHING;
+-- The column list depends on the step: before icons_drop_text.sql the table has the text icon, afterwards only icon_id (the icon
+-- with the key image, which seed_icons.py --csv loads).
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'core_ref_resource_type' AND column_name = 'icon') THEN
+        INSERT INTO core_ref_resource_type (id, key, name, color, icon, created_by)
+        SELECT gen_random_uuid(), 'icon', 'Icon', '#607D8B', 'image', u.id
+          FROM (SELECT p.id FROM profile_usr_user p
+                  JOIN profile_user_credentials c ON c.user_id = p.id
+                 WHERE c.user_group = 'administrator' ORDER BY p.created_at LIMIT 1) u
+        ON CONFLICT (key) DO NOTHING;
+    ELSE
+        INSERT INTO core_ref_resource_type (id, key, name, color, icon_id, created_by)
+        SELECT gen_random_uuid(), 'icon', 'Icon', '#607D8B', i.id, u.id
+          FROM (SELECT p.id FROM profile_usr_user p
+                  JOIN profile_user_credentials c ON c.user_id = p.id
+                 WHERE c.user_group = 'administrator' ORDER BY p.created_at LIMIT 1) u,
+               (SELECT id FROM asset_agg_icon WHERE key = 'image') i
+        ON CONFLICT (key) DO NOTHING;
+    END IF;
+END $$;
 
 INSERT INTO profile_access_policy (id, user_group, resource_type_id, action, scope)
 SELECT gen_random_uuid(), v.user_group, rt.id, v.action, 'all'

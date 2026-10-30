@@ -81,8 +81,8 @@ async def get_card_render(
                        error_errors=[{"field": "query.style", "code": "style", "message": str(exc)}])
     loaded = await service.load_async(db, card_id)
     check_object_access(access, loaded[0] if loaded else None, not_found_msg="Card not found")
-    card, links, poi_photo = loaded
-    models = {code: service.build_render_model(card, links, code, poi_photo) for code in service.LANGS}
+    card, links, poi_photo, flag_icons = loaded
+    models = {code: service.build_render_model(card, links, code, poi_photo, flag_icons) for code in service.LANGS}
     model = models[lang]
     if format == "json":
         return ok(model)
@@ -101,7 +101,7 @@ async def get_card_render(
     if fresh:
         data = await run_in_threadpool(stored.read_bytes)
     else:
-        data = await run_in_threadpool(service.render_card, model, format, size, style, sharpness)
+        data = await run_in_threadpool(service.render_card, model, format, size, style, sharpness, service.flag_svgs(flag_icons))
 
     shape = "" if size == card_render.DEFAULT_RATIO else f"-{size[0]}x{size[1]}"
     look = "" if style == card_render.DEFAULT_STYLE else f"-{style}"

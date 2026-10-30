@@ -7,9 +7,9 @@
 Order on a fresh database: scripts/init_seed.py (users, resource type `icon`, policies), then
 scripts/seed_icons.py for the flags (only needed for --expect-flags). Everything this script creates is deleted again.
 Checks: permissions of the four groups, upload and cleaning of an SVG (script, handler, external link), the size limits
-(413), duplicate and invalid keys, creating many icons from a CSV (dry run, update, link) and the link by key, the file route (headers, ETag and 304, PNG, by key), update and replace, the link on a
-reference table, a country, a region and a resource type, a wrong icon_id (422 instead of 500) on create, update and CSV
-import, the 409 of a delete while the icon is used, and that the event log does not hold the SVG text.
+(413), duplicate and invalid keys, creating many icons from a CSV (dry run, update, link) and the flag link by ISO code, the file route (headers, ETag and 304, PNG, by key), update and replace, the link on a
+reference table, a country, a region and a resource type (required on the reference table and the resource type), a wrong
+icon_id (422 instead of 500) on create, update and CSV import, the 409 of a delete while the icon is used, and that the event log does not hold the SVG text.
 """
 import argparse
 import io
@@ -159,7 +159,7 @@ check("PUT file with a bad file -> 400, as viewer -> 403", client.put(f"{API}/as
 
 # ---- 5. links: reference table, resource type, country, region
 def make_company(**extra):
-    r = client.post(f"{API}/core/companies", headers=admin, json={"name": f"Icon Co {RUN}", "color": "#112233", "icon": "building", **extra})
+    r = client.post(f"{API}/core/companies", headers=admin, json={"name": f"Icon Co {RUN}", "color": "#112233", **extra})
     if r.status_code == 201:
         created["companies"].append(r.json()["response_data"]["id"])
     return r
@@ -167,12 +167,17 @@ def make_company(**extra):
 
 r = make_company(icon_id=icon_id)
 co = (r.json().get("response_data") or {})
-check("POST a company with icon_id -> 201 and icon_id in the answer", r.status_code == 201 and co.get("icon_id") == icon_id and co.get("icon") == "building", r.text[:200])
+check("POST a company with icon_id -> 201 and icon_id in the answer, no icon text", r.status_code == 201 and co.get("icon_id") == icon_id and "icon" not in co, r.text[:200])
 r = client.get(f"{API}/core/companies/{co.get('id')}", headers=admin)
 check("GET the company shows icon_id", r.status_code == 200 and r.json()["response_data"]["icon_id"] == icon_id)
 r = make_company()
+check("POST a company without icon_id -> 422 (the icon is required)", r.status_code == 422, f"{r.status_code} {r.text[:150]}")
+r = make_company(icon_id=icon_id, icon="building")
+check("the old icon text is ignored, not stored", r.status_code == 201 and "icon" not in (r.json().get("response_data") or {}), r.text[:200])
+r = make_company(icon_id=icon_id)
 co2 = r.json().get("response_data") or {}
-check("a company without icon_id has icon_id null (old callers keep working)", r.status_code == 201 and co2.get("icon_id") is None)
+check("PATCH a company with icon_id null -> 422 (it cannot be removed)",
+      client.patch(f"{API}/core/companies/{co2.get('id')}", headers=admin, json={"icon_id": None}).status_code == 422)
 r = make_company(icon_id=str(uuid.uuid4()))
 check("POST a company with an unknown icon_id -> 422 icon_not_found (not 500)", r.status_code == 422 and "icon_not_found" in error_codes(r), f"{r.status_code} {r.text[:200]}")
 r = client.patch(f"{API}/core/companies/{co2.get('id')}", headers=admin, json={"icon_id": str(uuid.uuid4())})
@@ -182,11 +187,11 @@ check("PATCH a company: set icon_id -> 200", r.status_code == 200 and r.json()["
 r = client.get(f"{API}/core/companies", headers=admin, params={"q": f"Icon Co {RUN}"})
 check("the company list carries icon_id", r.status_code == 200 and all("icon_id" in x for x in r.json()["response_data"]) and len(r.json()["response_data"]) >= 1)
 
-r = client.post(f"{API}/core/resource-types", headers=admin, json={"key": f"icon_test_{RUN}", "color": "#112233", "icon": "x", "icon_id": icon_id})
+r = client.post(f"{API}/core/resource-types", headers=admin, json={"key": f"icon_test_{RUN}", "color": "#112233", "icon_id": icon_id})
 if r.status_code == 201:
     created["resource_types"].append(r.json()["response_data"]["id"])
 check("POST a resource type with icon_id -> 201 and icon_id in the answer", r.status_code == 201 and r.json()["response_data"]["icon_id"] == icon_id, r.text[:200])
-r = client.post(f"{API}/core/resource-types", headers=admin, json={"key": f"icon_bad_{RUN}", "color": "#112233", "icon": "x", "icon_id": str(uuid.uuid4())})
+r = client.post(f"{API}/core/resource-types", headers=admin, json={"key": f"icon_bad_{RUN}", "color": "#112233", "icon_id": str(uuid.uuid4())})
 check("POST a resource type with an unknown icon_id -> 422", r.status_code == 422 and "icon_not_found" in error_codes(r), f"{r.status_code} {r.text[:150]}")
 
 iso = "".join(c for c in RUN.upper() if c.isalpha())[:2].ljust(2, "Q")
@@ -200,7 +205,7 @@ check("PATCH a country with an unknown icon_id -> 422", r.status_code == 422 and
 r = client.get(f"{API}/compendium/countries", headers=admin, params={"q": f"Iconland {RUN}"})
 check("the country list carries icon_id", r.status_code == 200 and r.json()["response_data"] and r.json()["response_data"][0]["icon_id"] == icon_id, r.text[:200])
 
-r = client.post(f"{API}/core/region-types", headers=admin, json={"name": f"Icon type {RUN}", "color": "#112233", "icon": "x", "point_factor": 1.0})
+r = client.post(f"{API}/core/region-types", headers=admin, json={"name": f"Icon type {RUN}", "color": "#112233", "icon_id": icon_id, "point_factor": 1.0})
 rt = (r.json().get("response_data") or {}).get("id")
 if rt:
     created["region_types"].append(rt)
@@ -213,11 +218,11 @@ r = client.patch(f"{API}/compendium/regions/{region.get('id')}", headers=admin, 
 check("PATCH a region with an unknown icon_id -> 422", r.status_code == 422 and "icon_not_found" in error_codes(r), f"{r.status_code}")
 
 # ---- 6. CSV import
-csv_ok = f"name,color,icon,icon_id\nCsv Co {RUN},#aabbcc,truck,{icon_id}\n".encode()
+csv_ok = f"name,color,icon_id\nCsv Co {RUN},#aabbcc,{icon_id}\n".encode()
 r = client.post(f"{API}/core/companies/upload-csv", headers=admin, files={"file": ("c.csv", csv_ok, "text/csv")})
 check("CSV import with a good icon_id -> 1 inserted", r.status_code in (200, 201) and r.json()["response_data"]["inserted"] == 1 and not r.json()["response_data"]["errors"], r.text[:200])
 bad_id = str(uuid.uuid4())
-csv_bad = f"name,color,icon,icon_id\nCsv Bad {RUN},#aabbcc,truck,{bad_id}\nCsv Good2 {RUN},#aabbcc,truck,{icon_id}\n".encode()
+csv_bad = f"name,color,icon_id\nCsv Bad {RUN},#aabbcc,{bad_id}\nCsv Good2 {RUN},#aabbcc,{icon_id}\n".encode()
 r = client.post(f"{API}/core/companies/upload-csv", headers=admin, files={"file": ("c.csv", csv_bad, "text/csv")})
 res = r.json().get("response_data") or {}
 check("CSV import with an unknown icon_id: that row is refused by number, the other row is imported (no 500)",
@@ -332,24 +337,32 @@ check("with update=true it is replaced: new picture and names", d4.get("updated"
 check("update=true dry run counts the change and saves nothing", result_of(import_csv(csv_file([[pre + "a", good, "Back", ""]]), {"update": "true", "dry_run": "true", "link": "false"})).get("updated") == 1
       and client.get(f"{API}/assets/icons", headers=admin, params={"key": pre + "a"}).json()["response_data"][0]["name"] == "Csv A changed")
 
-# link: a company whose icon text is the key (in upper case), and one with a text that has no icon
-co_k = client.post(f"{API}/core/companies", headers=admin, json={"name": f"Csv link {RUN}", "color": "#112233", "icon": (pre + "a").upper()})
-co_n = client.post(f"{API}/core/companies", headers=admin, json={"name": f"Csv nolink {RUN}", "color": "#112233", "icon": f"no_such_icon_{RUN}"})
-for r_ in (co_k, co_n):
+# link: a country whose ISO code matches a flag key, and one whose code has no flag yet
+code_k, code_n = (("Q" + RUN[:3]).upper(), ("Z" + RUN[:3]).upper())
+for code in (code_k, code_n):
+    r_ = client.post(f"{API}/compendium/countries", headers=admin, json={"name": f"Linkland {code}", "iso_code": code, "location": {"type": "Point", "coordinates": [10, 47]}})
     if r_.status_code == 201:
-        created["companies"].append(r_.json()["response_data"]["id"])
+        created["countries"].append(r_.json()["response_data"]["id"])
+country_k = created["countries"][-2] if len(created["countries"]) >= 2 else None
+flag_k = f"flag_{code_k.lower()}"
+result_of(import_csv(csv_file([[flag_k, good, "Flag " + code_k, ""]]), {"link": "false"}))
+flag_row = (client.get(f"{API}/assets/icons", headers=admin, params={"key": flag_k}).json()["response_data"] or [{}])[0]
+created["icons"].append(flag_row.get("id"))
 r = client.post(f"{API}/assets/icons/link", headers=admin, params={"dry_run": "true"})
 d = r.json().get("response_data") or {}
-check("link dry run: counts the company, saves nothing", r.status_code == 200 and d.get("dry_run") is True and d.get("linked", {}).get("company") == 1
-      and client.get(f"{API}/core/companies/{co_k.json()['response_data']['id']}", headers=admin).json()["response_data"]["icon_id"] is None, r.text[:300])
+check("link dry run: counts the country, saves nothing", r.status_code == 200 and d.get("dry_run") is True and d.get("linked", {}).get("country") == 1
+      and client.get(f"{API}/compendium/countries/{country_k}", headers=admin).json()["response_data"]["icon_id"] is None, r.text[:300])
+check("link answers only for countries and regions", set(d.get("linked", {})) | set(d.get("still_without_icon", {})) <= {"country", "region"}, str(d))
 r = client.post(f"{API}/assets/icons/link", headers=admin)
 d = r.json().get("response_data") or {}
-check("link: the company got its icon (key compared in lower case), the other is still without", r.status_code == 200 and d.get("linked", {}).get("company") == 1
-      and d.get("still_without_icon", {}).get("company", 0) >= 1 and client.get(f"{API}/core/companies/{co_k.json()['response_data']['id']}", headers=admin).json()["response_data"]["icon_id"] == a_row["id"], r.text[:300])
+check("link: the country got its flag (key compared in lower case), the other is still without", r.status_code == 200 and d.get("linked", {}).get("country") == 1
+      and d.get("still_without_icon", {}).get("country", 0) >= 1
+      and client.get(f"{API}/compendium/countries/{country_k}", headers=admin).json()["response_data"]["icon_id"] == flag_row.get("id"), r.text[:300])
 d = (client.post(f"{API}/assets/icons/link", headers=admin).json().get("response_data") or {})
 check("link again: nothing new (a link that is set is never changed)", d.get("linked") == {}, str(d))
-check("import with link=true (the default) links too", (result_of(import_csv(csv_file([[f"no_such_icon_{RUN}", good, "Now it exists", ""]]))).get("linked") or {}).get("company") == 1)
-found = client.get(f"{API}/assets/icons", headers=admin, params={"key": f"no_such_icon_{RUN}"}).json()["response_data"]
+flag_n = f"flag_{code_n.lower()}"
+check("import with link=true (the default) links too", (result_of(import_csv(csv_file([[flag_n, good, "Now it exists", ""]]))).get("linked") or {}).get("country") == 1)
+found = client.get(f"{API}/assets/icons", headers=admin, params={"key": flag_n}).json()["response_data"]
 created["icons"] += [x["id"] for x in found]
 
 # a file that cannot be used
@@ -363,10 +376,10 @@ check("the key of an uploaded row is lower-cased (Upper_Key -> upper_key)", resu
       and count_icons(pre + "up") == 1)
 created["icons"] += [x["id"] for x in client.get(f"{API}/assets/icons", headers=admin, params={"key_prefix": pre}).json()["response_data"]]
 
-# clean up what this section made (companies first: a used icon cannot be deleted)
-for i in created["companies"]:
-    client.delete(f"{API}/core/companies/{i}", headers=admin)
-created["companies"] = []
+# clean up what this section made (countries first: a used icon cannot be deleted)
+for i in created["countries"]:
+    client.delete(f"{API}/compendium/countries/{i}", headers=admin)
+created["countries"] = []
 leftover = 0
 for i in set(created["icons"][1:]):
     if client.delete(f"{API}/assets/icons/{i}", headers=admin).status_code not in (200, 404):

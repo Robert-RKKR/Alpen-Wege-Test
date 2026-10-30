@@ -47,7 +47,7 @@ def _tables_with_icon_id():
 
 
 # ---------------------------------------------------------------- the 22 links
-def test_22_tables_have_the_link_and_it_is_optional_restrict_and_indexed():
+def test_22_tables_have_the_link_restrict_and_indexed():
     tables = _tables_with_icon_id()
     assert len(tables) == 22, sorted(tables)
     for name, t in tables.items():
@@ -55,22 +55,20 @@ def test_22_tables_have_the_link_and_it_is_optional_restrict_and_indexed():
         fks = list(column.foreign_keys)
         assert len(fks) == 1 and fks[0].column.table.name == "asset_agg_icon" and fks[0].column.name == "id", name
         assert fks[0].ondelete == "RESTRICT", f"{name}: a used icon must not be deletable"
-        assert column.nullable, f"{name}: step 1 keeps the link optional"
+        optional = name in ("compendium_cat_country", "compendium_cat_region")
+        assert column.nullable == optional, f"{name}: icon_id is required on the reference tables, optional on countries and regions"
         assert any([c.name for c in ix.columns] == ["icon_id"] for ix in t.indexes), f"{name}: no index on icon_id"
 
 
-def test_every_table_that_has_an_icon_text_also_has_the_link_and_is_in_the_usage_list():
-    # a reference table added later must not forget the link (or the delete check of the icon route)
-    with_text = {t.name for t in Base.metadata.tables.values() if "icon" in t.c}
+def test_every_table_with_the_link_is_in_the_usage_list():
+    # a reference table added later must not forget the delete check of the icon route
     with_link = set(_tables_with_icon_id())
-    assert with_text <= with_link, f"icon text without icon_id: {sorted(with_text - with_link)}"
     assert {m.__tablename__ for m in ICON_USERS.values()} == with_link, "icon_usage.ICON_USERS differs from the tables that have icon_id"
     assert len(ICON_USERS) == len({m for m in ICON_USERS.values()}) == 22
 
 
-def test_the_old_icon_text_is_untouched_in_step_1():
-    for name in ("core_ref_sport_type", "core_ref_company", "core_ref_resource_type"):
-        assert not Base.metadata.tables[name].c.icon.nullable
+def test_the_old_icon_text_is_gone():
+    assert [t.name for t in Base.metadata.tables.values() if "icon" in t.c] == []
 
 
 def test_icon_model_rules():
@@ -92,25 +90,32 @@ def _schema_classes():
                 yield cls
 
 
-def test_every_schema_with_an_icon_text_has_icon_id_and_country_and_region_schemas_too():
+def test_no_schema_has_the_icon_text_and_every_ref_country_and_region_schema_has_icon_id():
     classes = list(_schema_classes())
-    with_text = [c for c in classes if "icon" in c.model_fields]
-    assert len(with_text) >= 20
-    assert [c.__name__ for c in with_text if "icon_id" not in c.model_fields] == []
+    assert [c.__name__ for c in classes if "icon" in c.model_fields] == []
     for c in classes:
-        if c.__module__.endswith(("country", "region")) and re.search(r"(Create|Update|Read|SlimRead|Detail)$", c.__name__):
+        if re.search(r"(Create|Update|Read|SlimRead|Detail)$", c.__name__) and not c.__name__.startswith("AccessPolicy"):
             assert "icon_id" in c.model_fields, c.__name__
 
 
 def test_create_update_read_types_of_icon_id():
     from app.core.schemas.ref import RefBaseCreate, RefBaseRead, RefBaseUpdate
+    from app.profile.schemas.access_policy import ResourceTypeCreate, ResourceTypeUpdate
 
-    assert RefBaseCreate(color="#000000", icon="x").icon_id is None                       # old callers keep working
-    assert RefBaseUpdate(icon_id=None).icon_id is None and "icon_id" in RefBaseUpdate(icon_id=None).model_fields_set   # null removes the link
-    assert RefBaseCreate(color="#000000", icon="x", icon_id=str(uuid.uuid4())).icon_id is not None
-    with pytest.raises(Exception):
-        RefBaseCreate(color="#000000", icon="x", icon_id="not-a-uuid")
-    assert RefBaseRead.model_fields["icon_id"].is_required()      # always in the answer, null or not
+    for create in (RefBaseCreate, ResourceTypeCreate):
+        extra = {"key": "k"} if create is ResourceTypeCreate else {}
+        with pytest.raises(Exception):
+            create(color="#000000", **extra)                                                 # the icon is required
+        with pytest.raises(Exception):
+            create(color="#000000", icon_id=None, **extra)
+        with pytest.raises(Exception):
+            create(color="#000000", icon_id="not-a-uuid", **extra)
+        assert create(color="#000000", icon_id=str(uuid.uuid4()), **extra).icon_id is not None
+    for update in (RefBaseUpdate, ResourceTypeUpdate):
+        with pytest.raises(Exception):
+            update(icon_id=None)                                                             # it cannot be removed
+        assert update().model_dump(exclude_unset=True) == {}                                 # not sent: unchanged
+    assert RefBaseRead.model_fields["icon_id"].is_required()
 
 
 def test_icon_update_lowercases_the_key_and_checks_its_shape():
@@ -353,9 +358,13 @@ def test_the_sql_scripts_name_the_same_22_tables_as_the_models():
     assert _quoted_tables((SQL / "icons_ddl.sql").read_text()) == models
     assert _quoted_tables((SQL / "icons_rollback.sql").read_text()) == models
     link_sql = (SQL / "icons_link.sql").read_text()
-    assert _quoted_tables(link_sql) == models                                              # the 20 in the array, country and region by name
-    in_array = _quoted_tables(re.search(r"ARRAY\[(.*?)\]", link_sql, flags=re.S).group(1))
-    assert in_array == {t for t in models if t.startswith("core_ref_")} and len(in_array) == 20      # these link by their icon text
+    assert set(re.findall(r"UPDATE ([a-z_]+)", link_sql)) == {"compendium_cat_country", "compendium_cat_region"}
+    refs = {t for t in models if t.startswith("core_ref_")}
+    assert len(refs) == 20
+    for name in ("icons_drop_text.sql", "icons_rollback_text.sql"):
+        text = (SQL / name).read_text()
+        arrays = [_quoted_tables(a) for a in re.findall(r"ARRAY\[(.*?)\]", text, flags=re.S)]
+        assert arrays and all(a == refs for a in arrays), name                            # never countries or regions
     preflight = (SQL / "icons_preflight.sql").read_text()
     assert _quoted_tables(preflight) == models
     assert set(re.findall(r"SELECT icon FROM ((?:core_ref)_[a-z_]+)", preflight)) == {t for t in models if t.startswith("core_ref_")}
@@ -372,5 +381,14 @@ def test_the_ddl_creates_the_table_the_model_describes():
             assert re.search(rf"CONSTRAINT {c.name} CHECK \({re.escape(expression)}\)", re.sub(r"\s+", " ", body)), c.name
     assert "uq_asset_agg_icon_key UNIQUE (key)" in body
     assert "trg_set_updated_at BEFORE UPDATE ON asset_agg_icon" in ddl and "ON DELETE RESTRICT" in ddl
-    for comment in ("created_by", "name", "svg", "sha256", "key"):                    # the comments of a migrated and of a fresh database are the same
+    for comment in ("created_by", "name", "svg", "sha256"):                           # the comments of a migrated and of a fresh database are the same
         assert AssetAggIcon.__table__.c[comment].comment in ddl, comment
+    drop = (SQL / "icons_drop_text.sql").read_text()
+    assert AssetAggIcon.__table__.c.key.comment.replace("'", "''") in drop, "step 2 sets the comment of key"
+
+
+def test_step_2_gives_a_migrated_reference_table_the_same_icon_id_as_a_fresh_one():
+    drop = (SQL / "icons_drop_text.sql").read_text()
+    column = Base.metadata.tables["core_ref_sport_type"].c.icon_id
+    assert column.comment in drop and "SET NOT NULL" in drop and "DROP COLUMN IF EXISTS icon" in drop
+    assert drop.index("RAISE EXCEPTION") < drop.index("SET NOT NULL"), "the check for empty links comes before any change"

@@ -6,6 +6,7 @@ Run inside the API container:
     sudo docker exec alpen-api python /app/push_data/seed.py
 
 Creates a seed user, then loads all 22 CSV files in FK-dependency order.
+The core_ref_* files name their icon by id, so the icons must be loaded first (scripts/seed_icons.py --csv).
 Handles WKB hex geometry, title→name column rename, and bbox JSON arrays.
 Idempotent: re-running skips already-inserted rows via ON CONFLICT.
 """
@@ -211,6 +212,15 @@ def load_table(cur, table):
         print(f"    ... +{len(errors) - 5} more")
 
 
+def require_icons(cur):
+    # the core_ref_* rows name their icon by id (icon_id is required); without the icons every row would be refused
+    cur.execute("SELECT count(*) FROM asset_agg_icon")
+    if cur.fetchone()[0] == 0:
+        print("ERROR: asset_agg_icon is empty. Load the icons first:")
+        print("  python scripts/seed_icons.py --csv Routing/icons_import/icons_import.csv")
+        sys.exit(1)
+
+
 def main():
     print("Connecting to PostgreSQL ...")
     try:
@@ -219,6 +229,7 @@ def main():
         print(f"ERROR: {e}")
         sys.exit(1)
     cur = conn.cursor()
+    require_icons(cur)
 
     print("\n1) Seed user")
     ensure_seed_user(cur)

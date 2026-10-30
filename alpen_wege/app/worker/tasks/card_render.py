@@ -35,13 +35,14 @@ def render_card(self, card_id: str):
         loaded = service.load_sync(session, card_uuid)
         if loaded is None:
             return {"status": "failed", "message": "The card no longer exists."}
-        card, links, poi_photo = loaded
-        models = {lang: service.build_render_model(card, links, lang, poi_photo) for lang in service.LANGS}
+        card, links, poi_photo, flag_icons = loaded
+        models = {lang: service.build_render_model(card, links, lang, poi_photo, flag_icons) for lang in service.LANGS}
+    flags = service.flag_svgs(flag_icons)
 
     _set_status(card_uuid, render_status="rendering")
     try:
         for lang, model in models.items():
-            svg = render.render_svg(model, service.photo_data_uri(model))
+            svg = render.render_svg(model, service.photo_data_uri(model), flag_svgs=flags)
             for fmt in service.STORED_FORMATS:
                 service.write_atomic(service.stored_file(card_uuid, lang, fmt), render.svg_to(svg, fmt))
     except Exception:
